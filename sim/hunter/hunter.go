@@ -26,9 +26,10 @@ type Hunter struct {
 	RaptorStrike      *core.Spell
 	raptorStrikeQueue *core.Aura
 
-	AspectOfTheHawkAura  *core.Aura
-	AspectOfTheBeastAura *core.Aura
-	MongooseBiteAura     *core.Aura
+	AspectOfTheHawkAura    *core.Aura
+	AspectOfTheBeastAura   *core.Aura
+	AspectOfTheCheetahAura *core.Aura
+	MongooseBiteAura       *core.Aura
 
 	rapidRecuperationAura  *core.Aura
 	rapidRecuperationShare float64 // The share of regeneration while casting the aura grants, set by what granted it.
