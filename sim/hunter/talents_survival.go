@@ -220,7 +220,8 @@ func (hunter *Hunter) registerCleverTraps() {
 	spelldata.ParseStatic(&hunter.Character, spellData.CleverTraps.Rank(hunter.Talents.CleverTraps), spelldata.Effects(2))
 }
 
-// Hit with Immolation and Explosive Trap; Feign Death, the other spell it names, the sim does not cast.
+// Hit with Immolation and Explosive Trap. The talent also names Freezing Trap, Frost Trap and Feign
+// Death, which the sim does not cast.
 func (hunter *Hunter) registerSurvivalTactics() {
 	if hunter.Talents.SurvivalTactics == 0 {
 		return

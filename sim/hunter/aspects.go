@@ -47,8 +47,8 @@ func (hunter *Hunter) registerAspect(row *spelldata.Spell) *core.Aura {
 // MultiplyMovementSpeed stacks on the aspect's speed.
 func (hunter *Hunter) registerAspectOfTheCheetah() {
 	speed := aspectOfTheCheetahRank.EffectN(1).Percent() + spellData.Pathfinding.EffectAt(1).FractionAt(hunter.Talents.Pathfinding)
-	hunter.AspectOfTheCheetahAura = hunter.registerAspect(aspectOfTheCheetahRank)
-	hunter.AspectOfTheCheetahAura.NewActiveMovementSpeedEffect(speed)
+	aura := hunter.registerAspect(aspectOfTheCheetahRank)
+	aura.NewActiveMovementSpeedEffect(speed)
 
 	slow := 1 + dazedRank.EffectN(1).Percent()
 	dazed := hunter.RegisterAura(spelldata.AuraConfig(dazedRank))
@@ -64,7 +64,8 @@ func (hunter *Hunter) registerAspectOfTheCheetah() {
 			dazed.Activate(sim)
 		})
 	daze.Name = "Aspect of the Cheetah - Dazed"
-	hunter.AspectOfTheCheetahAura.AttachProcTrigger(daze)
+	daze.TriggerImmediately = true
+	aura.AttachProcTrigger(daze)
 }
 
 // Deadly Aspects is the chance the aspects' own procs fire with: the Hawk and Beast rows state the
