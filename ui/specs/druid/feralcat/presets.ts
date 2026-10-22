@@ -19,7 +19,7 @@ export const DefaultConsumables = ConsumesSpec.fromJson({
 	mhImbueId: 12643,
 	swapMhImbueId: 12643,
 	extraIds: [12460, 8412, 10646],
-	elixirIds: [250350, 250328, 250337, 250338, 250329, 250341],
+	elixirIds: [250328, 250338, 250329, 250341, 250351],
 	resourcePotId: 13444,
 	offensivePotId: 13442,
 });
