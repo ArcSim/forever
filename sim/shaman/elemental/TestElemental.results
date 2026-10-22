@@ -1015,11 +1015,27 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestElemental-AllItems-TheDefiler'sPurpose"
+ value: {
+  dps: 539.43922
+  tps: 382.1238
+  dtps: 8.99598
+ }
+}
+dps_results: {
  key: "TestElemental-AllItems-TheGreenTower-1204"
  value: {
   dps: 568.36281
   tps: 400.94204
   dtps: 7.89665
+ }
+}
+dps_results: {
+ key: "TestElemental-AllItems-TheHighlander'sPurpose"
+ value: {
+  dps: 539.43922
+  tps: 382.1238
+  dtps: 8.99598
  }
 }
 dps_results: {

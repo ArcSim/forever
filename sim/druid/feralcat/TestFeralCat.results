@@ -662,6 +662,14 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestFeralCat-AllItems-IdoloftheUrsineTwins-279251"
+ value: {
+  dps: 609.6787
+  tps: 324.79598
+  hps: 45.88556
+ }
+}
+dps_results: {
  key: "TestFeralCat-AllItems-JomGabbar-23570"
  value: {
   dps: 632.02384
@@ -747,6 +755,14 @@ dps_results: {
   dps: 616.18889
   tps: 329.24226
   hps: 46.13972
+ }
+}
+dps_results: {
+ key: "TestFeralCat-AllItems-MarkofUrs'endris-263435"
+ value: {
+  dps: 609.6787
+  tps: 324.79598
+  hps: 45.88556
  }
 }
 dps_results: {
@@ -963,6 +979,22 @@ dps_results: {
   dps: 616.18889
   tps: 329.24226
   hps: 46.13972
+ }
+}
+dps_results: {
+ key: "TestFeralCat-AllItems-TheDefiler'sPurpose"
+ value: {
+  dps: 604.28513
+  tps: 323.25759
+  hps: 46.15667
+ }
+}
+dps_results: {
+ key: "TestFeralCat-AllItems-TheHighlander'sPurpose"
+ value: {
+  dps: 604.28513
+  tps: 323.25759
+  hps: 46.15667
  }
 }
 dps_results: {

@@ -22,6 +22,7 @@ type Task interface {
 }
 
 type Simulation struct {
+	resetting bool
 	*Environment
 
 	Options *proto.SimOptions
@@ -439,7 +440,9 @@ func (sim *Simulation) reset() {
 
 	sim.movingUnits = sim.movingUnits[:0]
 
+	sim.resetting = true
 	sim.Environment.reset(sim)
+	sim.resetting = false
 
 	sim.enableManaTicks()
 }

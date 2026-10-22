@@ -718,6 +718,14 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestBalance-AllItems-IdoloftheUrsineTwins-279251"
+ value: {
+  dps: 812.70932
+  tps: 579.50946
+  dtps: 4.94932
+ }
+}
+dps_results: {
  key: "TestBalance-AllItems-JomGabbar-23570"
  value: {
   dps: 770.37889
@@ -818,6 +826,14 @@ dps_results: {
  value: {
   dps: 770.37889
   tps: 549.87816
+  dtps: 4.94932
+ }
+}
+dps_results: {
+ key: "TestBalance-AllItems-MarkofUrs'endris-263435"
+ value: {
+  dps: 812.70932
+  tps: 579.50946
   dtps: 4.94932
  }
 }
@@ -1035,6 +1051,22 @@ dps_results: {
   dps: 770.37889
   tps: 549.87816
   dtps: 4.94932
+ }
+}
+dps_results: {
+ key: "TestBalance-AllItems-TheDefiler'sPurpose"
+ value: {
+  dps: 773.81018
+  tps: 552.641
+  dtps: 4.97868
+ }
+}
+dps_results: {
+ key: "TestBalance-AllItems-TheHighlander'sPurpose"
+ value: {
+  dps: 773.81018
+  tps: 552.641
+  dtps: 4.97868
  }
 }
 dps_results: {
