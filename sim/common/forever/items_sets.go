@@ -19,7 +19,12 @@ func arathiLeatherSet(id int32, name string) *core.ItemSet {
 	})
 }
 
+// Arathi Basin reputation - Horde leather
+// https://www.wowhead.com/forever/item-set=486/the-defilers-purpose
 var ItemSetDefilersPurpose = arathiLeatherSet(486, "The Defiler's Purpose")
+
+// Arathi Basin reputation - Alliance leather
+// https://www.wowhead.com/forever/item-set=471/the-highlanders-purpose
 var ItemSetHighlandersPurpose = arathiLeatherSet(471, "The Highlander's Purpose")
 
 // Blacksmithing - Plate

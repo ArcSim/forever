@@ -10,6 +10,7 @@ import (
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/simsignals"
+	googleProto "google.golang.org/protobuf/proto"
 )
 
 // Same tree as the cat UI default. Shifting Power is the 11th feral talent.
@@ -529,8 +530,7 @@ func TestAdaptiveMcpReturnsToMainWeapon(t *testing.T) {
 			}
 			items[proto.ItemSlot_ItemSlotMainHand] = &proto.ItemSpec{Id: 9449, Enchant: 1896}
 			p.ItemSwap = &proto.ItemSwap{Items: items}
-			consumes := *p.Consumables
-			p.Consumables = &consumes
+			p.Consumables = googleProto.Clone(p.Consumables).(*proto.ConsumesSpec)
 			p.Consumables.SwapMhImbueId = 12643
 		}
 		sim := core.NewSim(req, simsignals.CreateSignals())

@@ -13,12 +13,14 @@ import (
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/simsignals"
+	googleProto "google.golang.org/protobuf/proto"
 )
 
 const bearTalents = DefaultTalents
 
 func TestBearShippedAplRuns(t *testing.T) {
 	req := bearNakedRequest()
+	req.Raid.Parties[0].Players[0].GetFeralBearDruid().Options.StartingRage = 25
 	result := core.RunSim(req, nil, simsignals.CreateSignals())
 	if result.Error != nil {
 		t.Fatalf("sim error: %s", result.Error.Message)
@@ -73,33 +75,60 @@ func bearCastsOf(actions []*proto.ActionMetrics, spellID int32) int32 {
 }
 
 func TestBearFormRecastGrantsFuror(t *testing.T) {
-	for _, id := range []int32{5487, spellDireBear} {
-		req := bearNakedRequest()
-		req.Raid.Parties[0].Players[0].Rotation = &proto.APLRotation{}
-		sim := core.NewSim(req, simsignals.CreateSignals())
-		sim.Reset()
-		sim.CurrentTime = 0
-		bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
-		bear.SetGCDTimer(sim, 0)
-		form := bear.GetSpell(core.ActionID{SpellID: id})
-		if id == 5487 {
-			if !form.Cast(sim, bear.CurrentTarget) {
-				t.Fatal("could not enter Bear Form")
+	for _, rank := range []int{0, 5} {
+		for _, at := range []time.Duration{-10 * time.Second, 0, 2 * time.Second} {
+			for _, id := range []int32{5487, spellDireBear} {
+				t.Run(fmt.Sprintf("rank%d/time%s/form%d", rank, at, id), func(t *testing.T) {
+					req := bearNakedRequest()
+					player := req.Raid.Parties[0].Players[0]
+					player.Rotation = &proto.APLRotation{}
+					trees := strings.Split(player.TalentsString, "-")
+					trees[2] = fmt.Sprintf("0%d", rank)
+					player.TalentsString = strings.Join(trees, "-")
+					sim := core.NewSim(req, simsignals.CreateSignals())
+					sim.Reset()
+					sim.CurrentTime = at
+					bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
+					form := bear.GetSpell(core.ActionID{SpellID: id})
+					wantRage := core.Ternary(rank == 0, 0.0, 10.0)
+					for cast := 0; cast < 2; cast++ {
+						bear.SetGCDTimer(sim, at)
+						bear.AddRage(sim, 40, bear.NewRageMetrics(core.ActionID{SpellID: 1}))
+						mana := bear.CurrentMana()
+						armor, health := bear.GetStat(stats.Armor), bear.MaxHealth()
+						if !form.Cast(sim, bear.CurrentTarget) {
+							t.Fatal("could not cast Bear form")
+						}
+						if cast == 1 && (bear.GetStat(stats.Armor) != armor || bear.MaxHealth() != health) {
+							t.Fatal("recasting the form changed its passive bonuses")
+						}
+						if bear.CurrentRage() != wantRage || bear.CurrentMana() != mana-form.CurCast.Cost {
+							t.Fatalf("cast %d: rage %g, want %g; mana spent %g", cast, bear.CurrentRage(), wantRage, mana-bear.CurrentMana())
+						}
+					}
+				})
 			}
-			sim.CurrentTime = bear.GCD.ReadyAt()
 		}
-		bear.AddRage(sim, 40, bear.NewRageMetrics(core.ActionID{SpellID: 1}))
-		mana := bear.CurrentMana()
-		armor := bear.GetStat(stats.Armor)
-		health := bear.MaxHealth()
-		if !form.CanCast(sim, bear.CurrentTarget) || !form.Cast(sim, bear.CurrentTarget) {
-			t.Fatalf("form %d cannot be recast while active", id)
-		}
-		if bear.CurrentRage() != 10 || bear.CurrentMana() != mana-form.CurCast.Cost {
-			t.Fatalf("form %d: rage %g, mana spent %g", id, bear.CurrentRage(), mana-bear.CurrentMana())
-		}
-		if bear.GetStat(stats.Armor) != armor || bear.MaxHealth() != health {
-			t.Fatal("recasting the form changed its passive bonuses")
+	}
+}
+
+func TestBearStartingRageDoesNotTriggerFuror(t *testing.T) {
+	for _, rage := range []float64{0, 25} {
+		req := bearNakedRequest()
+		player := req.Raid.Parties[0].Players[0]
+		player.GetFeralBearDruid().Options.StartingRage = rage
+		player.Rotation = selectedAdaptiveBearAPL()
+		sim := core.NewSim(req, simsignals.CreateSignals())
+		for iteration := 0; iteration < 2; iteration++ {
+			sim.Reset()
+			bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
+			if bear.CurrentRage() != rage {
+				t.Fatalf("iteration %d: starting rage = %g, want %g", iteration, bear.CurrentRage(), rage)
+			}
+			if bear.PrimalBite.SpellMetrics[bear.CurrentTarget.UnitIndex].Casts != 0 {
+				t.Fatal("starting form executed the rotation during reset")
+			}
+			sim.Cleanup()
 		}
 	}
 }
@@ -284,8 +313,7 @@ func TestAdaptiveMcpReturnsToMainWeapon(t *testing.T) {
 			}
 			items[proto.ItemSlot_ItemSlotMainHand] = &proto.ItemSpec{Id: 9449, Enchant: 1896}
 			p.ItemSwap = &proto.ItemSwap{Items: items}
-			consumes := *p.Consumables
-			p.Consumables = &consumes
+			p.Consumables = googleProto.Clone(p.Consumables).(*proto.ConsumesSpec)
 			p.Consumables.SwapMhImbueId = 12643
 		}
 		sim := core.NewSim(req, simsignals.CreateSignals())

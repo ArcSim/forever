@@ -163,7 +163,6 @@ func (druid *Druid) registerBearAura(form *spelldata.Spell, passive *spelldata.S
 		if !druid.Env.MeasuringStats {
 			druid.AutoAttacks.SetMH(druid.GetBearWeapon())
 		}
-		druid.furorRageOnEnterBear(sim)
 		druid.PseudoStats.ThreatMultiplier *= bearFormThreatMultiplier
 	})
 	aura.ApplyOnExpire(func(_ *core.Aura, sim *core.Simulation) {
@@ -250,6 +249,9 @@ func (druid *Druid) registerShapeshiftSpell(rank *spelldata.Spell, aura *core.Au
 			druid.SpendRage(sim, druid.CurrentRage(), rageMetrics)
 		}
 		aura.Activate(sim)
+		if rageMetrics != nil {
+			druid.furorRageOnEnterBear(sim)
+		}
 	}
 	return druid.RegisterSpell(config)
 }
