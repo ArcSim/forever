@@ -56,7 +56,7 @@ func (value *APLValueSpellIsReady) Type() proto.APLValueType {
 	return proto.APLValueType_ValueTypeBool
 }
 func (value *APLValueSpellIsReady) GetBool(sim *Simulation) bool {
-	return value.spell.IsReady(sim) || (value.spell.TimeToReady(sim) <= MaxSpellQueueWindow)
+	return value.spell.rotationTimeToReady(sim) <= MaxSpellQueueWindow
 }
 func (value *APLValueSpellIsReady) String() string {
 	return fmt.Sprintf("Is Ready(%s)", value.spell.ActionID)
@@ -80,10 +80,10 @@ func (value *APLValueSpellTimeToReady) Type() proto.APLValueType {
 	return proto.APLValueType_ValueTypeDuration
 }
 func (value *APLValueSpellTimeToReady) GetDuration(sim *Simulation) time.Duration {
-	return value.spell.TimeToReady(sim)
+	return value.spell.rotationTimeToReady(sim)
 }
 func (value *APLValueSpellTimeToReady) GetFloat(sim *Simulation) float64 {
-	return value.spell.TimeToReady(sim).Seconds()
+	return value.spell.rotationTimeToReady(sim).Seconds()
 }
 func (value *APLValueSpellTimeToReady) String() string {
 	return fmt.Sprintf("Time To Ready(%s)", value.spell.ActionID)
@@ -159,6 +159,35 @@ func (value *APLValueSpellCPM) GetFloat(sim *Simulation) float64 {
 }
 func (value *APLValueSpellCPM) String() string {
 	return fmt.Sprintf("CPM(%s)", value.spell.ActionID)
+}
+
+type APLValueSpellIsCasting struct {
+	DefaultAPLValueImpl
+	spell *Spell
+}
+
+func (rot *APLRotation) newValueSpellIsCasting(config *proto.APLValueSpellIsCasting, _ *proto.UUID) APLValue {
+	spell := rot.GetAPLSpell(config.SpellId)
+	if spell == nil {
+		return nil
+	}
+	return &APLValueSpellIsCasting{
+		spell: spell,
+	}
+}
+func (value *APLValueSpellIsCasting) Type() proto.APLValueType {
+	return proto.APLValueType_ValueTypeBool
+}
+
+// True while the spell is hardcast, through the rotation's pick at its end. A channel reads false: it is
+// Spell Is Channeling.
+func (value *APLValueSpellIsCasting) GetBool(sim *Simulation) bool {
+	unit := value.spell.Unit
+	hc := &unit.Hardcast
+	return unit.hardcastRuns(sim) && !hc.IsChanneled && hc.ActionID.SameAction(value.spell.ActionID)
+}
+func (value *APLValueSpellIsCasting) String() string {
+	return fmt.Sprintf("IsCasting(%s)", value.spell.ActionID)
 }
 
 type APLValueSpellIsChanneling struct {

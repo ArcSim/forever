@@ -390,12 +390,7 @@ func (character *Character) initialize(agent Agent) {
 	character.rotationAction = &PendingAction{
 		Priority: ActionPriorityGCD,
 		OnAction: func(sim *Simulation) {
-			if hc := &character.Hardcast; hc.Expires != startingCDTime && hc.Expires <= sim.CurrentTime {
-				hc.Expires = startingCDTime
-				if hc.OnComplete != nil {
-					hc.OnComplete(sim, hc.Target)
-				}
-			}
+			character.completeDueHardcast(sim)
 
 			if sim.CurrentTime < 0 && !character.engagedBeforePull {
 				return
