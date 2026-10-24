@@ -38,6 +38,30 @@ func (value *APLValueSpellCanCast) String() string {
 	return fmt.Sprintf("Can Cast(%s)", value.spell.ActionID)
 }
 
+type APLValueSpellInRange struct {
+	DefaultAPLValueImpl
+	spell *Spell
+}
+
+func (rot *APLRotation) newValueSpellInRange(config *proto.APLValueSpellInRange, _ *proto.UUID) APLValue {
+	spell := rot.GetAPLSpell(config.SpellId)
+	if spell == nil {
+		return nil
+	}
+	return &APLValueSpellInRange{
+		spell: spell,
+	}
+}
+func (value *APLValueSpellInRange) Type() proto.APLValueType {
+	return proto.APLValueType_ValueTypeBool
+}
+func (value *APLValueSpellInRange) GetBool(_ *Simulation) bool {
+	return value.spell.InRange()
+}
+func (value *APLValueSpellInRange) String() string {
+	return fmt.Sprintf("In Range(%s)", value.spell.ActionID)
+}
+
 type APLValueSpellIsReady struct {
 	DefaultAPLValueImpl
 	spell *Spell

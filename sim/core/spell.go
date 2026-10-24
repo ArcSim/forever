@@ -391,7 +391,7 @@ func (unit *Unit) RegisterSpell(config SpellConfig) *Spell {
 		spell.MaxRange = config.MaxRange
 		oldExtraCastCondition := spell.ExtraCastCondition
 		spell.ExtraCastCondition = func(sim *Simulation, target *Unit) bool {
-			if ((spell.MinRange != 0) && (spell.Unit.DistanceFromTarget < spell.MinRange)) || ((spell.MaxRange != 0) && (spell.Unit.DistanceFromTarget > spell.EffectiveMaxRange())) {
+			if !spell.InRange() {
 				/*if sim.Log != nil {
 					sim.Log("Cannot cast spell %s, out of range!", spell.ActionID)
 				}*/
@@ -444,6 +444,13 @@ func (spell *Spell) Dot(target *Unit) *Dot {
 		return nil
 	}
 	return spell.dots.Get(target)
+}
+
+// Whether the unit stands within the spell's range: no closer than MinRange and no farther than MaxRange
+// after the range mods. A range left at 0 does not limit.
+func (spell *Spell) InRange() bool {
+	distance := spell.Unit.DistanceFromTarget
+	return (spell.MinRange == 0 || distance >= spell.MinRange) && (spell.MaxRange == 0 || distance <= spell.EffectiveMaxRange())
 }
 
 // The distance the range check allows: MaxRange after the range mods.

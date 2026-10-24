@@ -100,7 +100,7 @@ message APLAction {
 }
 
 
-// NextIndex: 142
+// NextIndex: 143
 message APLValue {
 	UUID uuid = 85;
 
@@ -165,6 +165,7 @@ message APLValue {
         // Spell values
         APLValueSpellIsKnown spell_is_known = 74;
         APLValueSpellCanCast spell_can_cast = 19;
+        APLValueSpellInRange spell_in_range = 142;
         APLValueSpellIsReady spell_is_ready = 20;
         APLValueSpellTimeToReady spell_time_to_ready = 21;
         APLValueSpellCastTime spell_cast_time = 35;
@@ -392,6 +393,9 @@ message APLActionGuardianHotwDpsRotation {
 
 message APLActionMove {
     APLValue range_from_target = 1;
+    // While the walk is under way, the rotation looks again every reaction time: the walk stops where it is once
+    // the action's condition is false, and turns to the new range once the range changes.
+    bool recheck_while_moving = 2;
 }
 
 message APLActionMoveDuration {
@@ -594,6 +598,11 @@ message APLValueTalentRank {
     ActionID talent_id = 1;
 }
 message APLValueSpellCanCast {
+    ActionID spell_id = 1;
+}
+// True while the unit stands within the spell's range: no closer than its minimum and no farther than its
+// maximum after range mods. A spell with no range is always in range.
+message APLValueSpellInRange {
     ActionID spell_id = 1;
 }
 message APLValueSpellIsReady {

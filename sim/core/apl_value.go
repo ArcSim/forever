@@ -172,6 +172,8 @@ func (rot *APLRotation) newAPLValueWithContext(config *proto.APLValue, groupVari
 		value = rot.newValueSpellIsKnown(config.GetSpellIsKnown(), config.Uuid)
 	case *proto.APLValue_SpellCanCast:
 		value = rot.newValueSpellCanCast(config.GetSpellCanCast(), config.Uuid)
+	case *proto.APLValue_SpellInRange:
+		value = rot.newValueSpellInRange(config.GetSpellInRange(), config.Uuid)
 	case *proto.APLValue_SpellIsReady:
 		value = rot.newValueSpellIsReady(config.GetSpellIsReady(), config.Uuid)
 	case *proto.APLValue_SpellTimeToReady:
