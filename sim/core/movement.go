@@ -110,6 +110,22 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	}
 }
 
+// Ends the walk under way where the unit is now.
+func (unit *Unit) StopMoving(sim *Simulation) {
+	if !unit.Moving {
+		return
+	}
+
+	unit.UpdatePosition(sim, false)
+	unit.movementAction.Cancel(sim)
+	if unit.movementAction.meleeEdge != nil {
+		unit.movementAction.meleeEdge.Cancel(sim)
+	}
+	unit.moveAura.Deactivate(sim)
+
+	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
+}
+
 func (unit *Unit) FinalizeMovement(sim *Simulation) {
 	if !unit.Moving {
 		return

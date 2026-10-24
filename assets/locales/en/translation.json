@@ -1537,6 +1537,8 @@
 					"tooltip": "Starts a move to the desired range from target.",
 					"to_range": "to Range",
 					"to_range_tooltip": "Desired range from target.",
+					"recheck": "Re-check while moving",
+					"recheck_tooltip": "Looks again every reaction time while walking: stops where you are once the condition is false, and turns to the new range when it changes. The rest of the rotation keeps going meanwhile.",
 					"move_duration": "Move duration",
 					"duration": "Duration",
 					"duration_tooltip": "Amount of time the character should move.",
@@ -1794,6 +1796,11 @@
 					"label": "Can Cast",
 					"tooltip": "<b>True</b> if all requirements for casting the spell are currently met, otherwise <b>False</b>.",
 					"full_description": "<p>The <b>Cast Spell</b> action does not need to be conditioned on this, because it applies this check automatically.</p>"
+				},
+				"in_range": {
+					"label": "In Range",
+					"tooltip": "<b>True</b> if you stand within the spell's range, otherwise <b>False</b>.",
+					"full_description": "<p>Checks the distance only: no closer than the spell's minimum range and no farther than its maximum, range talents included. A bow, gun or crossbow shot's minimum range is the dead zone, so Arcane Shot being in range means your Auto Shot can fire from here.</p>"
 				},
 				"is_hit_capped": {
 					"label": "Is Hit Capped",
@@ -2291,6 +2298,10 @@
 						"weave": "Melee weave",
 						"melee": "Melee"
 					}
+				},
+				"pull_range": {
+					"label": "Pull range (yd)",
+					"tooltip": "Where you stand when the pull starts. From there you walk to your spot (12 yd at range, melee range in melee), stopping for each Auto Shot you can fire on the way."
 				},
 				"time_to_weave": {
 					"label": "Time to weave (ms)",

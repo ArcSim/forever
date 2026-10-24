@@ -35,6 +35,9 @@ type APLRotation struct {
 	// Their spells still need to be removed from MCD auto-casting.
 	prunedActions []APLActionImpl
 
+	// The moves that look again at their condition and range while their walk is under way.
+	recheckedMoves []*APLActionMove
+
 	// Action currently controlling this rotation (only used for certain actions, such as StrictSequence).
 	controllingActions []APLActionImpl
 
@@ -466,6 +469,12 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 	apl.inLoop = true
 
 	apl.unit.UpdatePosition(sim, false)
+	if len(apl.recheckedMoves) > 0 {
+		apl.evalGeneration++
+		for _, move := range apl.recheckedMoves {
+			move.recheck(sim)
+		}
+	}
 	free := apl.unit.GCD.IsReady(sim) && apl.unit.Hardcast.Expires <= sim.CurrentTime
 	apl.unit.costBlocked = false
 	for nextAction := apl.firstAction(sim); ; i, nextAction = i+1, apl.getNextAction(sim) {
