@@ -813,7 +813,9 @@ func (aa *AutoAttacks) EnableMeleeSwing(sim *Simulation) {
 	if !aa.mh.unit.engagedBeforePull {
 		earliest = max(earliest, 0)
 	}
-	if aa.AutoSwingRanged && !aa.mh.enabled && sim.CurrentTime > 0 && aa.mh.swingAt < earliest+MeleeArrivalDelay {
+	// With the attack started on the way in, a swing that came ready before the server sees the unit
+	// arrive waits for the next retry. An attack started on arrival swings at once.
+	if aa.AutoSwingRanged && aa.meleeAttackOn && !aa.mh.enabled && sim.CurrentTime > 0 && aa.mh.swingAt < earliest+MeleeArrivalDelay {
 		aa.mh.swingAt = aa.meleeRetryAt(sim)
 	}
 	aa.mh.swingAt = max(aa.mh.swingAt, earliest)
@@ -837,14 +839,10 @@ func (aa *AutoAttacks) EnableMeleeSwing(sim *Simulation) {
 	}
 }
 
-// The first retry of a main hand that came ready out of range after the server sees the unit arrive. With
-// the melee attack not on, it turns on at the arrival.
+// The first retry of a main hand that came ready out of range, with the melee attack on, after the server
+// sees the unit arrive. The retries run from the later of the timer running out and the attack starting.
 func (aa *AutoAttacks) meleeRetryAt(sim *Simulation) time.Duration {
-	from := sim.CurrentTime
-	if aa.meleeAttackOn {
-		from = aa.meleeAttackOnAt
-	}
-	from = max(from, aa.mh.swingAt)
+	from := max(aa.meleeAttackOnAt, aa.mh.swingAt)
 	seen := sim.CurrentTime + MeleeArrivalDelay
 	return from + (seen-from+MeleeAutoRetryInterval-1)/MeleeAutoRetryInterval*MeleeAutoRetryInterval
 }
