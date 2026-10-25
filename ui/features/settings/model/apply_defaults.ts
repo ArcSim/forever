@@ -1,5 +1,5 @@
 import { APLRotation, APLRotation_Type as APLRotationType } from '@generated/proto/apl';
-import { Cooldowns, ItemSwap, Profession, Spec } from '@generated/proto/common';
+import { Cooldowns, Profession, Spec } from '@generated/proto/common';
 import type { Player } from '@sim/player/player';
 import type { StatSweepSettings } from '@sim/settings/stat_sweep_settings';
 import type { StatWeightActionSettings } from '@sim/settings/stat_weight_settings';
@@ -67,6 +67,9 @@ export function applyIndividualDefaults<SpecType extends Spec>(host: DefaultsHos
 		player.applySharedDefaults();
 		player.setRace(config.defaults.other?.race || player.getPlayerClass().races[0]);
 		player.setGear(sim.db.lookupEquipmentSpec(config.defaults.gear));
+		if (config.defaults.itemSwap) {
+			player.itemSwapSettings.setItemSwapSettings(true, sim.db.lookupItemSwap(config.defaults.itemSwap));
+		}
 		player.setConsumes(config.defaults.consumables);
 		applyDefaultRotation(player, config);
 		player.setTalentsString(config.defaults.talents.talentsString);
@@ -78,9 +81,6 @@ export function applyIndividualDefaults<SpecType extends Spec>(host: DefaultsHos
 		// Tank specs can name their own EP reference stat; without this the dialog
 		// falls back to StatArmor for every one of them.
 		player.setRefStat('tankRefStat', config.tankRefStat);
-		if (config.defaults.itemSwap) {
-			player.itemSwapSettings.setItemSwapSettings(true, sim.db.lookupItemSwap(config.defaults.itemSwap || ItemSwap.create()));
-		}
 
 		const defaultRatios = player.getDefaultEpRatios(tankSpec, healingSpec);
 		player.setEpRatios(defaultRatios);
