@@ -734,6 +734,7 @@ export class Player<SpecType extends Spec> {
 		return ConsumesSpec.clone(this.slice().consumables);
 	}
 
+	/** Matches each hand's imbue to the weapon already in that hand, so the gear and the swap gear go in before the consumes. */
 	setConsumes(newConsumes: ConsumesSpec) {
 		const adjustedConsumes = this.itemSwapSettings.getGear().adjustSwapImbues(this.getGear().adjustImbues(newConsumes));
 		if (ConsumesSpec.equals(this.slice().consumables, adjustedConsumes)) return;
