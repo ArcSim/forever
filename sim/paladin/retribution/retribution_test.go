@@ -76,9 +76,9 @@ func retributionSuite() core.CharacterSuiteConfig {
 		Consumables:      DefaultConsumables,
 		Profession1:      proto.Profession_Engineering,
 		Profession2:      proto.Profession_Blacksmithing,
-		GearSet:          core.GetGearSet("../../../ui/specs/paladin/retribution/gear_sets", "twist_of_light"),
+		GearSet:          core.GetGearSet("../../../ui/specs/paladin/retribution/gear_sets", "default"),
 		Talents:          TwistOfLightTalents,
-		Rotation:         core.GetAplRotation("../../../ui/specs/paladin/retribution/apls", "twist_of_light"),
+		Rotation:         core.GetAplRotation("../../../ui/specs/paladin/retribution/apls", "default"),
 		ItemFilter: core.ItemFilter{
 			WeaponTypes: []proto.WeaponType{
 				proto.WeaponType_WeaponTypePolearm,

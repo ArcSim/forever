@@ -206,14 +206,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestShadowPriest-AllItems-DeathmistRaiment"
- value: {
-  dps: 724.20201
-  tps: 365.79773
-  dtps: 5.19766
- }
-}
-dps_results: {
  key: "TestShadowPriest-AllItems-Defender'sGripStabilizer-272440"
  value: {
   dps: 762.51183
@@ -815,14 +807,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestShadowPriest-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 730.38182
-  tps: 368.66349
-  dtps: 5.71545
- }
-}
-dps_results: {
  key: "TestShadowPriest-AllItems-Sulfuras,HandofRagnaros-17182"
  value: {
   dps: 770.1254
@@ -952,9 +936,9 @@ dps_results: {
 dps_results: {
  key: "TestShadowPriest-AllItems-VestmentsoftheVirtuous"
  value: {
-  dps: 708.53475
-  tps: 356.09445
-  dtps: 2.5975
+  dps: 744.39585
+  tps: 376.42847
+  dtps: 3.36873
  }
 }
 dps_results: {

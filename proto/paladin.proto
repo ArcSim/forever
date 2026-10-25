@@ -80,21 +80,28 @@ enum PaladinAura {
 	ShadowResistanceAura = 6;
 }
 
-// The seals whose Judgement a raid assigns a paladin to keep on the target.
+// The Judgement a raid assigns a paladin to keep on the target.
+enum PaladinJudgement {
+	JudgementNone          = 0;
+	JudgementOfTheCrusader = 1;
+	JudgementOfLight       = 2;
+	JudgementOfWisdom      = 3;
+}
+
+// The seals the player keeps up during the fight if not talented into Twist of Light.
 enum PaladinSeal {
-	SealNone          = 0;
-	SealOfTheCrusader = 1;
-	SealOfLight       = 2;
-	SealOfWisdom      = 3;
-	SealOfJustice     = 4;
+	SealUnknown         = 0; // Not a choice: the simple rotation defaults to either Seal of Command or Seal of Righteousness
+	SealOfCommand       = 1;
+	SealOfRighteousness = 2;
 }
 
 message RetributionPaladin {
 	message Rotation {
-		PaladinAura aura = 1;
-		PaladinSeal assigned_seal = 2; // Cast before the pull and judged on the way in; SealNone skips it.
-		int32 pull_range = 3;          // Where the paladin stands at the pull, in yards. 0 is 25 yd, and below 11 is 11.
-		int32 delay_major_cds = 4;     // Seconds into the fight before the other cooldowns are cast.
+		PaladinAura aura                    = 1;
+		PaladinJudgement assigned_judgement = 2; // Cast before the pull and judged on the way in; JudgementNone skips it.
+		PaladinSeal non_twist_seal          = 3; // When Twist of Light is not talented, this is the seal being kept up.
+		int32 pull_range                    = 4; // Where the paladin stands at the pull, in yards. 0 is 25 yd, and below 11 is 11.
+		int32 delay_major_cds               = 5; // Seconds into the fight before the other cooldowns are cast.
 	}
 
 	message Options {

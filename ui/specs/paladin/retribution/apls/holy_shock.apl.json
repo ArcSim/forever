@@ -19,23 +19,23 @@
 		},
 		{
 			"action": {
-				"condition": { "variableRef": { "name": "Has assigned seal" } },
-				"groupReference": { "groupName": "Cast assigned seal" }
-			},
-			"doAtValue": { "const": { "val": "-18.5s" } }
-		},
-		{
-			"action": {
 				"condition": {
 					"not": {
 						"val": {
-							"variableRef": { "name": "Has assigned seal" }
+							"variableRef": { "name": "Has assigned judgement" }
 						}
 					}
 				},
 				"castSpell": { "spellId": { "spellId": 20293, "rank": 8 } }
 			},
-			"doAtValue": { "const": { "val": "-18.5s" } }
+			"doAtValue": { "const": { "val": "-1.5s" } }
+		},
+		{
+			"action": {
+				"condition": { "variableRef": { "name": "Has assigned judgement" } },
+				"groupReference": { "groupName": "Cast assigned judgement" }
+			},
+			"doAtValue": { "const": { "val": "-1.5s" } }
 		}
 	],
 	"priorityList": [
@@ -157,7 +157,7 @@
 			]
 		},
 		{
-			"name": "Cast assigned seal",
+			"name": "Cast assigned judgement",
 			"actions": [
 				{
 					"action": {
@@ -178,7 +178,7 @@
 								"vals": [
 									{
 										"variableRef": {
-											"name": "Has assigned seal"
+											"name": "Has assigned judgement"
 										}
 									},
 									{
@@ -252,7 +252,7 @@
 										"not": {
 											"val": {
 												"variableRef": {
-													"name": "Has assigned seal"
+													"name": "Has assigned judgement"
 												}
 											}
 										}
@@ -343,7 +343,7 @@
 	],
 	"valueVariables": [
 		{
-			"name": "Has assigned seal",
+			"name": "Has assigned judgement",
 			"value": { "const": { "val": "true" } }
 		},
 		{ "name": "Delay Major CDs", "value": { "const": { "val": "0s" } } },

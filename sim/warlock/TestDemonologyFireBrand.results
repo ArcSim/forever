@@ -225,9 +225,10 @@ dps_results: {
 dps_results: {
  key: "TestDemonologyFireBrand-AllItems-DeathmistRaiment"
  value: {
-  dps: 805.93665
-  tps: 464.64059
-  dtps: 8.81873
+  dps: 814.7989
+  tps: 471.5852
+  dtps: 9.0894
+  hps: 10.978
  }
 }
 dps_results: {
@@ -908,14 +909,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestDemonologyFireBrand-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 809.49638
-  tps: 468.91965
-  dtps: 9.27828
- }
-}
-dps_results: {
  key: "TestDemonologyFireBrand-AllItems-SwordofZeal-6622"
  value: {
   dps: 734.61462
@@ -1065,14 +1058,6 @@ dps_results: {
   dps: 738.61923
   tps: 427.58983
   dtps: 8.68664
- }
-}
-dps_results: {
- key: "TestDemonologyFireBrand-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 783.69741
-  tps: 452.56709
-  dtps: 8.91173
  }
 }
 dps_results: {

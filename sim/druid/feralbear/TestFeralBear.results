@@ -244,15 +244,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestFeralBear-AllItems-DarkmantleArmor"
- value: {
-  dps: 447.62127
-  tps: 752.5868
-  dtps: 378.33987
-  hps: 80.2631
- }
-}
-dps_results: {
  key: "TestFeralBear-AllItems-DarkmoonCard:BlueDragon-19288"
  value: {
   dps: 437.93575
@@ -277,15 +268,6 @@ dps_results: {
   tps: 755.18967
   dtps: 373.10835
   hps: 83.24045
- }
-}
-dps_results: {
- key: "TestFeralBear-AllItems-DeathmistRaiment"
- value: {
-  dps: 391.41622
-  tps: 667.40767
-  dtps: 509.48952
-  hps: 81.28353
  }
 }
 dps_results: {
@@ -552,10 +534,10 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-AllItems-FeralheartRaiment"
  value: {
-  dps: 427.93359
-  tps: 720.77241
-  dtps: 419.23833
-  hps: 78.71863
+  dps: 435.92106
+  tps: 736.65543
+  dtps: 360.8377
+  hps: 84.28252
  }
 }
 dps_results: {
@@ -1045,15 +1027,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestFeralBear-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 386.46137
-  tps: 660.37383
-  dtps: 518.73655
-  hps: 81.98586
- }
-}
-dps_results: {
  key: "TestFeralBear-AllItems-Sulfuras,HandofRagnaros-17182"
  value: {
   dps: 451.20167
@@ -1195,15 +1168,6 @@ dps_results: {
   tps: 648.17138
   dtps: 521.84294
   hps: 78.81508
- }
-}
-dps_results: {
- key: "TestFeralBear-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 383.311
-  tps: 655.97756
-  dtps: 506.53607
-  hps: 82.58716
  }
 }
 dps_results: {

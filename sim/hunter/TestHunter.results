@@ -126,30 +126,48 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunter-AllItems-Beastmaster'sBoots-22061"
+ key: "TestHunter-AllItems-Beastmaster'sCap-226887"
  value: {
-  dps: 878.98762
-  tps: 641.22886
+  dps: 883.184
+  tps: 644.17451
   dtps: 9.51294
   hps: 19.13028
  }
 }
 dps_results: {
- key: "TestHunter-AllItems-Beastmaster'sCap-22013"
- value: {
-  dps: 882.23301
-  tps: 643.51702
-  dtps: 9.51294
-  hps: 19.14722
- }
-}
-dps_results: {
- key: "TestHunter-AllItems-Beastmaster'sGloves-22015"
+ key: "TestHunter-AllItems-Beastmaster'sGauntlets-226883"
  value: {
   dps: 880.58263
   tps: 642.33717
   dtps: 9.51294
   hps: 19.14722
+ }
+}
+dps_results: {
+ key: "TestHunter-AllItems-Beastmaster'sTreads-226881"
+ value: {
+  dps: 881.75856
+  tps: 643.17671
+  dtps: 9.51294
+  hps: 19.14722
+ }
+}
+dps_results: {
+ key: "TestHunter-AllItems-BeastmasterArmor"
+ value: {
+  dps: 877.82878
+  tps: 643.01158
+  dtps: 9.67212
+  hps: 18.94389
+ }
+}
+dps_results: {
+ key: "TestHunter-AllItems-BeaststalkerArmor"
+ value: {
+  dps: 835.15259
+  tps: 612.52246
+  dtps: 9.5964
+  hps: 18.58806
  }
 }
 dps_results: {
@@ -279,15 +297,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunter-AllItems-DarkmantleArmor"
- value: {
-  dps: 877.10707
-  tps: 640.19748
-  dtps: 10.16251
-  hps: 19.07944
- }
-}
-dps_results: {
  key: "TestHunter-AllItems-DarkmoonCard:BlueDragon-19288"
  value: {
   dps: 878.22969
@@ -321,15 +330,6 @@ dps_results: {
   tps: 639.44675
   dtps: 9.95167
   hps: 18.63889
- }
-}
-dps_results: {
- key: "TestHunter-AllItems-DeathmistRaiment"
- value: {
-  dps: 785.05817
-  tps: 575.87343
-  dtps: 10.16251
-  hps: 19.14722
  }
 }
 dps_results: {
@@ -600,15 +600,6 @@ dps_results: {
   tps: 640.69831
   dtps: 9.51294
   hps: 19.13028
- }
-}
-dps_results: {
- key: "TestHunter-AllItems-FeralheartRaiment"
- value: {
-  dps: 806.9025
-  tps: 590.43723
-  dtps: 9.91019
-  hps: 18.58806
  }
 }
 dps_results: {
@@ -1152,15 +1143,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunter-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 781.24174
-  tps: 572.75528
-  dtps: 9.97926
-  hps: 18.94389
- }
-}
-dps_results: {
  key: "TestHunter-AllItems-StormGauntlets-12632"
  value: {
   dps: 870.28114
@@ -1239,6 +1221,15 @@ dps_results: {
   tps: 640.69831
   dtps: 9.51294
   hps: 19.13028
+ }
+}
+dps_results: {
+ key: "TestHunter-AllItems-TheElements"
+ value: {
+  dps: 772.63894
+  tps: 566.65449
+  dtps: 9.95363
+  hps: 18.99472
  }
 }
 dps_results: {
@@ -1328,15 +1319,6 @@ dps_results: {
   dps: 754.68469
   tps: 553.80034
   dtps: 9.68836
-  hps: 18.58806
- }
-}
-dps_results: {
- key: "TestHunter-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 756.87944
-  tps: 554.72112
-  dtps: 8.61189
   hps: 18.58806
  }
 }

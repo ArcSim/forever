@@ -5,6 +5,7 @@ import { Debuffs, IndividualBuffs, PartyBuffs, RaidBuffs } from '@generated/prot
 import { ConsumesSpec, Profession, PseudoStat, Race, Spec, Stat, TristateEffect } from '@generated/proto/common';
 import {
 	PaladinAura,
+	PaladinJudgement,
 	PaladinSeal,
 	RetributionPaladin_Options as RetributionPaladinOptions,
 	RetributionPaladin_Rotation as RetributionPaladinRotation,
@@ -14,18 +15,19 @@ import * as Mechanics from '@sim/constants/mechanics';
 import type { PresetSettings } from '@sim/presets/types';
 import { Stats } from '@sim/proto/stats';
 
+import DefaultApl from './apls/default.apl.json';
 import HolyShockApl from './apls/holy_shock.apl.json';
-import TwistOfLightApl from './apls/twist_of_light.apl.json';
+import DefaultGear from './gear_sets/default.gear.json';
 import HolyShockGear from './gear_sets/holy_shock.gear.json';
 import HolyShockItemSwapGear from './gear_sets/holy_shock_item_swap.gear.json';
-import TwistOfLightGear from './gear_sets/twist_of_light.gear.json';
 
 export const HolyShockAplPreset = PresetUtils.makePresetAPLRotation('Holy Shock', HolyShockApl);
-export const TwistOfLightAplPreset = PresetUtils.makePresetAPLRotation('Twist of Light', TwistOfLightApl);
+export const DefaultAplPreset = PresetUtils.makePresetAPLRotation('Default', DefaultApl);
 
 export const DefaultSimpleRotation = RetributionPaladinRotation.create({
 	aura: PaladinAura.RetributionAura,
-	assignedSeal: PaladinSeal.SealOfTheCrusader,
+	assignedJudgement: PaladinJudgement.JudgementOfTheCrusader,
+	nonTwistSeal: PaladinSeal.SealOfCommand,
 	pullRange: 25,
 });
 export const SimpleRotation = PresetUtils.makePresetSimpleRotation('Simple', Spec.SpecRetributionPaladin, DefaultSimpleRotation);
@@ -34,7 +36,7 @@ export const HolyShockGearPreset = PresetUtils.makePresetGear('Holy Shock', Holy
 	devOnly: true,
 	tooltip: 'Level 60 blues from dungeons, quests, reputations and crafting. A placeholder until the Phase 1 gear is known.',
 });
-export const TwistOfLightGearPreset = PresetUtils.makePresetGear('Twist of Light', TwistOfLightGear, {
+export const DefaultGearPreset = PresetUtils.makePresetGear('Default', DefaultGear, {
 	devOnly: true,
 	tooltip: 'Level 60 blues from dungeons, quests, reputations and crafting. A placeholder until the Phase 1 gear is known.',
 });
@@ -97,7 +99,7 @@ export const TwistOfLightEpWeights = PresetUtils.makePresetEpWeights(
 	),
 );
 
-export const TwistOfLightConsumables = ConsumesSpec.create({
+export const DefaultConsumables = ConsumesSpec.create({
 	offensivePotId: Consumables.MajorSpellblastingPotion.id,
 	flaskId: Consumables.FlaskOfSupremePower.id,
 	foodId: Consumables.LobsterStew.id,
@@ -119,7 +121,7 @@ export const TwistOfLightConsumables = ConsumesSpec.create({
 });
 
 export const HolyShockConsumables = ConsumesSpec.create({
-	...TwistOfLightConsumables,
+	...DefaultConsumables,
 	extraIds: [Consumables.CerebralCortexCompound.id, Consumables.GoblinSapperCharge.id, Consumables.DragonbreathChili.id, Consumables.GordokGreenGrog.id],
 });
 
@@ -182,15 +184,15 @@ const settings = (name: string, consumables: ConsumesSpec, itemSwap?: PresetUtil
 	},
 });
 
-export const TwistOfLightSettings = settings('Twist of Light', TwistOfLightConsumables);
+export const DefaultSettings = settings('Default', DefaultConsumables);
 export const HolyShockSettings = settings('Holy Shock', HolyShockConsumables, HolyShockItemSwap);
 
-// The Simple rotation picks the Twist of Light or the Holy Shock APL from the talents.
-export const TwistOfLightBuild = PresetUtils.makePresetBuild('Twist of Light', {
-	gear: TwistOfLightGearPreset,
+// The Simple rotation picks the Default or the Holy Shock APL from the talents.
+export const DefaultBuild = PresetUtils.makePresetBuild('Twist of Light', {
+	gear: DefaultGearPreset,
 	talents: TwistOfLightTalents,
 	rotationType: APLRotationType.TypeSimple,
-	settings: TwistOfLightSettings,
+	settings: DefaultSettings,
 });
 
 export const HolyShockBuild = PresetUtils.makePresetBuild('Holy Shock', {

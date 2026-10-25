@@ -174,14 +174,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestFeralCat-AllItems-DarkmantleArmor"
- value: {
-  dps: 608.37103
-  tps: 325.2964
-  hps: 46.5125
- }
-}
-dps_results: {
  key: "TestFeralCat-AllItems-DarkmoonCard:BlueDragon-19288"
  value: {
   dps: 616.05528
@@ -203,14 +195,6 @@ dps_results: {
   dps: 624.1137
   tps: 333.15569
   hps: 46.13972
- }
-}
-dps_results: {
- key: "TestFeralCat-AllItems-DeathmistRaiment"
- value: {
-  dps: 477.89059
-  tps: 260.50564
-  hps: 46.37694
  }
 }
 dps_results: {
@@ -448,8 +432,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralCat-AllItems-FeralheartRaiment"
  value: {
-  dps: 544.19169
-  tps: 292.58684
+  dps: 557.02582
+  tps: 299.75302
   hps: 46.30917
  }
 }
@@ -878,14 +862,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestFeralCat-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 477.89059
-  tps: 259.97297
-  hps: 46.37694
- }
-}
-dps_results: {
  key: "TestFeralCat-AllItems-Sulfuras,HandofRagnaros-17182"
  value: {
   dps: 616.05528
@@ -1011,14 +987,6 @@ dps_results: {
   dps: 475.06713
   tps: 258.15902
   hps: 46.39389
- }
-}
-dps_results: {
- key: "TestFeralCat-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 477.89059
-  tps: 258.87891
-  hps: 46.37694
  }
 }
 dps_results: {

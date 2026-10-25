@@ -306,12 +306,14 @@
 		},
 		"copy_button": {
 			"default_text": "Copy to Clipboard",
-			"copied": "Copied"
+			"copied": "Copied",
+			"manual_copy": "The browser blocked the clipboard. Copy the text below by hand."
 		},
 		"list_picker": {
 			"new_item": "New {{itemLabel}}",
 			"delete_item": "Delete {{itemLabel}}",
 			"copy_to_new": "Copy to New {{itemLabel}}",
+			"copy_to_clipboard": "Copy {{itemLabel}} to Clipboard",
 			"move_drag_drop": "Move (Drag+Drop)",
 			"item_actions": "{{itemLabel}} menu",
 			"warnings": "Warnings",
@@ -387,6 +389,7 @@
 			"shoot": "Shoot",
 			"refund": "Refund",
 			"moving": "Moving",
+			"moving_from_spell": "Moving (from a spell)",
 			"prepull": "Prepull",
 			"encounter_start": "Encounter Start",
 			"minor_run_speed": "Minor Run Speed (8%)",
@@ -830,6 +833,12 @@
 			"cannot_shred_target": {
 				"label": "Cannot Shred Target",
 				"tooltip": "Alternative to \"In Front of Target\" for modeling bosses that do not Parry or Block, but which you still cannot Shred."
+			},
+			"innervate_assignment": {
+				"label": "Innervate",
+				"tooltip": "Self keeps the mana. Someone else still casts Innervate on your rotation, and the mana stays off you.",
+				"self": "Self",
+				"other": "Someone else"
 			},
 			"show_1h_weapons": {
 				"label": "1H",
@@ -1330,8 +1339,21 @@
 					"overview": "Groups of actions that can be referenced in the Action Priority List (APL). Useful for organizing your APL and reusing common action sequences. Actions are performed in order from top to bottom within a group."
 				}
 			},
+			"clipboard": {
+				"copied": "{{itemName}} copied to the clipboard.",
+				"empty": "The clipboard holds no copied {{itemName}}.",
+				"paste_dialog": {
+					"label": "Copied text",
+					"description": "This page cannot read the clipboard. Paste the copied text here with Ctrl+V."
+				},
+				"places": {
+					"action": "the Priority List or a group's actions"
+				},
+				"wrong_kind": "The clipboard holds a copied {{held}}. Paste it under {{places}}."
+			},
 			"floatingActionBar": {
 				"new": "New {{itemName}}",
+				"paste": "Paste {{itemName}}",
 				"reset": "Reset APL"
 			},
 			"nameModal": {
@@ -2334,10 +2356,14 @@
 						"label": "Aura",
 						"tooltip": "The aura you turn on before the pull."
 					},
-					"assigned_seal": {
-						"label": "Assigned seal",
-						"tooltip": "The seal whose Judgement the raid assigned you. You cast it before the pull and judge it on your way in, then switch to your own seals. Leave it empty when no Judgement is assigned to you.",
-						"none": "No assigned seal"
+					"assigned_judge": {
+						"label": "Assigned judgement",
+						"tooltip": "The Judgement the raid assigned you. You cast it before the pull and judge it on your way in, then switch to your own seals. Leave it empty when no Judgement is assigned to you.",
+						"none": "No assigned judgement"
+					},
+					"non_twist_seal": {
+						"label": "Seal",
+						"tooltip": "The seal being kept up during the fight."
 					},
 					"pull_range": {
 						"label": "Starting range (yd)",
@@ -2391,6 +2417,8 @@
 			"all_targets": "All Targets",
 			"target_number": "Target {{number}}",
 			"group_ranks": "Group ranks",
+			"hide_passives": "Hide passives",
+			"pets": "Pets",
 			"damage": {
 				"dps_histogram": "DPS Histogram"
 			},
@@ -3240,6 +3268,10 @@
 				"tps": {
 					"label": "TPS",
 					"tooltip": "Threat Per Second"
+				},
+				"apm": {
+					"label": "APM",
+					"tooltip": "Actions Per Minute: the spells, abilities and items the rotation uses by hand per minute, plus the walks the rotation or the encounter starts. Abilities that queue for the next swing, such as Heroic Strike, count once when pressed. Procs, auto attacks, walks a spell such as Charge starts, and pets are not counted."
 				},
 				"dtps": {
 					"label": "DTPS",

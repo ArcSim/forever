@@ -126,27 +126,43 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunterPets-AllItems-Beastmaster'sBoots-22061"
+ key: "TestHunterPets-AllItems-Beastmaster'sCap-226887"
  value: {
-  dps: 685.94886
-  tps: 283.7648
+  dps: 680.9617
+  tps: 284.97448
   dtps: 4.61467
  }
 }
 dps_results: {
- key: "TestHunterPets-AllItems-Beastmaster'sCap-22013"
- value: {
-  dps: 680.06901
-  tps: 284.45777
-  dtps: 4.61467
- }
-}
-dps_results: {
- key: "TestHunterPets-AllItems-Beastmaster'sGloves-22015"
+ key: "TestHunterPets-AllItems-Beastmaster'sGauntlets-226883"
  value: {
   dps: 684.43502
   tps: 284.63798
   dtps: 4.69665
+ }
+}
+dps_results: {
+ key: "TestHunterPets-AllItems-Beastmaster'sTreads-226881"
+ value: {
+  dps: 687.35259
+  tps: 284.57169
+  dtps: 4.61467
+ }
+}
+dps_results: {
+ key: "TestHunterPets-AllItems-BeastmasterArmor"
+ value: {
+  dps: 686.79181
+  tps: 284.26048
+  dtps: 3.91842
+ }
+}
+dps_results: {
+ key: "TestHunterPets-AllItems-BeaststalkerArmor"
+ value: {
+  dps: 653.24276
+  tps: 272.17476
+  dtps: 1.07542
  }
 }
 dps_results: {
@@ -269,14 +285,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunterPets-AllItems-DarkmantleArmor"
- value: {
-  dps: 676.3142
-  tps: 282.21526
-  dtps: 4.57997
- }
-}
-dps_results: {
  key: "TestHunterPets-AllItems-DarkmoonCard:BlueDragon-19288"
  value: {
   dps: 678.81567
@@ -306,14 +314,6 @@ dps_results: {
   dps: 680.58863
   tps: 284.86421
   dtps: 4.61467
- }
-}
-dps_results: {
- key: "TestHunterPets-AllItems-DeathmistRaiment"
- value: {
-  dps: 608.33671
-  tps: 247.06841
-  dtps: 4.55108
  }
 }
 dps_results: {
@@ -562,14 +562,6 @@ dps_results: {
   dps: 678.81567
   tps: 283.85948
   dtps: 4.61467
- }
-}
-dps_results: {
- key: "TestHunterPets-AllItems-FeralheartRaiment"
- value: {
-  dps: 625.02703
-  tps: 256.97297
-  dtps: 1.97373
  }
 }
 dps_results: {
@@ -1179,14 +1171,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestHunterPets-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 605.55211
-  tps: 246.3141
-  dtps: 3.99339
- }
-}
-dps_results: {
  key: "TestHunterPets-AllItems-StormGauntlets-12632"
  value: {
   dps: 671.82055
@@ -1275,6 +1259,14 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestHunterPets-AllItems-TheElements"
+ value: {
+  dps: 598.28228
+  tps: 240.90015
+  dtps: 1.07311
+ }
+}
+dps_results: {
  key: "TestHunterPets-AllItems-TheGreenTower-1204"
  value: {
   dps: 680.58863
@@ -1360,13 +1352,6 @@ dps_results: {
   dps: 591.59025
   tps: 238.77235
   dtps: 0.45503
- }
-}
-dps_results: {
- key: "TestHunterPets-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 596.53979
-  tps: 238.89462
  }
 }
 dps_results: {
