@@ -2,7 +2,7 @@ import * as BuffDebuffInputs from '@features/settings/model/buffs_debuffs';
 import * as OtherInputs from '@features/settings/model/other_inputs';
 import { APLRotation, APLRotation_Type as APLRotationType } from '@generated/proto/apl';
 import { Debuffs, IndividualBuffs, PartyBuffs, RaidBuffs } from '@generated/proto/buffs';
-import { ItemSlot, ItemSpec, ItemSwap, PseudoStat, Spec, Stat } from '@generated/proto/common';
+import { ItemSlot, ItemSpec, ItemSwap, PseudoStat, Spec, Stat, TristateEffect } from '@generated/proto/common';
 import { PlayerClasses } from '@sim/player/classes';
 import { Player } from '@sim/player/player';
 import { Stats, UnitStat } from '@sim/proto/stats';
@@ -90,7 +90,7 @@ export default defineSpec<Spec.SpecFeralBearDruid>({
 		aplRotation: Presets.ROTATION_ADAPTIVE.rotation.rotation!,
 		talents: Presets.BearTalents.data,
 		specOptions: Presets.DefaultOptions,
-		raidBuffs: RaidBuffs.fromJson({
+		raidBuffs: RaidBuffs.create({
 			arcaneBrilliance: true,
 			prayerOfSpirit: true,
 			giftOfTheWild: true,
@@ -99,11 +99,11 @@ export default defineSpec<Spec.SpecFeralBearDruid>({
 			strengthOfEarthTotem: true,
 			graceOfAirTotem: true,
 			windfuryTotem: true,
-			battleShout: 'TristateEffectRegular',
+			battleShout: TristateEffect.TristateEffectRegular,
 		}),
-		partyBuffs: PartyBuffs.fromJson({ devotionAura: true, manaSpringTotem: 'TristateEffectRegular', retributionAura: true }),
-		individualBuffs: IndividualBuffs.fromJson({ greaterBlessingOfKings: true, greaterBlessingOfMight: true, thorns: true }),
-		debuffs: Debuffs.fromJson({
+		partyBuffs: PartyBuffs.create({ devotionAura: true, manaSpringTotem: TristateEffect.TristateEffectRegular, retributionAura: true }),
+		individualBuffs: IndividualBuffs.create({ greaterBlessingOfKings: true, greaterBlessingOfMight: true, thorns: true }),
+		debuffs: Debuffs.create({
 			judgementOfLight: true,
 			judgementOfWisdom: true,
 

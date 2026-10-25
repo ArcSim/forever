@@ -1,8 +1,10 @@
 import * as PresetUtils from '@app/preset_utils';
-import { ConsumesSpec, Encounter, HealingModel, Profession, PseudoStat, Race, Stat } from '@generated/proto/common';
+import * as Consumables from '@features/settings/model/consumables_auto_gen';
+import { AreaType, ConsumesSpec, HealingModel, Profession, PseudoStat, Race, Stat } from '@generated/proto/common';
 import { FeralBearDruid_Options as DruidOptions } from '@generated/proto/druid';
 import { SavedTalents } from '@generated/proto/ui';
 import { Stats } from '@sim/proto/stats';
+import { Encounter } from '@sim/raid/encounter';
 import { OtherDefaults as SimUIOtherDefaults } from '@sim/spec_config';
 
 import AdaptiveApl from './apls/adaptive.apl.json';
@@ -17,32 +19,11 @@ export const Level60Gear = PresetUtils.makePresetGear('Level 60', Level60GearJso
 	tooltip: 'Leather at level 60 with no set bonus and no proc. The idol slot is empty: every idol has an effect.',
 });
 
-export const Level60Encounter = PresetUtils.makePresetEncounter(
-	'Mount Hyjal',
-	Encounter.fromJson({
-		apiVersion: 2,
-		duration: 180,
-		durationVariation: 5,
-		executeProportion20: 0.2,
-		executeProportion35: 0.35,
-		targets: [
-			{
-				id: 31146,
-				name: 'Raid Target',
-				level: 63,
-				mobType: 'MobTypeMechanical',
-				stats: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 3731, 0, 1428900, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				minBaseDamage: 6000,
-				damageSpread: 0.5,
-				swingSpeed: 2,
-				parryHaste: true,
-				canCrush: true,
-			},
-		],
-		areaTypes: ['AreaTypeForestGrassland', 'AreaTypeMountainous'],
-		zoneId: 616,
-	}),
-);
+const encounter = Encounter.defaultEncounterProto();
+encounter.areaTypes = [AreaType.AreaTypeForestGrassland, AreaType.AreaTypeMountainous];
+encounter.zoneId = 616;
+encounter.targets[0].minBaseDamage = 6000;
+export const Level60Encounter = PresetUtils.makePresetEncounter('Mount Hyjal', encounter);
 
 // DPS and TMI combined so Strength and Stamina have equal DPS-equivalent weight.
 // Four races, 180 ±120 seconds, Adaptive Bear and continuous Stoneshield.
@@ -80,16 +61,24 @@ export const DefaultOptions = DruidOptions.create({
 	assumeBleedActive: true,
 });
 
-export const DefaultConsumables = ConsumesSpec.fromJson({
-	flaskId: 274275,
-	foodId: 21023,
-	conjuredId: 9421,
-	mhImbueId: 18262,
-	swapMhImbueId: 12643,
-	extraIds: [10646, 12460, 10307, 8411],
-	elixirIds: [9088, 250351, 250328, 250337, 250338, 250329, 13445],
-	defensivePotId: 13455,
-	offensivePotId: 13442,
+export const DefaultConsumables = ConsumesSpec.create({
+	flaskId: Consumables.FlaskOfNaturalPrecision.id,
+	foodId: Consumables.DirgesKickinChimaerokChops.id,
+	conjuredId: Consumables.MajorHealthstone9421.id,
+	mhImbueId: Consumables.ElementalSharpeningStone.id,
+	swapMhImbueId: Consumables.DenseWeightstone.id,
+	extraIds: [Consumables.GoblinSapperCharge.id, Consumables.JujuMight.id, Consumables.ScrollOfStaminaIV.id, Consumables.LungJuiceCocktail.id],
+	elixirIds: [
+		Consumables.GiftOfArthas.id,
+		Consumables.ElixirOfTheGrizzly.id,
+		Consumables.ElixirOfCunning.id,
+		Consumables.ElixirOfTheOwl.id,
+		Consumables.ElixirOfSages.id,
+		Consumables.ElixirOfThePhalanx.id,
+		Consumables.ElixirOfGreaterDefense.id,
+	],
+	defensivePotId: Consumables.GreaterStoneshieldPotion.id,
+	offensivePotId: Consumables.MightyRagePotion.id,
 });
 
 export const OtherDefaults: Partial<SimUIOtherDefaults> = {

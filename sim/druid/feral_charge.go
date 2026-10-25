@@ -22,6 +22,8 @@ func (druid *Druid) registerFeralChargeSpell() {
 	chargeMovement := core.MakeDashAura(&druid.Unit, "Feral Charge Movement", core.ActionID{SpellID: rank.ID, Tag: 1}, 5*time.Second, nil)
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, _ *core.Spell) {
 		if druid.InForm(Cat) {
+			// Timed movement must not restore the position of an earlier walk.
+			druid.StopMoving(sim)
 			// TODO: Verify the modeled travel speed and landing delay in game.
 			travel := core.DurationFromSeconds(druid.DistanceFromTarget / 80)
 			druid.ExtendGCDUntil(sim, max(druid.NextGCDAt(), sim.CurrentTime+travel))

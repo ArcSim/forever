@@ -1216,6 +1216,51 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 617.12967
+  tps: 329.53456
+  hps: 46.46167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 617.12967
+  tps: 329.53456
+  hps: 46.46167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 658.77434
+  tps: 347.55318
+  hps: 48.29167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 306.04623
+  tps: 218.06575
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 306.04623
+  tps: 218.06575
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 353.06245
+  tps: 252.99312
+ }
+}
+dps_results: {
  key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-BleedAssumed-shadowmeld-FullBuffs-0.0yards-LongMultiTarget"
  value: {
   dps: 621.16542
@@ -1348,6 +1393,51 @@ dps_results: {
  value: {
   dps: 361.09283
   tps: 258.65459
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 617.73749
+  tps: 329.57474
+  hps: 46.42778
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 617.73749
+  tps: 329.57474
+  hps: 46.42778
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 659.7708
+  tps: 347.76914
+  hps: 48.59667
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 305.13414
+  tps: 217.17943
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 305.13414
+  tps: 217.17943
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-PrepullClearcasting-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 352.44298
+  tps: 251.8371
  }
 }
 dps_results: {
@@ -1486,6 +1576,51 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 616.01363
+  tps: 328.97989
+  hps: 46.46167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 616.01363
+  tps: 328.97989
+  hps: 46.46167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 656.64017
+  tps: 346.4925
+  hps: 48.29167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 305.1022
+  tps: 217.36924
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 305.1022
+  tps: 217.36924
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 351.90287
+  tps: 252.09108
+ }
+}
+dps_results: {
  key: "TestFeralCat-Settings-NightElf-default-DefaultTalents-Standard-shadowmeld-FullBuffs-0.0yards-LongMultiTarget"
  value: {
   dps: 620.30006
@@ -1618,6 +1753,51 @@ dps_results: {
  value: {
   dps: 344.63048
   tps: 246.68897
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 608.41195
+  tps: 326.61482
+  hps: 45.85167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 608.41195
+  tps: 326.61482
+  hps: 45.85167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 648.85887
+  tps: 345.12054
+  hps: 47.885
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 297.85741
+  tps: 212.50469
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 297.85741
+  tps: 212.50469
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-BleedAssumed-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 343.00001
+  tps: 246.60781
  }
 }
 dps_results: {
@@ -1756,6 +1936,51 @@ dps_results: {
  }
 }
 dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 611.69689
+  tps: 328.0975
+  hps: 45.88556
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 611.69689
+  tps: 328.0975
+  hps: 45.88556
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 656.54156
+  tps: 348.65171
+  hps: 48.24083
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 296.3611
+  tps: 211.00462
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 296.3611
+  tps: 211.00462
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 347.87487
+  tps: 248.75587
+ }
+}
+dps_results: {
  key: "TestFeralCat-Settings-NightElf-default-Hybrid-PrepullClearcasting-shadowmeld-FullBuffs-0.0yards-LongMultiTarget"
  value: {
   dps: 619.34251
@@ -1888,6 +2113,51 @@ dps_results: {
  value: {
   dps: 343.37757
   tps: 245.7994
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-FullBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 607.1212
+  tps: 325.97331
+  hps: 45.85167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-FullBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 607.1212
+  tps: 325.97331
+  hps: 45.85167
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-FullBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 646.11285
+  tps: 343.75577
+  hps: 47.885
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-NoBuffs-0.0yards-LongMultiTarget"
+ value: {
+  dps: 296.91824
+  tps: 211.83681
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-NoBuffs-0.0yards-LongSingleTarget"
+ value: {
+  dps: 296.91824
+  tps: 211.83681
+ }
+}
+dps_results: {
+ key: "TestFeralCat-Settings-NightElf-default-Hybrid-Standard-jvmes-NoBuffs-0.0yards-ShortSingleTarget"
+ value: {
+  dps: 341.50266
+  tps: 245.54145
  }
 }
 dps_results: {

@@ -893,6 +893,27 @@ func TestCatChargeRunIn(t *testing.T) {
 		for !sim.Step() {
 		}
 	}
+	sim.Cleanup()
+	sim.Reset()
+	cat.DistanceFromTarget = 25
+	cat.MoveTo(5, sim)
+	sim.AddPendingAction(&core.PendingAction{NextActionAt: 100 * time.Millisecond, OnAction: func(*core.Simulation) {}})
+	for sim.CurrentTime < 100*time.Millisecond {
+		if sim.Step() {
+			t.Fatal("simulation ended during the approach")
+		}
+	}
+	if !cat.FeralCharge.Cast(sim, cat.CurrentTarget) {
+		t.Fatal("Cat Charge did not cast while running")
+	}
+	for cat.Moving {
+		if sim.Step() {
+			t.Fatal("simulation ended during Charge")
+		}
+	}
+	if cat.DistanceFromTarget != 0 {
+		t.Fatalf("Charge left the running Cat at %g yards", cat.DistanceFromTarget)
+	}
 }
 
 func TestProwlSpeedChangePreservesMovementDestination(t *testing.T) {

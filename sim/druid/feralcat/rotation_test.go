@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/proto"
@@ -16,7 +17,7 @@ import (
 // Same tree as the cat UI default. Shifting Power is the 11th feral talent.
 const powershiftTalents = "05002-55000032021032212051-055"
 
-// The Monocat APL the cat UI sends by default.
+// The Monocat baseline assembled by the rotation sweep.
 func defaultCatRotation() *proto.APLRotation {
 	return catAPL(bestCatAPL)
 }
@@ -395,43 +396,45 @@ func TestJVMESResourcePotionOnlyWhenSelected(t *testing.T) {
 
 func TestJVMESBerserkImmediatelyPrecedesACatAttack(t *testing.T) {
 	for _, race := range []proto.Race{proto.Race_RaceTauren, proto.Race_RaceNightElf, proto.Race_RaceHighOrderSkyborne, proto.Race_RaceWindshaperSkyborne} {
-		t.Run(race.String(), func(t *testing.T) {
-			rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "jvmes").Rotation
-			request := sweepRequest(powershiftTalents, rotation, false, 1)
-			request.Encounter.Duration = 210
-			request.Raid.Parties[0].Players[0].Race = race
-			request.SimOptions.Debug = true
-			result := core.RunSim(request, nil, simsignals.CreateSignals())
-			if result.Error != nil {
-				t.Fatal(result.Error.Message)
-			}
-			lines := strings.Split(result.Logs, "\n")
-			uses := 0
-			for i, line := range lines {
-				if !strings.Contains(line, "Casting {SpellID: 417141}") {
-					continue
+		for _, cannotShred := range []bool{false, true} {
+			t.Run(race.String()+"/cannotShred="+strconv.FormatBool(cannotShred), func(t *testing.T) {
+				rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "jvmes").Rotation
+				request := sweepRequest(powershiftTalents, rotation, cannotShred, 1)
+				request.Encounter.Duration = 210
+				request.Raid.Parties[0].Players[0].Race = race
+				request.SimOptions.Debug = true
+				result := core.RunSim(request, nil, simsignals.CreateSignals())
+				if result.Error != nil {
+					t.Fatal(result.Error.Message)
 				}
-				uses++
-				at := line[:strings.Index(line, "]")+1]
-				found := false
-				for _, next := range lines[i+1:] {
-					if !strings.Contains(next, "Casting ") || strings.Contains(next, "GCD = 0s") {
+				lines := strings.Split(result.Logs, "\n")
+				uses := 0
+				for i, line := range lines {
+					if !strings.Contains(line, "Casting {SpellID: 417141}") {
 						continue
 					}
-					found = strings.HasPrefix(next, at) && (strings.Contains(next, "Casting {SpellID: 9867}") || strings.Contains(next, "Casting {SpellID: 9904}") || strings.Contains(next, "Casting {SpellID: 9830}"))
-					if !found {
-						t.Errorf("Berserk at %s was followed by %s", at, next)
+					uses++
+					at := line[:strings.Index(line, "]")+1]
+					found := false
+					for _, next := range lines[i+1:] {
+						if !strings.Contains(next, "Casting ") || strings.Contains(next, "GCD = 0s") {
+							continue
+						}
+						found = strings.HasPrefix(next, at) && (strings.Contains(next, "Casting {SpellID: 9867}") || strings.Contains(next, "Casting {SpellID: 9904}") || strings.Contains(next, "Casting {SpellID: 9830}") || strings.Contains(next, "Casting {SpellID: 9850}"))
+						if !found {
+							t.Errorf("Berserk at %s was followed by %s", at, next)
+						}
+						break
 					}
-					break
+					if !found {
+						t.Error("Berserk was not immediately followed by a Cat builder")
+					}
 				}
-				if !found {
-					t.Error("Berserk was not immediately followed by a Cat builder")
+				if uses < 2 {
+					t.Fatal("the fixture did not exercise a later Berserk activation")
 				}
-			}
-			if uses < 2 {
-				t.Fatal("the fixture did not exercise a later Berserk activation")
-			}
-		})
+			})
+		}
 	}
 }
 
@@ -566,5 +569,64 @@ func TestAdaptiveMcpReturnsToMainWeapon(t *testing.T) {
 			}
 			sim.Cleanup()
 		}
+	}
+}
+
+func TestAdaptiveClawsWhenShredCannotLand(t *testing.T) {
+	for _, cannotShred := range []bool{false, true} {
+		t.Run(strconv.FormatBool(cannotShred), func(t *testing.T) {
+			rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "jvmes").Rotation
+			req := sweepRequest("050022-35200032121131212051-052", rotation, cannotShred, 10)
+			player := runCat(t, req)
+			claws, shreds := castsOf(player.Actions, 9850), castsOf(player.Actions, 9830)
+			if cannotShred {
+				if claws == 0 || shreds != 0 || castsOf(player.Actions, 9896) == 0 {
+					t.Fatalf("Claw=%d Shred=%d Rip=%d when Shred cannot land", claws, shreds, castsOf(player.Actions, 9896))
+				}
+			} else if claws != 0 || shreds == 0 {
+				t.Fatalf("Claw=%d Shred=%d when Shred can land", claws, shreds)
+			}
+		})
+	}
+}
+
+func TestAdaptiveBleedsRespectExpiryReaction(t *testing.T) {
+	for _, id := range []int32{9904, 9896} {
+		t.Run(strconv.Itoa(int(id)), func(t *testing.T) {
+			rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "jvmes").Rotation
+			rotation.PrepullActions = nil
+			for _, item := range rotation.PriorityList {
+				if item.Action.GetCastSpell().GetSpellId().GetSpellId() == id {
+					rotation.PriorityList = []*proto.APLListItem{item}
+					break
+				}
+			}
+			req := sweepRequest(powershiftTalents, rotation, false, 1)
+			sim := core.NewSim(req, simsignals.CreateSignals())
+			sim.Reset()
+			cat := sim.Raid.Parties[0].Players[0].(*FeralDruid)
+			cat.AutoAttacks.CancelAutoSwing(sim)
+			spell := cat.GetSpell(core.ActionID{SpellID: id})
+			sim.CurrentTime = time.Second
+			spell.Dot(cat.CurrentTarget).Apply(sim)
+			sim.CurrentTime = 20 * time.Second
+			cat.AddComboPoints(sim, 5, cat.NewComboPointMetrics(core.ActionID{SpellID: 1}))
+			fillResource(sim, cat)
+			cat.SetGCDTimer(sim, 0)
+			before := spell.SpellMetrics[cat.CurrentTarget.UnitIndex].Casts
+			spell.Dot(cat.CurrentTarget).Deactivate(sim)
+			for _, at := range []time.Duration{20 * time.Second, 20*time.Second + cat.ReactionTime - time.Nanosecond} {
+				sim.CurrentTime = at
+				cat.Rotation.DoNextAction(sim)
+				if got := spell.SpellMetrics[cat.CurrentTarget.UnitIndex].Casts - before; got != 0 {
+					t.Fatalf("bleed refreshed before the expiry reaction elapsed: %d casts", got)
+				}
+			}
+			sim.CurrentTime = 20*time.Second + cat.ReactionTime
+			cat.Rotation.DoNextAction(sim)
+			if got := spell.SpellMetrics[cat.CurrentTarget.UnitIndex].Casts - before; got != 1 {
+				t.Fatalf("bleed casts after the expiry reaction = %d, want one", got)
+			}
+		})
 	}
 }

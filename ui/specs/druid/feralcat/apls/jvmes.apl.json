@@ -345,7 +345,7 @@
                                       },
                                       {
                                         "variableRef": {
-                                          "name": "Berserk into Shred"
+                                          "name": "Berserk into Shred or Claw"
                                         }
                                       }
                                     ]
@@ -1118,7 +1118,7 @@
       }
     },
     {
-      "notes": "Rip when missing: build to the target CP if the next-global Rip is funded",
+      "notes": "Refresh Rip after reacting to its expiry; build to the target CP when the next-global Rip is funded",
       "action": {
         "condition": {
           "and": {
@@ -1146,7 +1146,7 @@
       }
     },
     {
-      "notes": "Rake when missing and enough fight time remains",
+      "notes": "Refresh Rake after reacting to its expiry, if enough fight time remains",
       "action": {
         "condition": {
           "and": {
@@ -1174,31 +1174,16 @@
       }
     },
     {
-      "notes": "Shred without spending energy reserved for bleeds or later Berserk",
+      "notes": "Shred unless pooling for the next Berserk",
       "action": {
         "condition": {
           "and": {
             "vals": [
               {
-                "and": {
-                  "vals": [
-                    {
-                      "auraIsActive": {
-                        "auraId": {
-                          "spellId": 768
-                        }
-                      }
-                    },
-                    {
-                      "not": {
-                        "val": {
-                          "variableRef": {
-                            "name": "Pool for bleeds"
-                          }
-                        }
-                      }
-                    }
-                  ]
+                "auraIsActive": {
+                  "auraId": {
+                    "spellId": 768
+                  }
                 }
               },
               {
@@ -1216,6 +1201,64 @@
         "castSpell": {
           "spellId": {
             "spellId": 9830
+          }
+        }
+      }
+    },
+    {
+      "notes": "Use Claw when Shred cannot land",
+      "action": {
+        "condition": {
+          "and": {
+            "vals": [
+              {
+                "auraIsActive": {
+                  "auraId": {
+                    "spellId": 768
+                  }
+                }
+              },
+              {
+                "not": {
+                  "val": {
+                    "spellCanCast": {
+                      "spellId": {
+                        "spellId": 9830
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "cmp": {
+                  "op": "OpGe",
+                  "lhs": {
+                    "currentEnergy": {}
+                  },
+                  "rhs": {
+                    "spellCurrentCost": {
+                      "spellId": {
+                        "spellId": 9830
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "not": {
+                  "val": {
+                    "variableRef": {
+                      "name": "Pool for followup Berserk"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "castSpell": {
+          "spellId": {
+            "spellId": 9850
           }
         }
       }
@@ -1620,18 +1663,14 @@
         "and": {
           "vals": [
             {
-              "not": {
-                "val": {
-                  "auraIsActive": {
-                    "sourceUnit": {
-                      "type": "CurrentTarget"
-                    },
-                    "auraId": {
-                      "spellId": 9904
-                    },
-                    "includeReactionTime": true
-                  }
-                }
+              "auraIsInactive": {
+                "sourceUnit": {
+                  "type": "CurrentTarget"
+                },
+                "auraId": {
+                  "spellId": 9904
+                },
+                "includeReactionTime": true
               }
             },
             {
@@ -1763,18 +1802,14 @@
               }
             },
             {
-              "not": {
-                "val": {
-                  "auraIsActive": {
-                    "sourceUnit": {
-                      "type": "CurrentTarget"
-                    },
-                    "auraId": {
-                      "spellId": 9896
-                    },
-                    "includeReactionTime": true
-                  }
-                }
+              "auraIsInactive": {
+                "sourceUnit": {
+                  "type": "CurrentTarget"
+                },
+                "auraId": {
+                  "spellId": 9896
+                },
+                "includeReactionTime": true
               }
             },
             {
@@ -1795,14 +1830,6 @@
               }
             }
           ]
-        }
-      }
-    },
-    {
-      "name": "Pool for bleeds",
-      "value": {
-        "const": {
-          "val": "false"
         }
       }
     },
@@ -2268,7 +2295,7 @@
       }
     },
     {
-      "name": "Berserk into Shred",
+      "name": "Berserk into Shred or Claw",
       "value": {
         "and": {
           "vals": [
@@ -2311,34 +2338,86 @@
               }
             },
             {
-              "and": {
+              "not": {
+                "val": {
+                  "variableRef": {
+                    "name": "Rake due"
+                  }
+                }
+              }
+            },
+            {
+              "or": {
                 "vals": [
                   {
-                    "not": {
-                      "val": {
-                        "variableRef": {
-                          "name": "Rake due"
-                        }
+                    "spellCanCast": {
+                      "spellId": {
+                        "spellId": 9830
                       }
                     }
                   },
                   {
-                    "not": {
-                      "val": {
-                        "variableRef": {
-                          "name": "Pool for bleeds"
+                    "and": {
+                      "vals": [
+                        {
+                          "and": {
+                            "vals": [
+                              {
+                                "auraIsActive": {
+                                  "auraId": {
+                                    "spellId": 768
+                                  }
+                                }
+                              },
+                              {
+                                "not": {
+                                  "val": {
+                                    "spellCanCast": {
+                                      "spellId": {
+                                        "spellId": 9830
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "cmp": {
+                                  "op": "OpGe",
+                                  "lhs": {
+                                    "currentEnergy": {}
+                                  },
+                                  "rhs": {
+                                    "spellCurrentCost": {
+                                      "spellId": {
+                                        "spellId": 9830
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "not": {
+                                  "val": {
+                                    "variableRef": {
+                                      "name": "Pool for followup Berserk"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "spellCanCast": {
+                            "spellId": {
+                              "spellId": 9850
+                            }
+                          }
                         }
-                      }
+                      ]
                     }
                   }
                 ]
-              }
-            },
-            {
-              "spellCanCast": {
-                "spellId": {
-                  "spellId": 9830
-                }
               }
             }
           ]

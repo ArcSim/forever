@@ -2,7 +2,7 @@ import * as BuffDebuffInputs from '@features/settings/model/buffs_debuffs';
 import * as OtherInputs from '@features/settings/model/other_inputs';
 import { APLRotation, APLRotation_Type as APLRotationType } from '@generated/proto/apl';
 import { Debuffs, IndividualBuffs, PartyBuffs, RaidBuffs } from '@generated/proto/buffs';
-import { ItemSlot, ItemSpec, ItemSwap, PseudoStat, Spec, Stat } from '@generated/proto/common';
+import { ItemSlot, ItemSpec, ItemSwap, PseudoStat, Spec, Stat, TristateEffect } from '@generated/proto/common';
 import { PlayerClasses } from '@sim/player/classes';
 import { Player } from '@sim/player/player';
 import { Stats, UnitStat } from '@sim/proto/stats';
@@ -86,7 +86,7 @@ export default defineSpec<Spec.SpecFeralCatDruid>({
 		// Default spec-specific settings.
 		specOptions: Presets.DefaultOptions,
 		// Default raid/party buffs settings.
-		raidBuffs: RaidBuffs.fromJson({
+		raidBuffs: RaidBuffs.create({
 			arcaneBrilliance: true,
 			prayerOfSpirit: true,
 			giftOfTheWild: true,
@@ -94,11 +94,11 @@ export default defineSpec<Spec.SpecFeralCatDruid>({
 			strengthOfEarthTotem: true,
 			graceOfAirTotem: true,
 			windfuryTotem: true,
-			battleShout: 'TristateEffectRegular',
+			battleShout: TristateEffect.TristateEffectRegular,
 		}),
-		partyBuffs: PartyBuffs.fromJson({ manaSpringTotem: 'TristateEffectRegular' }),
-		individualBuffs: IndividualBuffs.fromJson({ greaterBlessingOfKings: true, greaterBlessingOfMight: true, greaterBlessingOfSalvation: true }),
-		debuffs: Debuffs.fromJson({ judgementOfWisdom: true, sunderArmor: true, giftOfArthas: true, vindication: true }),
+		partyBuffs: PartyBuffs.create({ manaSpringTotem: TristateEffect.TristateEffectRegular }),
+		individualBuffs: IndividualBuffs.create({ greaterBlessingOfKings: true, greaterBlessingOfMight: true, greaterBlessingOfSalvation: true }),
+		debuffs: Debuffs.create({ judgementOfWisdom: true, sunderArmor: true, giftOfArthas: true, vindication: true }),
 	},
 
 	// IconInputs to include in the 'Player' section on the settings tab.

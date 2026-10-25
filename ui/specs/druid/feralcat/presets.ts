@@ -1,8 +1,10 @@
 import * as PresetUtils from '@app/preset_utils';
-import { ConsumesSpec, Encounter, Profession, PseudoStat, Race, Stat } from '@generated/proto/common';
+import * as Consumables from '@features/settings/model/consumables_auto_gen';
+import { AreaType, ConsumesSpec, Profession, PseudoStat, Race, Stat } from '@generated/proto/common';
 import { FeralCatDruid_Options as FeralDruidOptions } from '@generated/proto/druid';
 import { SavedTalents } from '@generated/proto/ui';
 import { Stats } from '@sim/proto/stats';
+import { Encounter } from '@sim/raid/encounter';
 
 import JvmesApl from './apls/jvmes.apl.json';
 import Level60GearJson from './gear_sets/default.gear.json';
@@ -11,45 +13,29 @@ import PreRaidGearJson from './gear_sets/pre_raid.gear.json';
 // Another raid member's bleed keeps Rend and Tear up.
 export const DefaultOptions = FeralDruidOptions.create({ assumeBleedActive: true });
 
-export const DefaultConsumables = ConsumesSpec.fromJson({
-	flaskId: 274274,
-	foodId: 250072,
-	conjuredId: 12662,
-	explosiveId: 260816,
-	mhImbueId: 12643,
-	swapMhImbueId: 12643,
-	extraIds: [12460, 8412, 10646],
-	elixirIds: [250328, 250338, 250329, 250341, 250351],
-	resourcePotId: 13444,
-	offensivePotId: 13442,
+export const DefaultConsumables = ConsumesSpec.create({
+	flaskId: Consumables.FlaskOfNaturalAggression.id,
+	foodId: Consumables.SwiftstrikeSteak.id,
+	conjuredId: Consumables.DemonicRune.id,
+	explosiveId: Consumables.EZThroThoriumGrenade.id,
+	mhImbueId: Consumables.DenseWeightstone.id,
+	swapMhImbueId: Consumables.DenseWeightstone.id,
+	extraIds: [Consumables.JujuMight.id, Consumables.GroundScorpokAssay.id, Consumables.GoblinSapperCharge.id],
+	elixirIds: [
+		Consumables.ElixirOfCunning.id,
+		Consumables.ElixirOfSages.id,
+		Consumables.ElixirOfThePhalanx.id,
+		Consumables.GreaterMagebloodElixir.id,
+		Consumables.ElixirOfTheGrizzly.id,
+	],
+	resourcePotId: Consumables.MajorManaPotion.id,
+	offensivePotId: Consumables.MightyRagePotion.id,
 });
 
-export const DefaultEncounter = PresetUtils.makePresetEncounter(
-	'Mount Hyjal',
-	Encounter.fromJson({
-		apiVersion: 2,
-		duration: 180,
-		durationVariation: 5,
-		executeProportion20: 0.2,
-		executeProportion35: 0.35,
-		targets: [
-			{
-				id: 31146,
-				name: 'Raid Target',
-				level: 63,
-				mobType: 'MobTypeMechanical',
-				stats: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 320, 0, 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 3731, 0, 1428900, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-				minBaseDamage: 2601,
-				damageSpread: 0.5,
-				swingSpeed: 2,
-				parryHaste: true,
-				canCrush: true,
-			},
-		],
-		areaTypes: ['AreaTypeForestGrassland', 'AreaTypeMountainous'],
-		zoneId: 616,
-	}),
-);
+const encounter = Encounter.defaultEncounterProto();
+encounter.areaTypes = [AreaType.AreaTypeForestGrassland, AreaType.AreaTypeMountainous];
+encounter.zoneId = 616;
+export const DefaultEncounter = PresetUtils.makePresetEncounter('Mount Hyjal', encounter);
 
 export const OtherDefaults = {
 	distanceFromTarget: 25,
