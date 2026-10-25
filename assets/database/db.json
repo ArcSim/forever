@@ -10475,6 +10475,7 @@
 {"id":1787,"name":"Stealth","icon":"ability_stealth","rank":4,"hasBuff":true},
 {"id":1857,"name":"Vanish","icon":"ability_vanish","rank":2,"hasBuff":true},
 {"id":1866,"name":"Holy Strike","icon":"classicon_paladin","rank":3},
+{"id":1953,"name":"Blink","icon":"spell_arcane_blink","hasBuff":true},
 {"id":2050,"name":"Lesser Heal","icon":"spell_holy_lesserheal","rank":1},
 {"id":2052,"name":"Lesser Heal","icon":"spell_holy_lesserheal","rank":2},
 {"id":2053,"name":"Lesser Heal","icon":"spell_holy_lesserheal","rank":3},
