@@ -153,7 +153,6 @@ const (
 	MageSpellArcaneMissilesTick
 	MageSpellArcaneWrath
 	MageSpellBlastWave
-	MageSpellBlink
 	MageSpellBlizzard
 	MageSpellColdSnap
 	MageSpellConeOfCold

@@ -23,7 +23,6 @@ func (mage *Mage) registerBlinkSpell() {
 	aura := mage.RegisterAura(spelldata.AuraConfig(blinkRank))
 
 	config := spelldata.SpellConfig(&mage.Unit, blinkRank, spelldata.Flags(core.SpellFlagAPL|core.SpellFlagMovesToTarget))
-	config.ClassSpellMask = MageSpellBlink
 
 	config.ApplyEffects = func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) {
 		aura.Activate(sim)
