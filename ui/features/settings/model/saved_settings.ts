@@ -29,14 +29,15 @@ export const applySavedSettings = (host: IndividualSimHost<any>, settings: Saved
 		host.sim.raid.setDebuffs(settings.debuffs || Debuffs.create());
 		host.player.getParty()?.setBuffs(settings.partyBuffs || PartyBuffs.create());
 		host.player.setBuffs(settings.playerBuffs || IndividualBuffs.create());
-		host.player.setConsumes(settings.consumables || ConsumesSpec.create());
-		host.player.setRace(settings.race);
-		host.player.setProfessions(settings.professions);
+		// The swap gear goes in first: setConsumes matches the swap imbues to the swap weapons it finds.
 		host.player.itemSwapSettings.setItemSwapSettings(
 			settings.enableItemSwap,
 			host.sim.db.lookupItemSwap(settings.itemSwap || ItemSwap.create()),
 			Stats.fromProto(settings.itemSwap?.prepullBonusStats),
 		);
+		host.player.setConsumes(settings.consumables || ConsumesSpec.create());
+		host.player.setRace(settings.race);
+		host.player.setProfessions(settings.professions);
 		host.player.setReactionTime(settings.reactionTimeMs);
 		host.player.setChannelClipDelay(settings.channelClipDelayMs);
 		host.player.setInFrontOfTarget(settings.inFrontOfTarget);

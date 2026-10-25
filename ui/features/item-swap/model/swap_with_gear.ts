@@ -32,9 +32,10 @@ export const swapWithGear = <SpecType extends Spec>(player: Player<SpecType>, it
 		}
 	}
 
+	// Both gear sets go in first: setConsumes matches each imbue to the weapon it finds in that hand.
 	batch(() => {
-		player.setConsumes(newConsumes);
 		player.setGear(newGear);
 		player.itemSwapSettings.setGear(newSwapGear);
+		player.setConsumes(newConsumes);
 	});
 };

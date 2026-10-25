@@ -67,6 +67,10 @@ export function applyIndividualDefaults<SpecType extends Spec>(host: DefaultsHos
 		player.applySharedDefaults();
 		player.setRace(config.defaults.other?.race || player.getPlayerClass().races[0]);
 		player.setGear(sim.db.lookupEquipmentSpec(config.defaults.gear));
+		// The swap gear goes in first: setConsumes matches the swap imbues to the swap weapons it finds.
+		if (config.defaults.itemSwap) {
+			player.itemSwapSettings.setItemSwapSettings(true, sim.db.lookupItemSwap(config.defaults.itemSwap || ItemSwap.create()));
+		}
 		player.setConsumes(config.defaults.consumables);
 		applyDefaultRotation(player, config);
 		player.setTalentsString(config.defaults.talents.talentsString);
@@ -78,9 +82,6 @@ export function applyIndividualDefaults<SpecType extends Spec>(host: DefaultsHos
 		// Tank specs can name their own EP reference stat; without this the dialog
 		// falls back to StatArmor for every one of them.
 		player.setRefStat('tankRefStat', config.tankRefStat);
-		if (config.defaults.itemSwap) {
-			player.itemSwapSettings.setItemSwapSettings(true, sim.db.lookupItemSwap(config.defaults.itemSwap || ItemSwap.create()));
-		}
 
 		const defaultRatios = player.getDefaultEpRatios(tankSpec, healingSpec);
 		player.setEpRatios(defaultRatios);
