@@ -15,6 +15,7 @@ type MovementAction struct {
 	startTime    time.Duration  // starting time of the movement
 	speed        float64        // theoretical movement speed, can be 0
 	meleeEdge    *PendingAction // wakes the unit where the walk crosses melee range
+	keepsSpeed   bool           // a timed walk, which a movement speed change leaves alone
 }
 
 func (action *MovementAction) GetCurrentPosition(sim *Simulation) float64 {
@@ -72,6 +73,18 @@ func (unit *Unit) MoveDuration(duration time.Duration, sim *Simulation) {
 
 	unit.UpdatePosition(sim, false)
 	registerMovementAction(unit, sim, 0., sim.CurrentTime+duration, 0)
+}
+
+// Walks the unit to moveRange in duration, at the speed that takes instead of its run speed.
+func (unit *Unit) MoveToOver(moveRange float64, duration time.Duration, sim *Simulation) {
+	if moveRange == unit.DistanceFromTarget {
+		return
+	}
+
+	unit.UpdatePosition(sim, false)
+	moveDistance := moveRange - unit.DistanceFromTarget
+	registerMovementAction(unit, sim, moveDistance/duration.Seconds(), sim.CurrentTime+duration, moveDistance)
+	unit.movementAction.keepsSpeed = true
 }
 
 func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
@@ -205,8 +218,8 @@ func (unit *Unit) MultiplyMovementSpeed(sim *Simulation, amount float64) {
 		unit.Log(sim, "[DEBUG] Movement speed changed from %.2f (%.2f%%) to %.2f (%.2f%%)", oldSpeed, (oldMultiplier-1)*100.0, unit.GetMovementSpeed(), (unit.PseudoStats.MovementSpeedMultiplier-1)*100.0)
 	}
 
-	// A walk under way keeps its destination and covers the rest at the new speed.
-	if unit.movementAction != nil && unit.movementAction.speed != 0 {
+	// A walk under way keeps its destination and covers the rest at the new speed; a timed walk keeps its own speed.
+	if unit.movementAction != nil && unit.movementAction.speed != 0 && !unit.movementAction.keepsSpeed {
 		dest := unit.movementAction.srcPosition + unit.movementAction.moveDistance
 		unit.MoveTo(dest, sim)
 	}
