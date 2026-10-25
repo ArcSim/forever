@@ -15,6 +15,7 @@ type MovementAction struct {
 	startTime    time.Duration  // starting time of the movement
 	speed        float64        // theoretical movement speed, can be 0
 	meleeEdge    *PendingAction // wakes the unit where the walk crosses melee range
+	keepsSpeed   bool           // a timed walk, which a movement speed change leaves alone
 }
 
 func (action *MovementAction) GetCurrentPosition(sim *Simulation) float64 {
@@ -74,6 +75,18 @@ func (unit *Unit) MoveDuration(duration time.Duration, sim *Simulation) {
 	registerMovementAction(unit, sim, 0., sim.CurrentTime+duration, 0)
 }
 
+// Walks the unit to moveRange in duration, at the speed that takes instead of its run speed.
+func (unit *Unit) MoveToOver(moveRange float64, duration time.Duration, sim *Simulation) {
+	if moveRange == unit.DistanceFromTarget {
+		return
+	}
+
+	unit.UpdatePosition(sim, false)
+	moveDistance := moveRange - unit.DistanceFromTarget
+	registerMovementAction(unit, sim, moveDistance/duration.Seconds(), sim.CurrentTime+duration, moveDistance)
+	unit.movementAction.keepsSpeed = true
+}
+
 func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	if !unit.Moving {
 		return
@@ -90,15 +103,8 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	}
 
 	unit.OnMovement(sim, unit.DistanceFromTarget, MovementUpdate)
-	unit.updateAutoAttackRange(sim)
 
-	yards := max(int32(unit.DistanceFromTarget), 1) // never set to 0 yards as we deactivate the aura
-	if yards != unit.moveAura.GetStacks() {
-		unit.moveAura.SetStacks(sim, yards)
-	}
-}
-
-func (unit *Unit) updateAutoAttackRange(sim *Simulation) {
+	// update auto attack state
 	if unit.AutoAttacks.mh.enabled != unit.AutoAttacks.mh.IsInRange() {
 		if unit.AutoAttacks.mh.IsInRange() {
 			unit.AutoAttacks.cancelMeleeWeaveWakeup(sim)
@@ -110,6 +116,11 @@ func (unit *Unit) updateAutoAttackRange(sim *Simulation) {
 	}
 
 	unit.AutoAttacks.UpdateRangedRange(sim)
+
+	yards := max(int32(unit.DistanceFromTarget), 1) // never set to 0 yards as we deactivate the aura
+	if yards != unit.moveAura.GetStacks() {
+		unit.moveAura.SetStacks(sim, yards)
+	}
 }
 
 // Ends the walk under way where the unit is now.
@@ -118,37 +129,14 @@ func (unit *Unit) StopMoving(sim *Simulation) {
 		return
 	}
 
-	unit.cancelWalk(sim)
-	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
-}
-
-// Puts the unit at distance with no travel time, ending a walk under way. The movement callbacks see
-// one MovementEnd at the new distance, as the unit stands there afterwards: Start would end a wand
-// channel for a move that takes no time. A walk's own end is folded into that one.
-func (unit *Unit) MoveInstantlyTo(distance float64, sim *Simulation) {
-	walking := unit.Moving
-	if walking {
-		unit.cancelWalk(sim)
-	}
-
-	if distance != unit.DistanceFromTarget {
-		unit.DistanceFromTarget = distance
-		unit.updateAutoAttackRange(sim)
-	} else if !walking {
-		return
-	}
-
-	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
-}
-
-// Stops the walk under way where the unit is now, without a movement callback.
-func (unit *Unit) cancelWalk(sim *Simulation) {
 	unit.UpdatePosition(sim, false)
 	unit.movementAction.Cancel(sim)
 	if unit.movementAction.meleeEdge != nil {
 		unit.movementAction.meleeEdge.Cancel(sim)
 	}
 	unit.moveAura.Deactivate(sim)
+
+	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
 }
 
 func (unit *Unit) FinalizeMovement(sim *Simulation) {
@@ -230,8 +218,8 @@ func (unit *Unit) MultiplyMovementSpeed(sim *Simulation, amount float64) {
 		unit.Log(sim, "[DEBUG] Movement speed changed from %.2f (%.2f%%) to %.2f (%.2f%%)", oldSpeed, (oldMultiplier-1)*100.0, unit.GetMovementSpeed(), (unit.PseudoStats.MovementSpeedMultiplier-1)*100.0)
 	}
 
-	// A walk under way keeps its destination and covers the rest at the new speed.
-	if unit.movementAction != nil && unit.movementAction.speed != 0 {
+	// A walk under way keeps its destination and covers the rest at the new speed; a timed walk keeps its own speed.
+	if unit.movementAction != nil && unit.movementAction.speed != 0 && !unit.movementAction.keepsSpeed {
 		dest := unit.movementAction.srcPosition + unit.movementAction.moveDistance
 		unit.MoveTo(dest, sim)
 	}

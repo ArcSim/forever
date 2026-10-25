@@ -25,58 +25,36 @@ func TestWalkPositionIsCurrentAtEveryEvent(t *testing.T) {
 	}
 }
 
-// An instant move puts the unit at the distance with no walk, ends a walk under way there, and
-// starts or stops the melee swings for the new distance.
-func TestMoveInstantly(t *testing.T) {
-	t.Run("out of melee range at once, with no walk", func(t *testing.T) {
-		sim, fc := setupSwingResetSim(t) // at 0 yd, MH due at 2.6s
-		aa := &fc.AutoAttacks
-		mhPrevious := aa.MainhandPreviousSwing()
-		var kinds []MovementUpdateType
-		var positions []float64
-		fc.RegisterMovementCallback(func(_ *Simulation, position float64, kind MovementUpdateType) {
-			kinds = append(kinds, kind)
-			positions = append(positions, position)
-		})
+// A timed walk covers its distance in its own time, not at the run speed, and a speed change on the
+// way leaves its arrival alone.
+func TestTimedWalk(t *testing.T) {
+	sim, fc := setupSwingResetSim(t) // at 0 yd, one second in
+	start := sim.CurrentTime
+	fc.MoveToOver(12, time.Second, sim)
+	fc.WaitUntil(sim, NeverExpires)
 
-		fc.MoveInstantlyTo(12, sim)
-		if fc.DistanceFromTarget != 12 || fc.Moving {
-			t.Fatalf("expected the unit standing at 12 yd, got %.2f yd and moving %v", fc.DistanceFromTarget, fc.Moving)
-		}
-		if len(kinds) != 1 || kinds[0] != MovementEnd || positions[0] != 12 {
-			t.Fatalf("expected one MovementEnd at 12 yd, got kinds %v at %v", kinds, positions)
-		}
+	seen := map[time.Duration]float64{}
+	look := func(at time.Duration, then func(*Simulation)) {
+		sim.AddPendingAction(NewDelayedAction(DelayedActionOptions{
+			DoAt: start + at,
+			OnAction: func(sim *Simulation) {
+				seen[at] = fc.DistanceFromTarget
+				then(sim)
+			},
+		}))
+	}
+	look(time.Millisecond*500, func(sim *Simulation) { fc.MultiplyMovementSpeed(sim, 3) })
+	look(time.Millisecond*900, func(*Simulation) {})
+	stepSwingSim(t, sim, start+time.Second+time.Millisecond)
 
-		fc.WaitUntil(sim, NeverExpires)
-		stepSwingSim(t, sim, time.Second*4)
-		if aa.MainhandPreviousSwing() != mhPrevious {
-			t.Fatalf("expected no swing from out of range, got MH at %v", aa.MainhandPreviousSwing())
+	for at, expected := range map[time.Duration]float64{time.Millisecond * 500: 6, time.Millisecond * 900: 10.8} {
+		if math.Abs(seen[at]-expected) > 1e-9 {
+			t.Fatalf("expected %.1f yd after %v, got %.4f", expected, at, seen[at])
 		}
-	})
-
-	t.Run("a walk under way ends where the unit lands", func(t *testing.T) {
-		sim, fc := setupSwingResetSim(t)
-		fc.MoveTo(12, sim) // arrives after 1.714s
-		stepSwingSim(t, sim, sim.CurrentTime+time.Second)
-		var kinds []MovementUpdateType
-		fc.RegisterMovementCallback(func(_ *Simulation, _ float64, kind MovementUpdateType) {
-			kinds = append(kinds, kind)
-		})
-
-		fc.MoveInstantlyTo(0, sim)
-		fc.WaitUntil(sim, NeverExpires)
-		stepSwingSim(t, sim, sim.CurrentTime+time.Second*2)
-
-		if fc.DistanceFromTarget != 0 || fc.Moving {
-			t.Fatalf("expected the unit standing at 0 yd, got %.2f yd and moving %v", fc.DistanceFromTarget, fc.Moving)
-		}
-		if len(kinds) != 1 || kinds[0] != MovementEnd {
-			t.Fatalf("expected one MovementEnd, got %v", kinds)
-		}
-		if !fc.AutoAttacks.mh.enabled {
-			t.Fatalf("expected the melee swing back on in range")
-		}
-	})
+	}
+	if fc.DistanceFromTarget != 12 || fc.Moving {
+		t.Fatalf("expected the walk done at 12 yd after 1s, got %.2f yd and moving %v", fc.DistanceFromTarget, fc.Moving)
+	}
 }
 
 // A walk across melee range stops or starts the melee swings on the line. The rotation is parked, as

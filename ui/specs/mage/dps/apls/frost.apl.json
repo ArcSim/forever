@@ -3,7 +3,7 @@
 	"prepullActions": [
 		{"action":{"castSpell":{"spellId":{"spellId":13033}}},"doAtValue":{"math":{"op":"OpMul","lhs":{"math":{"op":"OpAdd","lhs":{"math":{"op":"OpAdd","lhs":{"spellCastTime":{"spellId":{"spellId":10181}}},"rhs":{"spellTravelTime":{"spellId":{"spellId":10181}}}}},"rhs":{"spellGcdHastedDuration":{"spellId":{"spellId":13033}}}}},"rhs":{"const":{"val":"-1"}}}}},
 		{"action":{"castSpell":{"spellId":{"spellId":10181}}},"doAtValue":{"math":{"op":"OpMul","lhs":{"math":{"op":"OpAdd","lhs":{"spellCastTime":{"spellId":{"spellId":10181}}},"rhs":{"spellTravelTime":{"spellId":{"spellId":10181}}}}},"rhs":{"const":{"val":"-1"}}}}},
-		{"action":{"castSpell":{"spellId":{"spellId":1953}}},"doAtValue":{"math":{"op":"OpMul","lhs":{"spellTravelTime":{"spellId":{"spellId":10181}}},"rhs":{"const":{"val":"-1"}}}}}
+		{"action":{"castSpell":{"spellId":{"spellId":1953}}},"doAtValue":{"math":{"op":"OpMul","lhs":{"auraDuration":{"auraId":{"spellId":1953}}},"rhs":{"const":{"val":"-1"}}}}}
 	],
 	"priorityList": [
 		{"action":{"condition":{"cmp":{"op":"OpLe","lhs":{"currentManaPercent":{}},"rhs":{"const":{"val":"5%"}}}},"groupReference":{"groupName":"Mana Tools"}}},
