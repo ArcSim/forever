@@ -1,7 +1,7 @@
 import { ActionCategory } from '@generated/proto/api';
 import type { UnitMetadata } from '@sim/player/player';
 import { ActionId } from '@sim/proto/action_id';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { actionIdSets } from './action_id_sets';
 
@@ -81,6 +81,43 @@ describe('castable_spells', () => {
 			'Fireball (Rank 1) > spell > Fireball (Rank 3)',
 			'Fireball (Rank 3) > spell',
 			'Fireball (Rank 2) > spell > Fireball (Rank 3)',
+		]);
+	});
+});
+
+describe('talents', () => {
+	const talentNames: Record<number, string> = { 40: 'Anger Management', 41: 'Cruelty' };
+	const talentMetadata = (talents: Array<ActionId>) => ({ getTalents: () => talents }) as unknown as UnitMetadata;
+	afterEach(() => vi.restoreAllMocks());
+
+	it('offers each held talent at its rank, with the lower ranks behind it', async () => {
+		// The lower ranks are built and filled by the set itself; the tooltip lookup is not reachable here.
+		vi.spyOn(ActionId.prototype, 'fill').mockImplementation(function (this: ActionId) {
+			return Promise.resolve(named(this.spellId, `${talentNames[this.spellId]} (Rank ${this.rank})`, this.rank));
+		});
+
+		const options = await actionIdSets.talents.getActionIDs(talentMetadata([named(40, 'Anger Management (Rank 1)', 1), named(41, 'Cruelty (Rank 3)', 3)]));
+		expect(menu(options)).toEqual([
+			'Anger Management (Rank 1)',
+			'Cruelty (Rank 3)',
+			'Cruelty (Rank 1) > Cruelty (Rank 3)',
+			'Cruelty (Rank 2) > Cruelty (Rank 3)',
+		]);
+		expect(options.map(option => [option.value.spellId, option.value.rank])).toEqual([
+			[40, 1],
+			[41, 3],
+			[41, 1],
+			[41, 2],
+		]);
+	});
+
+	it('offers each held talent once and without a rank for Talent Rank', async () => {
+		const options = await actionIdSets.talent_ranks.getActionIDs(
+			talentMetadata([named(40, 'Anger Management (Rank 1)', 1), named(41, 'Cruelty (Rank 3)', 3)]),
+		);
+		expect(options.map(option => [option.value.spellId, option.value.rank])).toEqual([
+			[40, 0],
+			[41, 0],
 		]);
 	});
 });

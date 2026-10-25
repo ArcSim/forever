@@ -83,6 +83,8 @@ with headless `playwright-core`. It is not a dependency of this repo, so use a l
   browser.
 - To load a realistic build, edit the page's `…__currentSettings__` localStorage key, or paste an
   `IndividualSimSettings` JSON into Import → JSON, and reload.
+- Healer specs are gear planning only and run no sim, so show a healing metric on Shadow Priest with Discipline
+  talents; the mage registers only its highest ranks, so show rank grouping with Shadow Priest Smite.
 
 Compare against a build of the parent commit on a second port rather than a remembered element count.
 

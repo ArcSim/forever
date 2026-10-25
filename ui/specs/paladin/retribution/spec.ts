@@ -1,14 +1,23 @@
 import * as BuffDebuffInputs from '@features/settings/model/buffs_debuffs';
 import * as OtherInputs from '@features/settings/model/other_inputs';
-import { APLRotation, APLRotation_Type } from '@generated/proto/apl';
-import { ItemSlot, PseudoStat, Spec, Stat } from '@generated/proto/common';
+import { APLGroup, APLListItem, APLRotation, APLRotation_Type, APLValueVariable } from '@generated/proto/apl';
+import { Cooldowns, ItemSlot, PseudoStat, Spec, Stat } from '@generated/proto/common';
 import { PlayerClasses } from '@sim/player/classes';
 import { Player } from '@sim/player/player';
 import { WeaponSkillGroup } from '@sim/player/weapon_skill_groups';
+import * as AplUtils from '@sim/proto/apl_utils';
+import { SpecRotation } from '@sim/proto/spec_types';
 import { Stats, UnitStat } from '@sim/proto/stats';
 import { defineSpec } from '@sim/spec_config';
 
+import * as Inputs from './inputs';
 import * as Presets from './presets';
+
+const aplFor = (player: Player<Spec.SpecRetributionPaladin>): APLRotation =>
+	player.getTalents().holyShock ? Presets.HolyShockAplPreset.rotation.rotation! : Presets.TwistOfLightAplPreset.rotation.rotation!;
+
+// A group that casts the one spell.
+const castGroup = (name: string, spellId: { spellId: number; rank?: number }) => APLGroup.fromJson({ name, actions: [{ action: { castSpell: { spellId } } }] });
 
 export default defineSpec<Spec.SpecRetributionPaladin>({
 	spec: Spec.SpecRetributionPaladin,
@@ -90,7 +99,8 @@ export default defineSpec<Spec.SpecRetributionPaladin>({
 		individualBuffs: Presets.DefaultIndividualBuffs,
 		debuffs: Presets.DefaultDebuffs,
 
-		rotationType: APLRotation_Type.TypeAuto,
+		rotationType: APLRotation_Type.TypeSimple,
+		simpleRotation: Presets.DefaultSimpleRotation,
 		aplRotation: Presets.TwistOfLightAplPreset.rotation.rotation!,
 	},
 
@@ -117,6 +127,8 @@ export default defineSpec<Spec.SpecRetributionPaladin>({
 		BuffDebuffInputs.Thunderfury,
 		BuffDebuffInputs.Vindication,
 	],
+	rotationInputs: Inputs.RotationInputs,
+	rotationIconInputs: Inputs.RotationIconInputs,
 	// Inputs to include in the 'Other' section on the settings tab.
 	otherInputs: {
 		inputs: [OtherInputs.InputDelay, OtherInputs.TankAssignment, OtherInputs.InFrontOfTarget],
@@ -129,7 +141,7 @@ export default defineSpec<Spec.SpecRetributionPaladin>({
 
 	presets: {
 		epWeights: [Presets.TwistOfLightEpWeights, Presets.HolyShockEpWeights],
-		rotations: [Presets.TwistOfLightAplPreset, Presets.HolyShockAplPreset],
+		rotations: [Presets.SimpleRotation, Presets.TwistOfLightAplPreset, Presets.HolyShockAplPreset],
 		// Preset talents that the user can quickly select.
 		talents: [Presets.TwistOfLightTalents, Presets.HolyShockTalents],
 		// Preset gear configurations that the user can quickly select.
@@ -138,8 +150,37 @@ export default defineSpec<Spec.SpecRetributionPaladin>({
 		builds: [Presets.TwistOfLightBuild, Presets.HolyShockBuild],
 	},
 
-	autoRotation: (player: Player<Spec.SpecRetributionPaladin>): APLRotation => {
-		return player.getTalents().holyShock ? Presets.HolyShockAplPreset.rotation.rotation! : Presets.TwistOfLightAplPreset.rotation.rotation!;
+	autoRotation: aplFor,
+
+	// The talents pick the APL, as for the Auto rotation; the options set its variables and the spells of
+	// its aura and seal groups. With no assigned seal, Has assigned seal is false and the APL never
+	// reaches Cast assigned seal.
+	simpleRotation: (player: Player<Spec.SpecRetributionPaladin>, simple: SpecRotation<Spec.SpecRetributionPaladin>, cooldowns: Cooldowns): APLRotation => {
+		const actions = AplUtils.simpleCooldownActions(cooldowns);
+		const rotation = APLRotation.clone(aplFor(player));
+		const aura = Inputs.AURA_SPELLS[simple.aura];
+		const seal = Inputs.SEAL_SPELLS[simple.assignedSeal];
+
+		const values: Record<string, string> = {
+			'Has assigned seal': String(!!seal),
+			'Pull range': String(Math.max(Inputs.MIN_PULL_RANGE, simple.pullRange || 25)),
+			'Delay Major CDs': `${simple.delayMajorCds}s`,
+		};
+		rotation.valueVariables = rotation.valueVariables.map(variable =>
+			variable.name in values ? APLValueVariable.fromJson({ name: variable.name, value: { const: { val: values[variable.name] } } }) : variable,
+		);
+
+		const groups: Record<string, APLGroup> = {};
+		if (aura) groups['Activate assigned aura'] = castGroup('Activate assigned aura', aura);
+		if (seal) groups['Cast assigned seal'] = castGroup('Cast assigned seal', seal);
+		rotation.groups = rotation.groups.map(group => groups[group.name] ?? group);
+
+		return APLRotation.create({
+			prepullActions: rotation.prepullActions,
+			priorityList: [...actions.map(action => APLListItem.create({ action })), ...rotation.priorityList],
+			groups: rotation.groups,
+			valueVariables: rotation.valueVariables,
+		});
 	},
 
 	reforge: {

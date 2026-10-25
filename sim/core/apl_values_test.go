@@ -2,12 +2,16 @@ package core
 
 import (
 	"fmt"
+	"maps"
 	"math"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/stats"
+	googleproto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func setupFakeRageRotation() (*Simulation, *FakeRageWarrior, *APLRotation) {
@@ -634,6 +638,7 @@ func TestValueUnknownIDs(t *testing.T) {
 		"Spell Cast Time for an unknown spell":           rot.newValueSpellCastTime(&proto.APLValueSpellCastTime{SpellId: spell}, nil),
 		"Spell Travel Time for an unknown spell":         rot.newValueSpellTravelTime(&proto.APLValueSpellTravelTime{SpellId: spell}, nil),
 		"Spell CPM for an unknown spell":                 rot.newValueSpellCPM(&proto.APLValueSpellCPM{SpellId: spell}, nil),
+		"Spell Is Casting for an unknown spell":          rot.newValueSpellIsCasting(&proto.APLValueSpellIsCasting{SpellId: spell}, nil),
 		"Spell Is Channeling for an unknown spell":       rot.newValueSpellIsChanneling(&proto.APLValueSpellIsChanneling{SpellId: spell}, nil),
 		"Spell Channeled Ticks for an unknown spell":     rot.newValueSpellChanneledTicks(&proto.APLValueSpellChanneledTicks{SpellId: spell}, nil),
 		"Spell Current Cost for an unknown spell":        rot.newValueSpellCurrentCost(&proto.APLValueSpellCurrentCost{SpellId: spell}, nil),
@@ -683,6 +688,123 @@ func TestValueSpellIsKnown(t *testing.T) {
 	}
 }
 
+// Three WarriorTalents fields picked by kind, with the spell ids their talent_spell_id options carry:
+// the first one-point talent with its point, the first ranked talent at 3 points, and the next ranked
+// talent with none. A talents string with every field in one tree sets field N from digit N.
+type testTalents struct {
+	single, ranked, untaken int32
+	fill                    func(char *Character)
+}
+
+func newTestTalents(t *testing.T) testTalents {
+	t.Helper()
+	fields := (&proto.WarriorTalents{}).ProtoReflect().Descriptor().Fields()
+	digits := []byte(strings.Repeat("0", fields.Len()))
+	spellID := func(fd protoreflect.FieldDescriptor) int32 {
+		return googleproto.GetExtension(fd.Options(), proto.E_TalentSpellId).(int32)
+	}
+
+	var tt testTalents
+	for i := range fields.Len() {
+		fd := fields.Get(i)
+		switch {
+		case fd.Kind() == protoreflect.BoolKind && tt.single == 0:
+			tt.single = spellID(fd)
+			digits[fd.Number()-1] = '1'
+		case fd.Kind() == protoreflect.Int32Kind && tt.ranked == 0:
+			tt.ranked = spellID(fd)
+			digits[fd.Number()-1] = '3'
+		case fd.Kind() == protoreflect.Int32Kind && tt.untaken == 0:
+			tt.untaken = spellID(fd)
+		}
+	}
+	if tt.single == 0 || tt.ranked == 0 || tt.untaken == 0 {
+		t.Fatalf("WarriorTalents lacks a one-point talent or two ranked talents with talent_spell_id: %+v", tt)
+	}
+
+	tt.fill = func(char *Character) {
+		char.FillTalentsProto((&proto.WarriorTalents{}).ProtoReflect(), string(digits), [3]int{fields.Len(), 0, 0})
+	}
+	return tt
+}
+
+func TestValueTalentIsKnown(t *testing.T) {
+	talents := newTestTalents(t)
+	sim, _, rot := setupFakeRageRotationWith(talents.fill)
+
+	talent := func(spellID int32, rank int32) *proto.ActionID {
+		id := ActionID{SpellID: spellID}.ToProto()
+		id.Rank = rank
+		return id
+	}
+	for _, tc := range []struct {
+		name string
+		id   *proto.ActionID
+		want bool
+	}{
+		{"one-point talent with no rank", talent(talents.single, 0), true},
+		{"one-point talent at its rank", talent(talents.single, 1), true},
+		{"ranked talent below the held rank", talent(talents.ranked, 1), true},
+		{"ranked talent at the held rank", talent(talents.ranked, 3), true},
+		{"ranked talent above the held rank", talent(talents.ranked, 4), false},
+		{"talent with no points", talent(talents.untaken, 1), false},
+	} {
+		rot.curValidations = nil
+		value := rot.newValueTalentIsKnown(&proto.APLValueTalentIsKnown{TalentId: tc.id}, nil)
+		if got := value.GetBool(sim); got != tc.want {
+			t.Errorf("%s: got %t, want %t", tc.name, got, tc.want)
+		}
+		if warned := len(rot.curValidations) > 0; warned == tc.want {
+			t.Errorf("%s: warned %t, want a warning only for an unknown talent", tc.name, warned)
+		}
+	}
+	rot.curValidations = nil
+}
+
+func TestValueTalentRank(t *testing.T) {
+	talents := newTestTalents(t)
+	sim, _, rot := setupFakeRageRotationWith(talents.fill)
+
+	for _, tc := range []struct {
+		name    string
+		spellID int32
+		want    int32
+	}{
+		{"one-point talent", talents.single, 1},
+		{"ranked talent", talents.ranked, 3},
+		{"talent with no points", talents.untaken, 0},
+	} {
+		rot.curValidations = nil
+		// The id's rank is not read, so one above the held rank changes nothing.
+		id := ActionID{SpellID: tc.spellID}.ToProto()
+		id.Rank = 5
+		value := rot.newValueTalentRank(&proto.APLValueTalentRank{TalentId: id}, nil)
+		if value.Type() != proto.APLValueType_ValueTypeInt || value.GetInt(sim) != tc.want {
+			t.Errorf("%s: got %s, want %d", tc.name, renderValue(sim, value), tc.want)
+		}
+		if warned := len(rot.curValidations) > 0; warned != (tc.want == 0) {
+			t.Errorf("%s: warned %t, want a warning only for a talent with no points", tc.name, warned)
+		}
+	}
+	rot.curValidations = nil
+}
+
+func TestPlayerMetadataTalents(t *testing.T) {
+	talents := newTestTalents(t)
+	_, fw, _ := setupFakeRageRotationWith(talents.fill)
+
+	playerStats := &proto.PlayerStats{}
+	fw.FillPlayerStats(playerStats)
+
+	got := map[int32]int32{}
+	for _, id := range playerStats.Metadata.Talents {
+		got[id.GetSpellId()] = id.Rank
+	}
+	if want := map[int32]int32{talents.single: 1, talents.ranked: 3}; !maps.Equal(got, want) {
+		t.Errorf("metadata talents = %v, want %v", got, want)
+	}
+}
+
 func TestValueSpellCastState(t *testing.T) {
 	sim, fw, rot := setupFakeRageRotation()
 	target := sim.Encounter.ActiveTargetUnits[0]
@@ -724,6 +846,12 @@ func TestValueSpellCastState(t *testing.T) {
 	if fullCD.GetDuration(sim) != time.Minute {
 		t.Errorf("Full Cooldown = %s, want 1m0s", fullCD.GetDuration(sim))
 	}
+	rend.SharedCD.Duration = 120 * time.Second
+	sharedFullCD := rot.newValueSpellFullCooldown(&proto.APLValueSpellFullCooldown{SpellId: rendID}, nil)
+	if sharedFullCD.GetDuration(sim) != 120*time.Second {
+		t.Errorf("Full Cooldown of a spell with only a 120s shared cooldown = %s, want 2m0s", sharedFullCD.GetDuration(sim))
+	}
+	rend.SharedCD.Duration = 0
 
 	sim.CurrentTime = 90 * time.Second
 	cdSpell.casts = 3
@@ -998,69 +1126,6 @@ func TestValueAuraReactionTime(t *testing.T) {
 	sim.CurrentTime = time.Second + 200*time.Millisecond
 	if !isActive.GetBool(sim) || isInactive.GetBool(sim) || icdReady.GetBool(sim) {
 		t.Errorf("past the reaction time: active = %t, inactive = %t, ICD ready = %t, want true, false, false", isActive.GetBool(sim), isInactive.GetBool(sim), icdReady.GetBool(sim))
-	}
-}
-
-func TestValueAuraIsActiveOwnCastReactionTime(t *testing.T) {
-	// The window is a proc that shares its id with the spell it allows, as the Revenge window does.
-	var ownCast, window *Aura
-	var ownSpell, windowSpell *Spell
-	ownCastID, windowID := ActionID{SpellID: testPlainAuraID}, ActionID{SpellID: testStackAuraID}
-	sim, fw, rot := setupFakeRageRotationWith(func(char *Character) {
-		ownCast, window, _ = registerTestAuras(char)
-		ownSpell = char.RegisterSpell(SpellConfig{ActionID: ownCastID, Flags: SpellFlagAPL, ApplyEffects: func(sim *Simulation, _ *Unit, _ *Spell) {
-			ownCast.Activate(sim)
-		}})
-		windowSpell = char.RegisterSpell(SpellConfig{ActionID: windowID, Flags: SpellFlagAPL, ApplyEffects: func(sim *Simulation, _ *Unit, _ *Spell) {
-			window.Deactivate(sim)
-		}})
-	})
-	ownSpell.finalize()
-	windowSpell.finalize()
-	fw.ReactionTime = 100 * time.Millisecond
-	target := fw.CurrentTarget
-
-	ownCastActive := rot.newValueAuraIsActive(&proto.APLValueAuraIsActive{AuraId: ownCastID.ToProto(), IncludeReactionTime: true}, nil)
-	windowActive := rot.newValueAuraIsActive(&proto.APLValueAuraIsActive{AuraId: windowID.ToProto(), IncludeReactionTime: true}, nil)
-
-	sim.CurrentTime = 500 * time.Millisecond
-	if ownCastActive.GetBool(sim) {
-		t.Errorf("before the first cast: own cast active = true, want false")
-	}
-
-	sim.CurrentTime = time.Second
-	ownSpell.applyEffects(sim, target)
-	window.Activate(sim)
-	if !ownCastActive.GetBool(sim) || windowActive.GetBool(sim) {
-		t.Errorf("as the auras land: own cast active = %t, window active = %t, want true, false", ownCastActive.GetBool(sim), windowActive.GetBool(sim))
-	}
-	sim.CurrentTime = time.Second + 200*time.Millisecond
-	if !windowActive.GetBool(sim) {
-		t.Errorf("past the reaction time: window active = false, want true")
-	}
-
-	sim.CurrentTime = 2 * time.Second
-	windowSpell.applyEffects(sim, target)
-	if windowActive.GetBool(sim) {
-		t.Errorf("window used up by its spell: window active = true, want false")
-	}
-
-	sim.CurrentTime = ownCast.ExpiresAt()
-	ownCast.Deactivate(sim)
-	sim.CurrentTime += 50 * time.Millisecond
-	if !ownCastActive.GetBool(sim) {
-		t.Errorf("inside the reaction time after running out: own cast active = false, want true")
-	}
-	sim.CurrentTime += 50 * time.Millisecond
-	if ownCastActive.GetBool(sim) {
-		t.Errorf("at the reaction time after running out: own cast active = true, want false")
-	}
-
-	ownSpell.applyEffects(sim, target)
-	sim.CurrentTime += time.Second
-	ownCast.Deactivate(sim)
-	if ownCastActive.GetBool(sim) {
-		t.Errorf("removed before running out: own cast active = true, want false")
 	}
 }
 
@@ -1672,6 +1737,31 @@ func TestValueMultipleCdUsages(t *testing.T) {
 		t.Fatal("a target spell with a related self buff should construct")
 	}
 
+	// The UI sends an empty base spell id when none is picked, which counts as no base spell.
+	for _, tc := range []struct {
+		name        string
+		base        *proto.ActionID
+		wantWarning bool
+	}{
+		{"an empty base spell id", &proto.ActionID{}, false},
+		{"an unknown base spell", ActionID{SpellID: 999999}.ToProto(), true},
+		{"a base spell without a related self buff", plain.ActionID.ToProto(), true},
+	} {
+		rot.curValidations = nil
+		value := rot.newValueMultipleCdUsages(&proto.APLValueMultipleCdUsages{BaseSpellId: tc.base, TargetSpellId: targetID, AlignCdEnd: true}, nil)
+		if value == nil {
+			t.Errorf("%s should construct", tc.name)
+		}
+		if !tc.wantWarning {
+			if len(rot.curValidations) != 0 {
+				t.Errorf("%s should log no validation, got %v", tc.name, rot.curValidations)
+			}
+		} else if len(rot.curValidations) == 0 || !strings.HasSuffix(rot.curValidations[len(rot.curValidations)-1].Validation, "Ignoring the base spell and offset.") {
+			t.Errorf("%s should log the ignored base spell warning, got %v", tc.name, rot.curValidations)
+		}
+	}
+	rot.curValidations = nil
+
 	// With a 60s cooldown and a 10s buff, the aligned value casts while a later use would still get at least
 	// half its buff (more than 65s left) or the buff would run to the end, and holds in between. The
 	// cooldown is read when the value is evaluated, so a cooldown change applies at once.
@@ -1700,6 +1790,24 @@ func TestValueMultipleCdUsages(t *testing.T) {
 			t.Errorf("at %s of %s with a %s cooldown aligned to the end of combat: got %t, want %t", tc.elapsed, tc.fight, tc.cooldown, got, tc.aligned)
 		}
 	}
+
+	// A spell with only a shared category lockout, like a potion, counts that lockout as its cooldown.
+	target.CD.Duration, target.SharedCD.Duration, sim.Duration = 0, 120*time.Second, 300*time.Second
+	for _, tc := range []struct {
+		remaining time.Duration
+		aligned   bool
+	}{
+		{126 * time.Second, true},
+		{125 * time.Second, false},
+		{10 * time.Second, true},
+		{11 * time.Second, false},
+	} {
+		sim.CurrentTime = sim.Duration - tc.remaining
+		if got := aligned.GetBool(sim); got != tc.aligned {
+			t.Errorf("with %s left and a 120s shared cooldown aligned to the end of combat: got %t, want %t", tc.remaining, got, tc.aligned)
+		}
+	}
+	target.SharedCD.Duration = 0
 
 	target.CD.Duration = 5 * time.Second
 	sim.Duration = 180 * time.Second

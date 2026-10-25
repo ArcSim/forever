@@ -664,6 +664,8 @@ message UnitMetadata {
 	string name = 3;
 	repeated SpellStats spells = 1;
 	repeated AuraStats auras = 2;
+	// The talents the unit has points in, each at the rank it holds.
+	repeated ActionID talents = 4;
 }
 message PetStats {
 	UnitMetadata metadata = 1;

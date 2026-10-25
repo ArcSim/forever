@@ -2,8 +2,13 @@ import * as PresetUtils from '@app/preset_utils';
 import * as Consumables from '@features/settings/model/consumables_auto_gen';
 import { APLRotation_Type as APLRotationType } from '@generated/proto/apl';
 import { Debuffs, IndividualBuffs, PartyBuffs, RaidBuffs } from '@generated/proto/buffs';
-import { ConsumesSpec, Profession, PseudoStat, Race, Stat, TristateEffect } from '@generated/proto/common';
-import { RetributionPaladin_Options as RetributionPaladinOptions } from '@generated/proto/paladin';
+import { ConsumesSpec, Profession, PseudoStat, Race, Spec, Stat, TristateEffect } from '@generated/proto/common';
+import {
+	PaladinAura,
+	PaladinSeal,
+	RetributionPaladin_Options as RetributionPaladinOptions,
+	RetributionPaladin_Rotation as RetributionPaladinRotation,
+} from '@generated/proto/paladin';
 import { SavedTalents } from '@generated/proto/ui';
 import * as Mechanics from '@sim/constants/mechanics';
 import type { PresetSettings } from '@sim/presets/types';
@@ -17,6 +22,13 @@ import TwistOfLightGear from './gear_sets/twist_of_light.gear.json';
 
 export const HolyShockAplPreset = PresetUtils.makePresetAPLRotation('Holy Shock', HolyShockApl);
 export const TwistOfLightAplPreset = PresetUtils.makePresetAPLRotation('Twist of Light', TwistOfLightApl);
+
+export const DefaultSimpleRotation = RetributionPaladinRotation.create({
+	aura: PaladinAura.RetributionAura,
+	assignedSeal: PaladinSeal.SealOfTheCrusader,
+	pullRange: 25,
+});
+export const SimpleRotation = PresetUtils.makePresetSimpleRotation('Simple', Spec.SpecRetributionPaladin, DefaultSimpleRotation);
 
 export const HolyShockGearPreset = PresetUtils.makePresetGear('Holy Shock', HolyShockGear, {
 	devOnly: true,
@@ -90,24 +102,25 @@ export const TwistOfLightConsumables = ConsumesSpec.create({
 	flaskId: Consumables.FlaskOfSupremePower.id,
 	foodId: Consumables.LobsterStew.id,
 	conjuredId: Consumables.DemonicRune.id,
-	explosiveId: Consumables.EzThroDynamiteII.id,
-	extraIds: [Consumables.GoblinSapperCharge.id, Consumables.ROIDS.id],
+	extraIds: [Consumables.ROIDS.id, Consumables.GoblinSapperCharge.id, Consumables.DragonbreathChili.id, Consumables.GordokGreenGrog.id],
 	elixirIds: [
 		Consumables.ElixirOfHolyPower.id,
 		Consumables.ElixirOfSages.id,
 		Consumables.ElixirOfTheMongoose.id,
 		Consumables.ElixirOfTheOwl.id,
 		Consumables.ElixirOfTheGrizzly.id,
+		Consumables.ElixirOfThePhalanx.id,
 		Consumables.GreaterArcaneElixir.id,
 		Consumables.GreaterMagebloodElixir.id,
 		Consumables.JujuMight.id,
 	],
 	mhImbueId: Consumables.BrilliantWizardOil.id,
+	swapMhImbueId: Consumables.BrilliantWizardOil.id,
 });
 
 export const HolyShockConsumables = ConsumesSpec.create({
 	...TwistOfLightConsumables,
-	extraIds: [Consumables.GoblinSapperCharge.id, Consumables.CerebralCortexCompound.id],
+	extraIds: [Consumables.CerebralCortexCompound.id, Consumables.GoblinSapperCharge.id, Consumables.DragonbreathChili.id, Consumables.GordokGreenGrog.id],
 });
 
 export const DefaultRaidBuffs = RaidBuffs.create({
@@ -145,7 +158,7 @@ export const DefaultDebuffs = Debuffs.create({
 export const OtherDefaults = {
 	profession1: Profession.Engineering,
 	profession2: Profession.Blacksmithing,
-	distanceFromTarget: 5,
+	distanceFromTarget: 25,
 	reactionTime: 100,
 	iterationCount: 25000,
 	race: Race.RaceHuman,
@@ -172,17 +185,17 @@ const settings = (name: string, consumables: ConsumesSpec, itemSwap?: PresetUtil
 export const TwistOfLightSettings = settings('Twist of Light', TwistOfLightConsumables);
 export const HolyShockSettings = settings('Holy Shock', HolyShockConsumables, HolyShockItemSwap);
 
-// The Auto rotation picks the Twist of Light or the Holy Shock APL from the talents.
+// The Simple rotation picks the Twist of Light or the Holy Shock APL from the talents.
 export const TwistOfLightBuild = PresetUtils.makePresetBuild('Twist of Light', {
 	gear: TwistOfLightGearPreset,
 	talents: TwistOfLightTalents,
-	rotationType: APLRotationType.TypeAuto,
+	rotationType: APLRotationType.TypeSimple,
 	settings: TwistOfLightSettings,
 });
 
 export const HolyShockBuild = PresetUtils.makePresetBuild('Holy Shock', {
 	gear: HolyShockGearPreset,
 	talents: HolyShockTalents,
-	rotationType: APLRotationType.TypeAuto,
+	rotationType: APLRotationType.TypeSimple,
 	settings: HolyShockSettings,
 });

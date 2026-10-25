@@ -94,7 +94,7 @@ func (druid *Druid) feralWeapon(swingSpeed float64) core.Weapon {
 		MaxRange:             core.MaxMeleeRange,
 	}
 	if item := druid.GetMHWeapon(); item != nil {
-		mean := float32(float32(item.UnroundedDPS) * float32(swingSpeed*1000))
+		mean := float32(item.UnroundedDPS * float32(swingSpeed*1000))
 		mean = float32(mean * 0.001)
 		half := float32(float32(feralPawVariance) / 2)
 		flat := item.Enchant.WeaponDamage + item.TempEnchantWeaponDamage + druid.PseudoStats.BonusMHDps*swingSpeed
