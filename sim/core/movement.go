@@ -90,8 +90,15 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	}
 
 	unit.OnMovement(sim, unit.DistanceFromTarget, MovementUpdate)
+	unit.updateAutoAttackRange(sim)
 
-	// update auto attack state
+	yards := max(int32(unit.DistanceFromTarget), 1) // never set to 0 yards as we deactivate the aura
+	if yards != unit.moveAura.GetStacks() {
+		unit.moveAura.SetStacks(sim, yards)
+	}
+}
+
+func (unit *Unit) updateAutoAttackRange(sim *Simulation) {
 	if unit.AutoAttacks.mh.enabled != unit.AutoAttacks.mh.IsInRange() {
 		if unit.AutoAttacks.mh.IsInRange() {
 			unit.AutoAttacks.cancelMeleeWeaveWakeup(sim)
@@ -103,11 +110,6 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	}
 
 	unit.AutoAttacks.UpdateRangedRange(sim)
-
-	yards := max(int32(unit.DistanceFromTarget), 1) // never set to 0 yards as we deactivate the aura
-	if yards != unit.moveAura.GetStacks() {
-		unit.moveAura.SetStacks(sim, yards)
-	}
 }
 
 // Ends the walk under way where the unit is now.
@@ -116,14 +118,37 @@ func (unit *Unit) StopMoving(sim *Simulation) {
 		return
 	}
 
+	unit.cancelWalk(sim)
+	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
+}
+
+// Puts the unit at distance with no travel time, ending a walk under way. The movement callbacks see
+// one MovementEnd at the new distance, as the unit stands there afterwards: Start would end a wand
+// channel for a move that takes no time. A walk's own end is folded into that one.
+func (unit *Unit) MoveInstantlyTo(distance float64, sim *Simulation) {
+	walking := unit.Moving
+	if walking {
+		unit.cancelWalk(sim)
+	}
+
+	if distance != unit.DistanceFromTarget {
+		unit.DistanceFromTarget = distance
+		unit.updateAutoAttackRange(sim)
+	} else if !walking {
+		return
+	}
+
+	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
+}
+
+// Stops the walk under way where the unit is now, without a movement callback.
+func (unit *Unit) cancelWalk(sim *Simulation) {
 	unit.UpdatePosition(sim, false)
 	unit.movementAction.Cancel(sim)
 	if unit.movementAction.meleeEdge != nil {
 		unit.movementAction.meleeEdge.Cancel(sim)
 	}
 	unit.moveAura.Deactivate(sim)
-
-	unit.OnMovement(sim, unit.DistanceFromTarget, MovementEnd)
 }
 
 func (unit *Unit) FinalizeMovement(sim *Simulation) {

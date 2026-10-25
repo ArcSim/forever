@@ -128,7 +128,7 @@ export const FireBuild = PresetUtils.makePresetBuild('Fire', {
 export const FrostSettings: PresetSettings = {
 	name: 'Frost',
 	playerOptions: {
-		distanceFromTarget: 10,
+		distanceFromTarget: 30,
 	},
 };
 

@@ -77,6 +77,7 @@ func (mage *Mage) registerSpells() {
 	mage.registerArcaneExplosionSpell()
 	mage.registerArcaneMissilesSpell()
 	mage.registerArmorSpells()
+	mage.registerBlinkSpell()
 	mage.registerBlizzardSpell()
 	mage.registerConeOfColdSpell()
 	mage.registerFrostboltSpell()
@@ -152,6 +153,7 @@ const (
 	MageSpellArcaneMissilesTick
 	MageSpellArcaneWrath
 	MageSpellBlastWave
+	MageSpellBlink
 	MageSpellBlizzard
 	MageSpellColdSnap
 	MageSpellConeOfCold

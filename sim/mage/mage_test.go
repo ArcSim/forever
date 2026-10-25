@@ -49,7 +49,9 @@ func fireSuite() core.CharacterSuiteConfig {
 }
 
 func frostSuite() core.CharacterSuiteConfig {
-	return mageSuite(FrostTalents, "frost")
+	config := mageSuite(FrostTalents, "frost")
+	config.StartingDistance = 30
+	return config
 }
 
 func mageSuite(talents string, apl string) core.CharacterSuiteConfig {
