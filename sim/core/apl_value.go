@@ -172,6 +172,8 @@ func (rot *APLRotation) newAPLValueWithContext(config *proto.APLValue, groupVari
 		value = rot.newValueSpellIsKnown(config.GetSpellIsKnown(), config.Uuid)
 	case *proto.APLValue_SpellCanCast:
 		value = rot.newValueSpellCanCast(config.GetSpellCanCast(), config.Uuid)
+	case *proto.APLValue_SpellInRange:
+		value = rot.newValueSpellInRange(config.GetSpellInRange(), config.Uuid)
 	case *proto.APLValue_SpellIsReady:
 		value = rot.newValueSpellIsReady(config.GetSpellIsReady(), config.Uuid)
 	case *proto.APLValue_SpellTimeToReady:
@@ -206,6 +208,12 @@ func (rot *APLRotation) newAPLValueWithContext(config *proto.APLValue, groupVari
 		value = rot.newValueSpellIsHitCapped(config.GetSpellIsHitCapped(), config.Uuid)
 	case *proto.APLValue_SpellIsExpertiseCapped:
 		value = rot.newValueSpellIsExpertiseCapped(config.GetSpellIsExpertiseCapped(), config.Uuid)
+
+	// Talents
+	case *proto.APLValue_TalentIsKnown:
+		value = rot.newValueTalentIsKnown(config.GetTalentIsKnown(), config.Uuid)
+	case *proto.APLValue_TalentRank:
+		value = rot.newValueTalentRank(config.GetTalentRank(), config.Uuid)
 
 	// Auras
 	case *proto.APLValue_AuraIsKnown:

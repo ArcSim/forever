@@ -45,6 +45,8 @@ var BaseStats = map[BaseStatsKey]stats.Stats{}
 // These are also scattered in various dbc/casc files,
 // `octbasempbyclass.txt`, `combatratings.txt`, `chancetospellcritbase.txt`, etc.
 
+// Each race's offset on the class base attributes, Spirit included.
+// TODO: the Skyborne rows keep their sheet values until fresh level 1 naked sheets show their own offsets.
 var RaceOffsets = map[proto.Race]stats.Stats{
 	proto.Race_RaceUnknown: stats.Stats{},
 	proto.Race_RaceHuman:   stats.Stats{},
@@ -243,6 +245,8 @@ var ClassBaseScaling = map[proto.Class]float64{
 	proto.Class_ClassDruid:   282.633330,
 }
 
+// No game file ships class base crit: ExtraClassBaseStats carries it from the hand-kept tables in
+// assets/db_inputs/basestats/, and crit per Agility comes from PlayerExpectedStat.
 func AddBaseStatsCombo(r proto.Race, c proto.Class) {
 	BaseStats[BaseStatsKey{Race: r, Class: c}] = ClassBaseStats[c].Add(RaceOffsets[r]).Add(ExtraClassBaseStats[c])
 }

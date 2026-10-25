@@ -391,7 +391,7 @@ func (unit *Unit) RegisterSpell(config SpellConfig) *Spell {
 		spell.MaxRange = config.MaxRange
 		oldExtraCastCondition := spell.ExtraCastCondition
 		spell.ExtraCastCondition = func(sim *Simulation, target *Unit) bool {
-			if ((spell.MinRange != 0) && (spell.Unit.DistanceFromTarget < spell.MinRange)) || ((spell.MaxRange != 0) && (spell.Unit.DistanceFromTarget > spell.EffectiveMaxRange())) {
+			if !spell.InRange() {
 				/*if sim.Log != nil {
 					sim.Log("Cannot cast spell %s, out of range!", spell.ActionID)
 				}*/
@@ -444,6 +444,13 @@ func (spell *Spell) Dot(target *Unit) *Dot {
 		return nil
 	}
 	return spell.dots.Get(target)
+}
+
+// Whether the unit stands within the spell's range: no closer than MinRange and no farther than MaxRange
+// after the range mods. A range left at 0 does not limit.
+func (spell *Spell) InRange() bool {
+	distance := spell.Unit.DistanceFromTarget
+	return (spell.MinRange == 0 || distance >= spell.MinRange) && (spell.MaxRange == 0 || distance <= spell.EffectiveMaxRange())
 }
 
 // The distance the range check allows: MaxRange after the range mods.
@@ -631,6 +638,8 @@ func (spell *Spell) rangesToRecord(target *Unit, value float64) *hitRanges {
 	return hr
 }
 
+// Called with the total each hit feeds, so a range follows its total: damage records in combat only,
+// heals and shields always.
 func (spell *Spell) recordHit(target *Unit, kind proto.HitKind, value float64) {
 	if hr := spell.rangesToRecord(target, value); hr != nil {
 		hr.kinds[kind].add(value)
@@ -923,6 +932,8 @@ func (spell *Spell) ExpectedTickDamageFromCurrentSnapshot(sim *Simulation, targe
 // for 150%, melee and ranged attacks for 200%. Multiplicative modifiers (the slaying
 // talents on the attack table, SpellMod_CritMultiplier_Pct) scale that base; additive
 // ones (Ruin, Impale, SpellMod_CritMultiplier_Flat) scale only the bonus part above 100%.
+// Aura 163 (aura 50 for healing) multiplies PseudoStats.CritDamageMultiplier, so 2% gives 204% melee
+// and 153% spell crits, and Vengeance 5/5 on top gives (1.53 - 1) × 2 + 1 = 206%.
 // https://web.archive.org/web/20081014064638/http://elitistjerks.com/f31/t12595-relentless_earthstorm_diamond_-_melee_only/p4/
 func (spell *Spell) CritDamageMultiplier(at *AttackTable) float64 {
 	var base float64

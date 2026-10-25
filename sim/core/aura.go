@@ -1195,6 +1195,9 @@ func (auras AuraArray) ApplyOnExpire(onExpire OnExpire) {
 	}
 }
 
+// An aura on every unit allied to the caster, for raid-targeted buffs such as Battle Shout and the
+// prayers. An in-sim cast of a party or raid area aura (paladin auras, shaman totems) reaches only the
+// caster; the party and raid buff settings stand in for the others.
 func (caster *Unit) NewAllyAuraArray(makeAura func(*Unit) *Aura) AuraArray {
 	auras := make([]*Aura, len(caster.Env.AllUnits))
 	for _, target := range caster.Env.AllUnits {

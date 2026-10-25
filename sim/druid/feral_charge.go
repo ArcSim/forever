@@ -1,9 +1,10 @@
 package druid
 
 import (
+	"time"
+
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/spelldata"
-	"time"
 )
 
 func (druid *Druid) registerFeralChargeSpell() {
@@ -18,23 +19,7 @@ func (druid *Druid) registerFeralChargeSpell() {
 	config.ExtraCastCondition = func(_ *core.Simulation, _ *core.Unit) bool {
 		return druid.Talents.FeralCharge
 	}
-	// TODO: Verify the ground-charge speed in game; the movement model uses a temporary run-speed multiplier.
-	chargeMovement := druid.RegisterAura(core.Aura{
-		Label:    "Feral Charge Movement",
-		ActionID: core.ActionID{SpellID: rank.ID, Tag: 1},
-		Duration: 5 * time.Second,
-		OnGain: func(_ *core.Aura, sim *core.Simulation) {
-			druid.MultiplyMovementSpeed(sim, 3)
-		},
-		OnExpire: func(_ *core.Aura, sim *core.Simulation) {
-			druid.MultiplyMovementSpeed(sim, 1.0/3.0)
-		},
-	})
-	druid.RegisterMovementCallback(func(sim *core.Simulation, _ float64, kind core.MovementUpdateType) {
-		if kind == core.MovementEnd && chargeMovement.IsActive() {
-			chargeMovement.Deactivate(sim)
-		}
-	})
+	chargeMovement := core.MakeDashAura(&druid.Unit, "Feral Charge Movement", core.ActionID{SpellID: rank.ID, Tag: 1}, 5*time.Second, nil)
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, _ *core.Spell) {
 		if druid.InForm(Cat) {
 			// TODO: Verify the modeled travel speed and landing delay in game.

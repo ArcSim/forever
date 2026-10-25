@@ -296,12 +296,44 @@ type APLActionMove struct {
 	defaultAPLActionImpl
 	unit      *Unit
 	moveRange APLValue
+
+	recheckWhileMoving bool
+	entry              *APLAction      // The rotation entry, whose condition the walk is held to.
+	walk               *MovementAction // The walk this action started, while it is under way.
 }
 
 func (rot *APLRotation) newActionMove(config *proto.APLActionMove) APLActionImpl {
-	return &APLActionMove{
-		unit:      rot.unit,
-		moveRange: rot.newAPLValue(config.RangeFromTarget),
+	action := &APLActionMove{
+		unit:               rot.unit,
+		moveRange:          rot.newAPLValue(config.RangeFromTarget),
+		recheckWhileMoving: config.RecheckWhileMoving,
+	}
+	if action.recheckWhileMoving {
+		rot.recheckedMoves = append(rot.recheckedMoves, action)
+	}
+	return action
+}
+
+// At each look of the rotation during this action's walk: the walk stops where it is once the condition is
+// false, and turns to the range once it changes. A walk something else replaced or that ended is let go.
+func (action *APLActionMove) recheck(sim *Simulation) {
+	if action.walk == nil {
+		return
+	}
+	if action.unit.movementAction != action.walk {
+		action.walk = nil
+		return
+	}
+	if action.entry != nil && action.entry.condition != nil && !action.entry.condition.GetBool(sim) {
+		action.walk = nil
+		if sim.Log != nil {
+			action.unit.Log(sim, "[DEBUG] Stopping at %.1f yards", action.unit.DistanceFromTarget)
+		}
+		action.unit.StopMoving(sim)
+		return
+	}
+	if action.moveRange.GetFloat(sim) != action.walk.srcPosition+action.walk.moveDistance {
+		action.Execute(sim)
 	}
 }
 func (action *APLActionMove) IsReady(sim *Simulation) bool {
@@ -315,6 +347,9 @@ func (action *APLActionMove) Execute(sim *Simulation) {
 	}
 
 	action.unit.MoveTo(moveRange, sim)
+	if action.recheckWhileMoving && action.unit.Moving {
+		action.walk = action.unit.movementAction
+	}
 }
 func (action *APLActionMove) String() string {
 	return fmt.Sprintf("Move(%s)", action.moveRange)

@@ -46,7 +46,7 @@ const centred = ({ anchor, positioner }: { anchor: { height: number }; positione
  */
 export const TourCard = ({ kind, title, body, media, position, total, anchor, onNext, onPrevious, onSkip, waiting = false, onKeyDown }: TourCardProps) => {
 	const portalContainer = usePortalContainer();
-	const primary = useRef<HTMLButtonElement>(null);
+	const card = useRef<HTMLDivElement>(null);
 	const label =
 		kind === 'welcome'
 			? i18n.t('onboarding.start')
@@ -73,7 +73,8 @@ export const TourCard = ({ kind, title, body, media, position, total, anchor, on
 					collisionPadding={VIEWPORT_MARGIN}
 					collisionAvoidance={anchor ? { side: 'flip', align: 'shift', fallbackAxisSide: 'end' } : { side: 'none', align: 'none' }}
 					data-testid="tour-card-positioner">
-					<BasePopover.Popup className="ui-tour-card" initialFocus={waiting ? false : primary} onKeyDown={onKeyDown} data-testid="tour-card">
+					{/* The card takes the focus, not its primary button: a script focus on a button shows its keyboard ring under the mouse, and the arrow keys move the tour from the card. */}
+					<BasePopover.Popup ref={card} className="ui-tour-card" initialFocus={waiting ? false : card} onKeyDown={onKeyDown} data-testid="tour-card">
 						{media}
 						{kind === 'step' && (
 							<div className="flex items-center justify-between text-xs text-muted" data-testid="tour-card-progress">
@@ -108,7 +109,7 @@ export const TourCard = ({ kind, title, body, media, position, total, anchor, on
 									{i18n.t('onboarding.previous')}
 								</Button>
 							)}
-							<Button ref={primary} variant="primary" size="sm" onClick={kind === 'finish' ? onSkip : onNext} data-testid="tour-card-next">
+							<Button variant="primary" size="sm" onClick={kind === 'finish' ? onSkip : onNext} data-testid="tour-card-next">
 								{label}
 							</Button>
 						</div>

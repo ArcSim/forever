@@ -9,7 +9,7 @@ import Level60GearJson from './gear_sets/default.gear.json';
 import PreRaidGearJson from './gear_sets/pre_raid.gear.json';
 
 // Another raid member's bleed keeps Rend and Tear up.
-export const DefaultOptions = FeralDruidOptions.fromJson({ assumeBleedActive: true });
+export const DefaultOptions = FeralDruidOptions.create({ assumeBleedActive: true });
 
 export const DefaultConsumables = ConsumesSpec.fromJson({
 	flaskId: 274274,
@@ -98,5 +98,5 @@ export const JVMES_APL = {
 	tooltip:
 		'Maintains Faerie Fire and bleeds, pools for later Berserks, and uses optional consumables and racials. Supports an MCP opener from the weapon swap slot.',
 };
-export const CatTalents = PresetUtils.makePresetTalents('Cat', SavedTalents.create({ talentsString: '050022-35200032121131212051-05200' }));
+export const CatTalents = PresetUtils.makePresetTalents('Cat', SavedTalents.create({ talentsString: '050022-35200032121131212051-052' }));
 export const HybridTalents = PresetUtils.makePresetTalents('Hybrid', SavedTalents.create({ talentsString: '050022-35230332121132212051-' }));

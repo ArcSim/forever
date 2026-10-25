@@ -33,12 +33,13 @@ enemies, channels, casts the GCD outlasts and interactive sims decide after the 
 end. A prepull cast ending at the pull picks at 0, before it lands.
 
 The major cooldowns the cast-end pass asks are the entries that can be one: Autocast Other Cooldowns,
-a Cast Spell of a spell flagged as a major cooldown, and a group reference holding either. When none is
-ready, the queued pick goes off without a scan of the list. The pick itself never queues a major
-cooldown: every major cooldown decides at the cast end, with the outcome visible.
+a Cast Spell or Channel Spell of a spell flagged as a major cooldown, and a group reference holding
+any of these. When none is ready, the queued pick goes off without a scan of the list. The pick itself
+never queues a major cooldown: every major cooldown decides at the cast end, with the outcome visible.
 
 A Sequence, Strict Sequence or Strict Multidot step queued by the pick lets a major cooldown go ahead
-of it in the same way.
+of it in the same way. A Strict Sequence whose next step is a ready major cooldown or a spell off the
+GCD keeps control through the pick and casts that step in the cast-end pass.
 
 ## What the pick sees
 

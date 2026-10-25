@@ -66,7 +66,7 @@ dps_results: {
  key: "TestAffliction-AllItems-Admiral'sHat-10030"
  value: {
   dps: 670.93274
-  tps: 393.72211
+  tps: 393.70296
   dtps: 8.34184
   hps: 7.27415
  }
@@ -225,9 +225,10 @@ dps_results: {
 dps_results: {
  key: "TestAffliction-AllItems-DeathmistRaiment"
  value: {
-  dps: 708.98442
-  tps: 410.01965
-  dtps: 8.49508
+  dps: 711.2057
+  tps: 412.72947
+  dtps: 8.40287
+  hps: 8.63416
  }
 }
 dps_results: {
@@ -908,14 +909,6 @@ dps_results: {
  }
 }
 dps_results: {
- key: "TestAffliction-AllItems-Sorcerer'sRegalia"
- value: {
-  dps: 705.17404
-  tps: 408.79377
-  dtps: 8.86249
- }
-}
-dps_results: {
  key: "TestAffliction-AllItems-SwordofZeal-6622"
  value: {
   dps: 628.51385
@@ -1065,14 +1058,6 @@ dps_results: {
   dps: 649.45844
   tps: 379.46175
   dtps: 8.63055
- }
-}
-dps_results: {
- key: "TestAffliction-AllItems-VestmentsoftheVirtuous"
- value: {
-  dps: 691.49398
-  tps: 400.63554
-  dtps: 8.75164
  }
 }
 dps_results: {

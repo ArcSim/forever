@@ -831,6 +831,12 @@
 				"label": "Cannot Shred Target",
 				"tooltip": "Alternative to \"In Front of Target\" for modeling bosses that do not Parry or Block, but which you still cannot Shred."
 			},
+			"innervate_assignment": {
+				"label": "Innervate",
+				"tooltip": "Self keeps the mana. Someone else still casts Innervate on your rotation, and the mana stays off you.",
+				"self": "Self",
+				"other": "Someone else"
+			},
 			"show_1h_weapons": {
 				"label": "1H",
 				"tooltip": "Show one-handed weapons"
@@ -1537,6 +1543,8 @@
 					"tooltip": "Starts a move to the desired range from target.",
 					"to_range": "to Range",
 					"to_range_tooltip": "Desired range from target.",
+					"recheck": "Re-check while moving",
+					"recheck_tooltip": "Looks again every reaction time while walking: stops where you are once the condition is false, and turns to the new range when it changes. The rest of the rotation keeps going meanwhile.",
 					"move_duration": "Move duration",
 					"duration": "Duration",
 					"duration_tooltip": "Amount of time the character should move.",
@@ -1778,6 +1786,14 @@
 					"label": "Spell Known",
 					"tooltip": "<b>True</b> if the spell is currently known, otherwise <b>False</b>."
 				},
+				"talent_known": {
+					"label": "Talent Known",
+					"tooltip": "<b>True</b> if the talent has at least the chosen rank, otherwise <b>False</b>."
+				},
+				"talent_rank": {
+					"label": "Talent Rank",
+					"tooltip": "The rank the player holds in the talent, <b>0</b> without points."
+				},
 				"current_cost": {
 					"label": "Current Cost",
 					"tooltip": "Returns current resource cost of spell"
@@ -1786,6 +1802,11 @@
 					"label": "Can Cast",
 					"tooltip": "<b>True</b> if all requirements for casting the spell are currently met, otherwise <b>False</b>.",
 					"full_description": "<p>The <b>Cast Spell</b> action does not need to be conditioned on this, because it applies this check automatically.</p>"
+				},
+				"in_range": {
+					"label": "In Range",
+					"tooltip": "<b>True</b> if you stand within the spell's range, otherwise <b>False</b>.",
+					"full_description": "<p>Checks the distance only: no closer than the spell's minimum range and no farther than its maximum, range talents included. A bow, gun or crossbow shot's minimum range is the dead zone, so Arcane Shot being in range means your Auto Shot can fire from here.</p>"
 				},
 				"is_hit_capped": {
 					"label": "Is Hit Capped",
@@ -1996,6 +2017,14 @@
 					"label": "Assigned Curse Is Active",
 					"tooltip": "Returns true is assigned curse is active on target"
 				},
+				"warlock_assigned_curse_is_active_on_all_targets": {
+					"label": "Assigned Curse Is Active On All Targets",
+					"tooltip": "<b>True</b> while your assigned curse is on every target, otherwise <b>False</b>. With no curse assigned it is <b>False</b>."
+				},
+				"warlock_bane_is_active_on_all_targets": {
+					"label": "Bane Is Active On All Targets",
+					"tooltip": "<b>True</b> while one of your Banes (Agony, Doom or Havoc) is on every target, otherwise <b>False</b>. A target holds one Bane at a time."
+				},
 				"warlock_is_assigned_curse": {
 					"label": "Is Assigned Curse",
 					"tooltip": "True if the warlock is assigned the specified curse"
@@ -2171,7 +2200,9 @@
 					"friendly_spells": "Friendly Spell",
 					"expected_dot_spells": "DoT Spell",
 					"expected_damage_spells": "Damage Spell",
-					"spells_with_travelTime": "Spell"
+					"spells_with_travelTime": "Spell",
+					"talents": "Talent",
+					"talent_ranks": "Talent"
 				},
 				"field_configs": {
 					"type": "Type",
@@ -2274,6 +2305,10 @@
 						"melee": "Melee"
 					}
 				},
+				"pull_range": {
+					"label": "Pull range (yd)",
+					"tooltip": "Where you stand when the pull starts. From there you walk to your spot (12 yd at range, melee range in melee), stopping for each Auto Shot you can fire on the way."
+				},
 				"time_to_weave": {
 					"label": "Time to weave (ms)",
 					"tooltip": "How long, in milliseconds, you stay in melee after the weave swing before walking back out. Never shorter than your input delay."
@@ -2297,6 +2332,31 @@
 				"use_hawk": {
 					"label": "Use Summon Hawk",
 					"tooltip": "Sends hawks between Arcane Shots, the two sharing a cooldown."
+				}
+			},
+			"paladin": {
+				"retribution": {
+					"aura": {
+						"label": "Aura",
+						"tooltip": "The aura you turn on before the pull."
+					},
+					"assigned_judge": {
+						"label": "Assigned judgement",
+						"tooltip": "The Judgement the raid assigned you. You cast it before the pull and judge it on your way in, then switch to your own seals. Leave it empty when no Judgement is assigned to you.",
+						"none": "No assigned judgement"
+					},
+					"non_twist_seal": {
+						"label": "Seal",
+						"tooltip": "The seal being kept up during the fight."
+					},
+					"pull_range": {
+						"label": "Starting range (yd)",
+						"tooltip": "Where you stand when the pull starts. From there you walk into melee range, judging on the way. Never less than {{min}} yd, one yard outside Judgement's range."
+					},
+					"delay_major_cds": {
+						"label": "Delay major cooldowns (s)",
+						"tooltip": "How many seconds into the fight to wait before trinkets and other cooldowns are used automatically."
+					}
 				}
 			},
 			"warrior": {

@@ -37,13 +37,13 @@ caller gates on `sim.Encounter.InArea(row.AreaType())`. A group that is a single
 is needed for the cooldown timers, so a config is built where the sim has a character rather than at
 package init.
 
-|               |                                                                                                                                                                       |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Melee(mask)` | the proc mask, `SpellFlagMeleeMetrics` and `SpellFlagAPL`, damage and threat multipliers of 1, and `IgnoreHaste`                                                      |
-| `Magic(mask)` | the proc mask, `SpellFlagAPL`, the multipliers, and `BonusCoefficient` from the damage effect's spell power share, or the heal's where the spell damages nothing      |
-| `Proc()`      | `SpellFlagPassiveSpell` and `SpellFlagNoOnCastComplete`, clears `SpellFlagAPL`, and empties the cast (cast time, GCD, cooldowns), every cost and the cast requirement |
-| `Flags(f)`    | ors in flags the game files do not state                                                                                                                              |
-| `Tag(n)`      | splits one spell id into several actions                                                                                                                              |
+|               |                                                                                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Melee(mask)` | the proc mask, `SpellFlagMeleeMetrics` and `SpellFlagAPL`, a damage multiplier of 1, a threat multiplier of 1 (0 on a row that generates no threat), and `IgnoreHaste` |
+| `Magic(mask)` | the proc mask, `SpellFlagAPL`, the multipliers, and `BonusCoefficient` from the damage effect's spell power share, or the heal's where the spell damages nothing       |
+| `Proc()`      | `SpellFlagPassiveSpell` and `SpellFlagNoOnCastComplete`, clears `SpellFlagAPL`, and empties the cast (cast time, GCD, cooldowns), every cost and the cast requirement  |
+| `Flags(f)`    | ors in flags the game files do not state                                                                                                                               |
+| `Tag(n)`      | splits one spell id into several actions                                                                                                                               |
 
 The row is filled first and the options run on top in the order given, so an option sees what the row
 put there.

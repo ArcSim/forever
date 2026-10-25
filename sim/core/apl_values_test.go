@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"maps"
 	"math"
 	"strings"
 	"testing"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/stats"
+	googleproto "google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func setupFakeRageRotation() (*Simulation, *FakeRageWarrior, *APLRotation) {
@@ -682,6 +685,123 @@ func TestValueSpellIsKnown(t *testing.T) {
 	unknown := rot.newValueSpellIsKnown(&proto.APLValueSpellIsKnown{SpellId: ActionID{SpellID: 1}.ToProto()}, nil)
 	if !known.GetBool(sim) || unknown.GetBool(sim) {
 		t.Fatalf("Is Known: Rend = %t, unknown = %t, want true, false", known.GetBool(sim), unknown.GetBool(sim))
+	}
+}
+
+// Three WarriorTalents fields picked by kind, with the spell ids their talent_spell_id options carry:
+// the first one-point talent with its point, the first ranked talent at 3 points, and the next ranked
+// talent with none. A talents string with every field in one tree sets field N from digit N.
+type testTalents struct {
+	single, ranked, untaken int32
+	fill                    func(char *Character)
+}
+
+func newTestTalents(t *testing.T) testTalents {
+	t.Helper()
+	fields := (&proto.WarriorTalents{}).ProtoReflect().Descriptor().Fields()
+	digits := []byte(strings.Repeat("0", fields.Len()))
+	spellID := func(fd protoreflect.FieldDescriptor) int32 {
+		return googleproto.GetExtension(fd.Options(), proto.E_TalentSpellId).(int32)
+	}
+
+	var tt testTalents
+	for i := range fields.Len() {
+		fd := fields.Get(i)
+		switch {
+		case fd.Kind() == protoreflect.BoolKind && tt.single == 0:
+			tt.single = spellID(fd)
+			digits[fd.Number()-1] = '1'
+		case fd.Kind() == protoreflect.Int32Kind && tt.ranked == 0:
+			tt.ranked = spellID(fd)
+			digits[fd.Number()-1] = '3'
+		case fd.Kind() == protoreflect.Int32Kind && tt.untaken == 0:
+			tt.untaken = spellID(fd)
+		}
+	}
+	if tt.single == 0 || tt.ranked == 0 || tt.untaken == 0 {
+		t.Fatalf("WarriorTalents lacks a one-point talent or two ranked talents with talent_spell_id: %+v", tt)
+	}
+
+	tt.fill = func(char *Character) {
+		char.FillTalentsProto((&proto.WarriorTalents{}).ProtoReflect(), string(digits), [3]int{fields.Len(), 0, 0})
+	}
+	return tt
+}
+
+func TestValueTalentIsKnown(t *testing.T) {
+	talents := newTestTalents(t)
+	sim, _, rot := setupFakeRageRotationWith(talents.fill)
+
+	talent := func(spellID int32, rank int32) *proto.ActionID {
+		id := ActionID{SpellID: spellID}.ToProto()
+		id.Rank = rank
+		return id
+	}
+	for _, tc := range []struct {
+		name string
+		id   *proto.ActionID
+		want bool
+	}{
+		{"one-point talent with no rank", talent(talents.single, 0), true},
+		{"one-point talent at its rank", talent(talents.single, 1), true},
+		{"ranked talent below the held rank", talent(talents.ranked, 1), true},
+		{"ranked talent at the held rank", talent(talents.ranked, 3), true},
+		{"ranked talent above the held rank", talent(talents.ranked, 4), false},
+		{"talent with no points", talent(talents.untaken, 1), false},
+	} {
+		rot.curValidations = nil
+		value := rot.newValueTalentIsKnown(&proto.APLValueTalentIsKnown{TalentId: tc.id}, nil)
+		if got := value.GetBool(sim); got != tc.want {
+			t.Errorf("%s: got %t, want %t", tc.name, got, tc.want)
+		}
+		if warned := len(rot.curValidations) > 0; warned == tc.want {
+			t.Errorf("%s: warned %t, want a warning only for an unknown talent", tc.name, warned)
+		}
+	}
+	rot.curValidations = nil
+}
+
+func TestValueTalentRank(t *testing.T) {
+	talents := newTestTalents(t)
+	sim, _, rot := setupFakeRageRotationWith(talents.fill)
+
+	for _, tc := range []struct {
+		name    string
+		spellID int32
+		want    int32
+	}{
+		{"one-point talent", talents.single, 1},
+		{"ranked talent", talents.ranked, 3},
+		{"talent with no points", talents.untaken, 0},
+	} {
+		rot.curValidations = nil
+		// The id's rank is not read, so one above the held rank changes nothing.
+		id := ActionID{SpellID: tc.spellID}.ToProto()
+		id.Rank = 5
+		value := rot.newValueTalentRank(&proto.APLValueTalentRank{TalentId: id}, nil)
+		if value.Type() != proto.APLValueType_ValueTypeInt || value.GetInt(sim) != tc.want {
+			t.Errorf("%s: got %s, want %d", tc.name, renderValue(sim, value), tc.want)
+		}
+		if warned := len(rot.curValidations) > 0; warned != (tc.want == 0) {
+			t.Errorf("%s: warned %t, want a warning only for a talent with no points", tc.name, warned)
+		}
+	}
+	rot.curValidations = nil
+}
+
+func TestPlayerMetadataTalents(t *testing.T) {
+	talents := newTestTalents(t)
+	_, fw, _ := setupFakeRageRotationWith(talents.fill)
+
+	playerStats := &proto.PlayerStats{}
+	fw.FillPlayerStats(playerStats)
+
+	got := map[int32]int32{}
+	for _, id := range playerStats.Metadata.Talents {
+		got[id.GetSpellId()] = id.Rank
+	}
+	if want := map[int32]int32{talents.single: 1, talents.ranked: 3}; !maps.Equal(got, want) {
+		t.Errorf("metadata talents = %v, want %v", got, want)
 	}
 }
 

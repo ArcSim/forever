@@ -2979,6 +2979,17 @@
 							"additionalProperties": false,
 							"required": ["label", "tooltip"]
 						},
+						"innervate_assignment": {
+							"type": "object",
+							"properties": {
+								"label": { "type": "string" },
+								"tooltip": { "type": "string" },
+								"self": { "type": "string" },
+								"other": { "type": "string" }
+							},
+							"additionalProperties": false,
+							"required": ["label", "tooltip", "self", "other"]
+						},
 						"show_1h_weapons": {
 							"type": "object",
 							"properties": {
@@ -3269,6 +3280,7 @@
 						"assume_bleed_active",
 						"prepull_clearcasting",
 						"cannot_shred_target",
+						"innervate_assignment",
 						"show_1h_weapons",
 						"show_2h_weapons",
 						"show_all_enchants",
@@ -5456,6 +5468,12 @@
 										"to_range_tooltip": {
 											"type": "string"
 										},
+										"recheck": {
+											"type": "string"
+										},
+										"recheck_tooltip": {
+											"type": "string"
+										},
 										"move_duration": {
 											"type": "string"
 										},
@@ -5475,6 +5493,8 @@
 										"tooltip",
 										"to_range",
 										"to_range_tooltip",
+										"recheck",
+										"recheck_tooltip",
 										"move_duration",
 										"duration",
 										"duration_tooltip",
@@ -6275,6 +6295,32 @@
 									"additionalProperties": false,
 									"required": ["label", "tooltip"]
 								},
+								"talent_known": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
+								"talent_rank": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
 								"current_cost": {
 									"type": "object",
 									"properties": {
@@ -6289,6 +6335,22 @@
 									"required": ["label", "tooltip"]
 								},
 								"can_cast": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										},
+										"full_description": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip", "full_description"]
+								},
+								"in_range": {
 									"type": "object",
 									"properties": {
 										"label": {
@@ -6994,6 +7056,32 @@
 									"additionalProperties": false,
 									"required": ["label", "tooltip"]
 								},
+								"warlock_assigned_curse_is_active_on_all_targets": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
+								"warlock_bane_is_active_on_all_targets": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
 								"warlock_is_assigned_curse": {
 									"type": "object",
 									"properties": {
@@ -7293,6 +7381,8 @@
 								"time_since_last_auto",
 								"wand",
 								"spell_known",
+								"talent_known",
+								"talent_rank",
 								"current_cost",
 								"can_cast",
 								"is_hit_capped",
@@ -7347,6 +7437,8 @@
 								"warlock_assigned_curse_is_active",
 								"warlock_is_assigned_curse",
 								"warlock_active_pet",
+								"warlock_assigned_curse_is_active_on_all_targets",
+								"warlock_bane_is_active_on_all_targets",
 								"protection_paladin_damage_taken_last_global",
 								"aura_remaining_icd",
 								"aura_icd_is_ready",
@@ -7720,6 +7812,12 @@
 										},
 										"spells_with_travelTime": {
 											"type": "string"
+										},
+										"talents": {
+											"type": "string"
+										},
+										"talent_ranks": {
+											"type": "string"
 										}
 									},
 									"additionalProperties": false,
@@ -7738,7 +7836,9 @@
 										"friendly_spells",
 										"expected_dot_spells",
 										"expected_damage_spells",
-										"spells_with_travelTime"
+										"spells_with_travelTime",
+										"talents",
+										"talent_ranks"
 									]
 								},
 								"field_configs": {
@@ -8112,6 +8212,19 @@
 									"additionalProperties": false,
 									"required": ["label", "tooltip", "values"]
 								},
+								"pull_range": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
 								"time_to_weave": {
 									"type": "object",
 									"properties": {
@@ -8192,7 +8305,89 @@
 								}
 							},
 							"additionalProperties": false,
-							"required": ["playstyle", "time_to_weave", "use_aimed", "use_multi", "use_arcane", "use_sniper", "use_hawk"]
+							"required": ["playstyle", "pull_range", "time_to_weave", "use_aimed", "use_multi", "use_arcane", "use_sniper", "use_hawk"]
+						},
+						"paladin": {
+							"type": "object",
+							"properties": {
+								"retribution": {
+									"type": "object",
+									"properties": {
+										"aura": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
+										},
+										"assigned_judge": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												},
+												"none": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip", "none"]
+										},
+										"non_twist_seal": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
+										},
+										"pull_range": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
+										},
+										"delay_major_cds": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
+										}
+									},
+									"additionalProperties": false,
+									"required": ["aura", "assigned_judge", "non_twist_seal", "pull_range", "delay_major_cds"]
+								}
+							},
+							"additionalProperties": false,
+							"required": ["retribution"]
 						},
 						"warrior": {
 							"type": "object",
@@ -8295,7 +8490,7 @@
 						}
 					},
 					"additionalProperties": false,
-					"required": ["rogue", "shaman", "warlock", "hunter", "warrior"]
+					"required": ["rogue", "shaman", "warlock", "hunter", "paladin", "warrior"]
 				}
 			},
 			"additionalProperties": false,
