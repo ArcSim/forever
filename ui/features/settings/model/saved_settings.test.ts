@@ -1,9 +1,9 @@
-import { ConsumesSpec, EquipmentSpec, ItemSlot, ItemSpec } from '@generated/proto/common';
+import { ConsumesSpec, ItemSlot } from '@generated/proto/common';
 import { SavedSettings } from '@generated/proto/ui';
-import type { Player } from '@sim/player/player';
 import { DENSE_SHARPENING_STONE_ID, DENSE_WEIGHTSTONE_ID } from '@sim/proto/sim_tables_auto_gen';
 import { makeIndividualSim, serveDatabase } from '@testing/sim/individual_sim';
-import { MACE, swapSet, SWORD, weaponsDatabase } from '@testing/sim/weapons';
+import { MACE, swapSet, swapWeaponIds, SWORD, weaponsDatabase } from '@testing/sim/weapons';
+import { makeEquipmentSpec } from '@testing/storybook/fixtures/protos';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { applySavedSettings } from './saved_settings';
@@ -11,9 +11,6 @@ import { applySavedSettings } from './saved_settings';
 vi.mock('@sim/workers/worker_pool', async () => (await import('@testing/sim/worker_pool')).idleWorkerPool());
 
 beforeAll(() => serveDatabase(weaponsDatabase()));
-
-const swapWeaponIds = (player: Player<any>) =>
-	[ItemSlot.ItemSlotMainHand, ItemSlot.ItemSlotOffHand].map(slot => player.itemSwapSettings.getItem(slot)?.item.id);
 
 describe('applySavedSettings', () => {
 	it("keeps the swap stones for the entry's swap weapons when the live swap set has none", async () => {
@@ -35,7 +32,7 @@ describe('applySavedSettings', () => {
 
 	it("matches each stone to its weapon: the swap hand to the entry's swap weapon, the main hand to the gear", async () => {
 		const { sim, player, host } = await makeIndividualSim();
-		player.setGear(sim.db.lookupEquipmentSpec(EquipmentSpec.create({ items: [ItemSpec.create({ id: MACE })] })));
+		player.setGear(sim.db.lookupEquipmentSpec(makeEquipmentSpec({ [ItemSlot.ItemSlotMainHand]: { id: MACE } })));
 		player.itemSwapSettings.setItemSwapSettings(true, sim.db.lookupItemSwap(swapSet({ mainHand: SWORD })));
 		player.setConsumes(ConsumesSpec.create({ mhImbueId: DENSE_WEIGHTSTONE_ID, swapMhImbueId: DENSE_SHARPENING_STONE_ID }));
 

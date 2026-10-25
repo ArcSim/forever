@@ -29,7 +29,6 @@ export const applySavedSettings = (host: IndividualSimHost<any>, settings: Saved
 		host.sim.raid.setDebuffs(settings.debuffs || Debuffs.create());
 		host.player.getParty()?.setBuffs(settings.partyBuffs || PartyBuffs.create());
 		host.player.setBuffs(settings.playerBuffs || IndividualBuffs.create());
-		// The swap gear goes in first: setConsumes matches the swap imbues to the swap weapons it finds.
 		host.player.itemSwapSettings.setItemSwapSettings(
 			settings.enableItemSwap,
 			host.sim.db.lookupItemSwap(settings.itemSwap || ItemSwap.create()),

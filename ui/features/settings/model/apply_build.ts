@@ -41,7 +41,6 @@ export const applyBuild = (
 		if (epWeights) simUI.player.setEpWeights(epWeights.epWeights);
 		if (settings) {
 			if (settings.race) simUI.player.setRace(settings.race);
-			// The swap gear goes in first: setConsumes matches the swap imbues to the swap weapons it finds.
 			if (settings.playerOptions?.enableItemSwap !== undefined && settings.playerOptions?.itemSwap) {
 				simUI.player.itemSwapSettings.setItemSwapSettings(
 					settings.playerOptions.enableItemSwap,
