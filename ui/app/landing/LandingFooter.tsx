@@ -16,7 +16,7 @@ const FooterLinkList = ({ children, split }: { children: React.ReactNode; split?
 
 const FooterGroup = ({ id, title, wide, children }: { id: string; title: string; wide?: boolean; children: React.ReactNode }) => (
 	<nav aria-labelledby={id} className={wide ? 'col-span-full lg:col-span-1' : undefined}>
-		<h2 id={id} className="m-0 mb-4 text-xs font-bold tracking-wider text-white uppercase">
+		<h2 id={id} className="m-0 mb-4 text-sm font-bold text-white">
 			{title}
 		</h2>
 		{children}
