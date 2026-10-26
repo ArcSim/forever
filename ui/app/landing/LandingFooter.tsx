@@ -1,17 +1,16 @@
 import i18n from '@i18n/config';
 import { ADDON_URL, DISCORD_URL, GITHUB_ORG_URL, PATREON_URL } from '@sim/constants/other';
 import { Button } from '@ui-kit/Button';
-import { Icon } from '@ui-kit/Icon';
 import { useEffect, useState } from 'react';
 
 import { FALLBACK_FOOTER, fetchFooterContent, type FooterCommunityGroup, type FooterContent } from './footer_content';
 import { LandingBrand } from './LandingBrand';
 
 const SOCIAL_LINKS = [
-	{ href: DISCORD_URL, icon: 'discord', label: 'landing.header.discord' },
-	{ href: GITHUB_ORG_URL, icon: 'github', label: 'landing.header.github' },
-	{ href: ADDON_URL, icon: 'wow', label: 'landing.footer.addon' },
-	{ href: PATREON_URL, icon: 'patreon', label: 'landing.footer.patreon' },
+	{ href: DISCORD_URL, label: 'landing.header.discord' },
+	{ href: GITHUB_ORG_URL, label: 'landing.header.github' },
+	{ href: ADDON_URL, label: 'landing.footer.addon' },
+	{ href: PATREON_URL, label: 'landing.footer.patreon' },
 ] as const;
 
 // A group with more links than this lays them out in two columns
@@ -22,7 +21,7 @@ const FooterLinkList = ({ children, split }: { children: React.ReactNode; split?
 );
 
 const FooterGroup = ({ id, title, wide, children }: { id: string; title: string; wide?: boolean; children: React.ReactNode }) => (
-	<nav aria-labelledby={id} className={wide ? 'col-span-full lg:col-span-1' : undefined}>
+	<nav aria-labelledby={id} className={wide ? 'col-span-full md:col-span-1' : undefined}>
 		<h2 id={id} className="m-0 mb-4 text-sm font-bold text-white">
 			{title}
 		</h2>
@@ -63,19 +62,23 @@ export const LandingFooter = () => {
 	return (
 		<footer className="border-t border-solid border-white/8 bg-background/90 text-sm text-white/65">
 			<div className="ui-landing-container">
-				<div className="grid grid-cols-2 gap-6 py-12 lg:grid-cols-landing-footer lg:gap-12">
-					<div className="col-span-full flex flex-col items-start gap-4 lg:col-span-1">
+				<div className="grid grid-cols-2 gap-6 py-12 md:grid-cols-landing-footer-links xl:grid-cols-landing-footer xl:gap-12">
+					<div className="col-span-full flex flex-col items-start gap-4 xl:col-span-1">
 						<LandingBrand />
-						<FooterLinkList>
-							{SOCIAL_LINKS.map(({ href, icon, label }) => (
-								<li key={icon}>
-									<Button href={href} target="_blank" variant="unstyled" className="ui-landing-footer-link inline-flex items-center gap-2">
-										<Icon name={icon} style="brands" fixedWidth />
+						<ul className="m-0 flex list-none flex-wrap items-center gap-2 p-0">
+							{SOCIAL_LINKS.map(({ href, label }, index) => (
+								<li key={href} className="flex items-center gap-2">
+									{index > 0 && (
+										<span className="text-white/35" aria-hidden="true">
+											·
+										</span>
+									)}
+									<Button href={href} target="_blank" variant="unstyled" className="ui-landing-footer-link">
 										{i18n.t(label)}
 									</Button>
 								</li>
 							))}
-						</FooterLinkList>
+						</ul>
 					</div>
 					<FooterGroup id="landing-footer-sims" title={i18n.t('landing.footer.sims')}>
 						<FooterLinkList>
