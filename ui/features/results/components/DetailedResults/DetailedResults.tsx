@@ -172,7 +172,7 @@ export const DetailedResults = ({ resultsManager }: DetailedResultsProps) => {
 	const [deathDisabled, setDeathDisabled] = useState(true);
 	const [target, setTarget] = useState(ALL_UNITS);
 	const [groupRanks, setGroupRanks] = useLocalStorageState(GROUP_RANKS_STORAGE_KEY, parseFlag, () => true);
-	const [hidePassives, setHidePassives] = useLocalStorageState(HIDE_PASSIVES_STORAGE_KEY, parseFlag, () => true);
+	const [hidePassives, setHidePassives] = useLocalStorageState(HIDE_PASSIVES_STORAGE_KEY, parseFlag, () => false);
 	const hasResults = useSimResult() !== null;
 
 	// `updateResults` is bound to the emitter, not to the filter, so the selection it reads is a ref.

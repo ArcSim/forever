@@ -3254,6 +3254,10 @@
 					"label": "TPS",
 					"tooltip": "Threat Per Second"
 				},
+				"apm": {
+					"label": "APM",
+					"tooltip": "Actions Per Minute: the spells, abilities and items the rotation uses by hand per minute, plus the walks the rotation or the encounter starts. Abilities that queue for the next swing, such as Heroic Strike, count once when pressed. Procs, auto attacks, walks a spell such as Charge starts, and pets are not counted."
+				},
 				"dtps": {
 					"label": "DTPS",
 					"tooltip": "Damage Taken Per Second"

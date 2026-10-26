@@ -176,7 +176,10 @@ func registerMovementAction(unit *Unit, sim *Simulation, speed float64, endTime 
 		// SetMetricsSplit would tag the action id the log records, and the timeline draws every walk
 		// from those casts in one Moving row.
 		unit.moveSpell.recordInSplit(TernaryInt32(byHand, 0, 1))
-		unit.moveSpell.Cast(sim, unit.CurrentTarget)
+		// A walk by hand from standing is one press; turning a walk under way is none.
+		if unit.moveSpell.Cast(sim, unit.CurrentTarget) && byHand {
+			unit.moveSpell.CountManualCast(unit.CurrentTarget)
+		}
 	}
 
 	movementAction := MovementAction{

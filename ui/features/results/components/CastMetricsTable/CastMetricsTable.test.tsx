@@ -23,20 +23,9 @@ describe('CastMetricsTable', () => {
 		mockActionMetricsMerge('casts', 'castsPerMinute');
 	});
 
-	it('leaves out an action the player does not press while passives are hidden, which they are by default', () => {
+	it('lists every action with casts while passives are shown, which they are by default', () => {
 		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isPressed: false })]);
 		const { container } = render(<CastMetricsTable />);
-
-		expect(playerRows(container)).toEqual([['Mortal Strike', false]]);
-	});
-
-	it('lists every action with casts once passives are shown', () => {
-		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isPressed: false })]);
-		const { container } = render(
-			<HidePassivesContext.Provider value={false}>
-				<CastMetricsTable />
-			</HidePassivesContext.Provider>,
-		);
 
 		expect(playerRows(container)).toEqual([
 			['Mortal Strike', false],
@@ -44,9 +33,24 @@ describe('CastMetricsTable', () => {
 		]);
 	});
 
+	it('leaves out an action the player does not press once passives are hidden', () => {
+		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isPressed: false })]);
+		const { container } = render(
+			<HidePassivesContext.Provider value={true}>
+				<CastMetricsTable />
+			</HidePassivesContext.Provider>,
+		);
+
+		expect(playerRows(container)).toEqual([['Mortal Strike', false]]);
+	});
+
 	it('puts the pet under its own table, without its melee while passives are hidden', () => {
 		result = castMetricsResult([metric('Steady Shot')], [pet('Claw'), pet('Melee', { isPressed: false })]);
-		const { container } = render(<CastMetricsTable />);
+		const { container } = render(
+			<HidePassivesContext.Provider value={true}>
+				<CastMetricsTable />
+			</HidePassivesContext.Provider>,
+		);
 
 		expect(playerRows(container)).toEqual([['Steady Shot', false]]);
 		expect(tableRows(container, 'pet-cast-metrics-root')).toEqual([
@@ -62,7 +66,11 @@ describe('CastMetricsTable', () => {
 		withoutPets.unmount();
 
 		result = castMetricsResult([metric('Steady Shot')], [pet('Melee', { isPressed: false })]);
-		const { container } = render(<CastMetricsTable />);
+		const { container } = render(
+			<HidePassivesContext.Provider value={true}>
+				<CastMetricsTable />
+			</HidePassivesContext.Provider>,
+		);
 		expect(petTable(container)).toBeNull();
 	});
 });

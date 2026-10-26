@@ -217,6 +217,7 @@ func (actionMetrics *ActionMetrics) ToProto(actionID ActionID) *proto.ActionMetr
 // Metric totals for a spell against a specific target, for the current iteration.
 type SpellMetrics struct {
 	Casts             int32
+	ManualCasts       int32 // Presses by the rotation or a major cooldown, one per press however many targets it hits.
 	Misses            int32
 	TickMisses        int32
 	Hits              int32
@@ -257,6 +258,7 @@ type TargetedActionMetrics struct {
 	UnitIndex int32
 
 	Casts             int32
+	ManualCasts       int32
 	Misses            int32
 	TickMisses        int32
 	Hits              int32
@@ -298,6 +300,7 @@ func (tam *TargetedActionMetrics) ToProto() *proto.TargetedActionMetrics {
 		UnitIndex: tam.UnitIndex,
 
 		Casts:                  tam.Casts,
+		ManualCasts:            tam.ManualCasts,
 		Hits:                   tam.Hits,
 		ResistedHits:           tam.ResistedHits,
 		Crits:                  tam.Crits,
@@ -492,6 +495,7 @@ func (unitMetrics *UnitMetrics) addSpellMetrics(spell *Spell, actionID ActionID,
 		if !spell.Flags.Matches(SpellFlagPassiveSpell) {
 			tam.Casts += spellTargetMetrics.Casts
 		}
+		tam.ManualCasts += spellTargetMetrics.ManualCasts
 		tam.Misses += spellTargetMetrics.Misses
 		tam.TickMisses += spellTargetMetrics.TickMisses
 		tam.Hits += spellTargetMetrics.Hits

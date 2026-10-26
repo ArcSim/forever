@@ -60,7 +60,7 @@ const meta = {
 		targetPicker: <span className="px-2">All units</span>,
 		groupRanks: true,
 		onGroupRanksChange: fn(),
-		hidePassives: true,
+		hidePassives: false,
 		onHidePassivesChange: fn(),
 		children: DETAILED_RESULTS_TABS.map(tab => (
 			<TabPanel key={tab.id} value={tab.id} className="pt-0 pb-0">
@@ -98,10 +98,10 @@ export const RanksUngrouped: Story = {
 	},
 };
 
-export const PassivesShown: Story = {
+export const PassivesHidden: Story = {
 	args: { activeId: 'castsTab' },
 	play: async ({ args, canvasElement }) => {
 		await userEvent.click(within(canvasElement).getByRole('checkbox', { name: i18n.t('results_tab.details.hide_passives') }));
-		await expect(args.onHidePassivesChange).toHaveBeenCalledWith(false);
+		await expect(args.onHidePassivesChange).toHaveBeenCalledWith(true);
 	},
 };
