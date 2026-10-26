@@ -29,7 +29,9 @@
 		"footer": {
 			"copyright": "© {{startYear}}-{{year}} {{holder}}",
 			"disclaimer": "A fan-made project, not affiliated with Blizzard Entertainment.",
-			"sims": "Sims"
+			"sims": "Sims",
+			"addon": "Exporter Addon",
+			"patreon": "Patreon"
 		}
 	},
 	"common": {

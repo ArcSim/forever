@@ -62,8 +62,8 @@ describe('LandingFooter', () => {
 		const links: [string, string][] = [
 			['landing.header.discord', DISCORD_URL],
 			['landing.header.github', GITHUB_ORG_URL],
-			['landing.header.addon', ADDON_URL],
-			['landing.header.patreon', PATREON_URL],
+			['landing.footer.addon', ADDON_URL],
+			['landing.footer.patreon', PATREON_URL],
 		];
 		links.forEach(([label, url]) => {
 			const link = screen.getByRole('link', { name: i18n.t(label) });

@@ -10,8 +10,8 @@ import { LandingBrand } from './LandingBrand';
 const SOCIAL_LINKS = [
 	{ href: DISCORD_URL, icon: 'discord', label: 'landing.header.discord' },
 	{ href: GITHUB_ORG_URL, icon: 'github', label: 'landing.header.github' },
-	{ href: ADDON_URL, icon: 'wow', label: 'landing.header.addon' },
-	{ href: PATREON_URL, icon: 'patreon', label: 'landing.header.patreon' },
+	{ href: ADDON_URL, icon: 'wow', label: 'landing.footer.addon' },
+	{ href: PATREON_URL, icon: 'patreon', label: 'landing.footer.patreon' },
 ] as const;
 
 // A group with more links than this lays them out in two columns
@@ -66,20 +66,16 @@ export const LandingFooter = () => {
 				<div className="grid grid-cols-2 gap-6 py-12 lg:grid-cols-landing-footer lg:gap-12">
 					<div className="col-span-full flex flex-col items-start gap-4 lg:col-span-1">
 						<LandingBrand />
-						<div className="flex gap-4">
+						<FooterLinkList>
 							{SOCIAL_LINKS.map(({ href, icon, label }) => (
-								<Button
-									key={icon}
-									href={href}
-									target="_blank"
-									variant="unstyled"
-									aria-label={i18n.t(label)}
-									title={i18n.t(label)}
-									className="ui-landing-footer-link">
-									<Icon name={icon} style="brands" size="lg" />
-								</Button>
+								<li key={icon}>
+									<Button href={href} target="_blank" variant="unstyled" className="ui-landing-footer-link inline-flex items-center gap-2">
+										<Icon name={icon} style="brands" fixedWidth />
+										{i18n.t(label)}
+									</Button>
+								</li>
 							))}
-						</div>
+						</FooterLinkList>
 					</div>
 					<FooterGroup id="landing-footer-sims" title={i18n.t('landing.footer.sims')}>
 						<FooterLinkList>
