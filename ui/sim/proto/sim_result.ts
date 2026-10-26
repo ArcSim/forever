@@ -1051,6 +1051,10 @@ export class ActionMetrics {
 	}
 
 	// Presses by the rotation, which a passive action can have too (Judgement is cast by hand and flagged passive).
+	get manualCasts() {
+		return this.combinedMetrics.manualCasts;
+	}
+
 	get manualCastsPerMinute() {
 		return this.combinedMetrics.manualCastsPerMinute;
 	}
@@ -1730,8 +1734,12 @@ class TargetedActionMetrics {
 		return this.casts / (this.duration / 60);
 	}
 
+	get manualCasts() {
+		return this.data.manualCasts / this.iterations;
+	}
+
 	get manualCastsPerMinute() {
-		return this.data.manualCasts / this.iterations / (this.duration / 60);
+		return this.manualCasts / (this.duration / 60);
 	}
 
 	get avgCastTimeMs() {

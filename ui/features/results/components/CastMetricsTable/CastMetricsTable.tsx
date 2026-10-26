@@ -2,7 +2,7 @@ import i18n from '@i18n/config';
 import { ActionMetrics, type UnitMetrics } from '@sim/proto/sim_result';
 import { useMemo } from 'react';
 
-import { useHidePassives } from '../../context/HidePassivesContext';
+import { useShowApmBreakdown } from '../../context/ShowApmBreakdownContext';
 import { useActionRows } from '../../hooks/useActionRows';
 import type { SimResultData } from '../../model/result_data';
 import { createMetricsColumnHelper, MetricsActionCell, MetricsTable } from '../MetricsTable';
@@ -10,9 +10,9 @@ import { createMetricsColumnHelper, MetricsActionCell, MetricsTable } from '../M
 const helper = createMetricsColumnHelper<ActionMetrics>();
 
 // One pair of groups functions per toggle state, built once, so `useActionRows` sees stable functions.
-const castGroupsOf = (hidePassives: boolean) => {
+const castGroupsOf = (showApmBreakdown: boolean) => {
 	const castsOf = (unit: UnitMetrics, resultData: SimResultData) =>
-		unit.actions.filter(action => action.casts != 0 && (!hidePassives || action.isPressed)).map(action => action.forTarget(resultData.filter));
+		unit.actions.filter(action => (showApmBreakdown ? action.manualCasts : action.casts) != 0).map(action => action.forTarget(resultData.filter));
 	const playerOf = (resultData: SimResultData): UnitMetrics | undefined => resultData.result.getRaidIndexedPlayers(resultData.filter)[0];
 
 	return {
@@ -20,16 +20,18 @@ const castGroupsOf = (hidePassives: boolean) => {
 			const player = playerOf(resultData);
 			return player ? ActionMetrics.groupById(castsOf(player, resultData)) : [];
 		},
+		// APM counts only the player's presses, so the breakdown has no pet table.
 		pets: (resultData: SimResultData): Array<Array<ActionMetrics>> =>
-			(playerOf(resultData)?.pets ?? []).map(pet => castsOf(pet, resultData)).filter(group => group.length),
+			showApmBreakdown ? [] : (playerOf(resultData)?.pets ?? []).map(pet => castsOf(pet, resultData)).filter(group => group.length),
 	};
 };
 
-const WITHOUT_PASSIVES = castGroupsOf(true);
-const WITH_PASSIVES = castGroupsOf(false);
+const APM_BREAKDOWN = castGroupsOf(true);
+const ALL_CASTS = castGroupsOf(false);
 
 export const CastMetricsTable = () => {
-	const groups = useHidePassives() ? WITHOUT_PASSIVES : WITH_PASSIVES;
+	const showApmBreakdown = useShowApmBreakdown();
+	const groups = showApmBreakdown ? APM_BREAKDOWN : ALL_CASTS;
 	const { resultData, rows } = useActionRows(groups.player);
 	const { rows: petRows } = useActionRows(groups.pets);
 
@@ -49,18 +51,18 @@ export const CastMetricsTable = () => {
 						/>
 					),
 				}),
-				helper.accessor(row => row.metric.casts, {
+				helper.accessor(row => (showApmBreakdown ? row.metric.manualCasts : row.metric.casts), {
 					id: 'casts',
 					header: i18n.t('results_tab.details.columns.casts'),
 					cell: info => info.getValue().toFixed(1),
 				}),
-				helper.accessor(row => row.metric.castsPerMinute, {
+				helper.accessor(row => (showApmBreakdown ? row.metric.manualCastsPerMinute : row.metric.castsPerMinute), {
 					id: 'cpm',
 					header: i18n.t('results_tab.details.columns.cpm'),
 					cell: info => info.getValue().toFixed(1),
 				}),
 			]),
-		[],
+		[showApmBreakdown],
 	);
 
 	return (
