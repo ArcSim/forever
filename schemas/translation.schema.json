@@ -8526,6 +8526,12 @@
 						"group_ranks": {
 							"type": "string"
 						},
+						"hide_passives": {
+							"type": "string"
+						},
+						"pets": {
+							"type": "string"
+						},
 						"damage": {
 							"type": "object",
 							"properties": {
@@ -9473,6 +9479,8 @@
 						"all_targets",
 						"target_number",
 						"group_ranks",
+						"hide_passives",
+						"pets",
 						"damage",
 						"timeline",
 						"logs",

@@ -866,6 +866,10 @@ export class ActionMetrics {
 		return this.data.isPassive;
 	}
 
+	get isCastable() {
+		return this.data.isCastable;
+	}
+
 	get totalDamagePercent() {
 		const totalAvgDps = this.resultData.result.raidMetrics?.dps?.avg;
 		if (!totalAvgDps) return undefined;
@@ -1459,6 +1463,7 @@ export class ActionMetrics {
 			ActionMetricsProto.create({
 				isMelee: firstAction.isMeleeAction,
 				isPassive: isAllPassiveSpells,
+				isCastable: actions.some(action => action.isCastable),
 				targets: mergedTargets.map(t => t.data),
 				spellSchool: firstAction.spellSchool || undefined,
 			}),
