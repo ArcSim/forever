@@ -1,11 +1,11 @@
 import * as PresetUtils from '@app/preset_utils';
 import * as Consumables from '@features/settings/model/consumables_auto_gen';
-import { AreaType, ConsumesSpec, Profession, PseudoStat, Race, Stat } from '@generated/proto/common';
+import { AreaType, ConsumesSpec, Profession, Race } from '@generated/proto/common';
 import { FeralCatDruid_Options as FeralDruidOptions } from '@generated/proto/druid';
 import { SavedTalents } from '@generated/proto/ui';
-import { Stats } from '@sim/proto/stats';
 import { Encounter } from '@sim/raid/encounter';
 
+import { CatEp, HybridEp } from '../feral_ep';
 import JvmesApl from './apls/jvmes.apl.json';
 import Level60GearJson from './gear_sets/default.gear.json';
 import PreRaidGearJson from './gear_sets/pre_raid.gear.json';
@@ -56,31 +56,14 @@ export const PreRaidGear = PresetUtils.makePresetGear('Pre-raid', PreRaidGearJso
 	tooltip: 'Pre-raid leather with The Unstoppable Force, Wolfshead Helm and full enchants.',
 });
 
-// DPS weights for Dream, Cat 9/35/7 and 180s ±120s, averaged across the four races.
-// Rating weights measure hit at 7% and expertise at 5.5%.
-export const DefaultEp = Stats.fromMap(
-	{
-		[Stat.StatStrength]: 0.5699,
-		[Stat.StatAgility]: 0.5815,
-		[Stat.StatAttackPower]: 0.2351,
-		[Stat.StatFeralAttackPower]: 0.2351,
-		[Stat.StatPhysicalDamage]: 2.1248,
-		[Stat.StatHitRating]: 4.8332 / 10,
-		[Stat.StatExpertiseRating]: 4.57 / 10,
-		[Stat.StatCritRating]: 5.9088 / 14,
-		[Stat.StatHasteRating]: 4.1595 / 10,
-	},
-	{
-		[PseudoStat.PseudoStatMainHandDps]: 2.2704,
-	},
-);
-
-export const DefaultEpWeights = PresetUtils.makePresetEpWeights('Feral Cat', DefaultEp);
+export const DefaultEp = CatEp;
+export const DefaultEpWeights = PresetUtils.makePresetEpWeights('Cat', DefaultEp);
+export const HybridEpWeights = PresetUtils.makePresetEpWeights('Hybrid', HybridEp);
 
 // Uses Thistle Tea and optional Sapper, with racial actions gated by availability.
 // Uses Dash for the approach; Sapper can be used without leaving Cat Form.
 export const JVMES_APL = {
-	...PresetUtils.makePresetAPLRotation('Monocat, adaptive racials and Sapper', JvmesApl),
+	...PresetUtils.makePresetAPLRotation('Adaptive Cat', JvmesApl),
 	tooltip:
 		'Maintains Faerie Fire and bleeds, pools for later Berserks, and uses optional consumables and racials. Supports an MCP opener from the weapon swap slot.',
 };

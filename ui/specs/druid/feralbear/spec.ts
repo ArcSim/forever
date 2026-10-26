@@ -77,7 +77,7 @@ export default defineSpec<Spec.SpecFeralBearDruid>({
 			items: Array.from({ length: 17 }, (_, slot) => ItemSpec.create(slot === ItemSlot.ItemSlotMainHand ? { id: 9449, enchant: 1900 } : {})),
 		}),
 		encounter: Presets.Level60Encounter,
-		epWeights: Presets.BalancedEp,
+		epWeights: Presets.DefaultEp,
 		statCaps: (() => {
 			const hitCap = new Stats().withPseudoStat(PseudoStat.PseudoStatMeleeHitPercent, 8);
 			const expCap = new Stats().withPseudoStat(PseudoStat.PseudoStatExpertisePercent, 6.5);
@@ -141,7 +141,7 @@ export default defineSpec<Spec.SpecFeralBearDruid>({
 	},
 
 	presets: {
-		epWeights: [Presets.BalancedEpWeights],
+		epWeights: [Presets.DefaultEpWeights, Presets.HybridEpWeights],
 		talents: [Presets.BearTalents, Presets.HybridTalents],
 		rotations: [Presets.ROTATION_ADAPTIVE],
 		gear: [Presets.Level60Gear],
