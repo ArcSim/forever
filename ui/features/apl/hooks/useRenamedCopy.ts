@@ -29,6 +29,21 @@ export interface RenamedCopy {
  * ask for the new name and insert the renamed clone next to the original. The dialog starts on the
  * next free name (`freeName`), as a paste's does in `useAplPaste`.
  */
+export interface FreeNameDialogOptions extends Omit<AplNameDialogProps, 'open' | 'defaultValue' | 'existingNames'> {
+	/** The name the new copy starts from; the dialog is open while it is set. */
+	name: string | undefined;
+	/** The names already in the list. */
+	taken: Array<string>;
+}
+
+/** The name dialog for a new copy of an item referenced by name: it starts on the next free name and refuses a taken one. */
+export const freeNameDialog = ({ name, taken, ...props }: FreeNameDialogOptions): AplNameDialogProps => ({
+	...props,
+	open: name !== undefined,
+	defaultValue: name === undefined ? undefined : freeName(name, taken),
+	existingNames: taken,
+});
+
 export const useRenamedCopy = <T>(player: Player<any>, { itemName, inputLabel, read, write, nameOf, copy }: RenamedCopyOptions<T>): RenamedCopy => {
 	const [copying, setCopying] = useState<number | null>(null);
 	// Read at render, which the dialog's own `copying` state has just triggered — so this is the
@@ -37,12 +52,11 @@ export const useRenamedCopy = <T>(player: Player<any>, { itemName, inputLabel, r
 
 	return {
 		onCopyItem: setCopying,
-		dialog: {
-			open: copying !== null,
+		dialog: freeNameDialog({
 			title: i18n.t('rotation_tab.apl.floatingActionBar.new', { itemName }),
 			inputLabel,
-			defaultValue: copying === null || !items[copying] ? undefined : freeName(nameOf(items[copying]), items.map(nameOf)),
-			existingNames: items.map(nameOf),
+			name: copying === null || !items[copying] ? undefined : nameOf(items[copying]),
+			taken: items.map(nameOf),
 			onSubmit: name =>
 				player.modifyAplRotation(rotation => {
 					if (copying === null) return;
@@ -52,6 +66,6 @@ export const useRenamedCopy = <T>(player: Player<any>, { itemName, inputLabel, r
 					write(rotation, next);
 				}),
 			onClose: () => setCopying(null),
-		},
+		}),
 	};
 };

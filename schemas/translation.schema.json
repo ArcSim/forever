@@ -1103,10 +1103,13 @@
 						},
 						"copied": {
 							"type": "string"
+						},
+						"manual_copy": {
+							"type": "string"
 						}
 					},
 					"additionalProperties": false,
-					"required": ["default_text", "copied"]
+					"required": ["default_text", "copied", "manual_copy"]
 				},
 				"list_picker": {
 					"type": "object",

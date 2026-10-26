@@ -306,7 +306,8 @@
 		},
 		"copy_button": {
 			"default_text": "Copy to Clipboard",
-			"copied": "Copied"
+			"copied": "Copied",
+			"manual_copy": "The browser blocked the clipboard. Copy the text below by hand."
 		},
 		"list_picker": {
 			"new_item": "New {{itemLabel}}",
@@ -1345,7 +1346,7 @@
 					"description": "This page cannot read the clipboard. Paste the copied text here with Ctrl+V."
 				},
 				"places": {
-					"action": "Priority List, or in a group's actions"
+					"action": "the Priority List or a group's actions"
 				},
 				"wrong_kind": "The clipboard holds a copied {{held}}. Paste it under {{places}}."
 			},

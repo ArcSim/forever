@@ -22,11 +22,9 @@ export const AplPasteDialog = ({ open, title, onSubmit, onClose }: AplPasteDialo
 	const inputRef = useRef<HTMLTextAreaElement>(null);
 	const [text, setText] = useState('');
 
-	// Each opening starts empty, and focuses the box once it is on screen.
+	// Each opening starts empty; the dialog focuses the box (`initialFocus`).
 	useEffect(() => {
-		if (!open) return;
-		setText('');
-		inputRef.current?.focus();
+		if (open) setText('');
 	}, [open]);
 
 	const submit = () => {
@@ -41,6 +39,7 @@ export const AplPasteDialog = ({ open, title, onSubmit, onClose }: AplPasteDialo
 			onOpenChange={next => {
 				if (!next) onClose();
 			}}
+			initialFocus={inputRef}
 			size="sm"
 			title={title}
 			footer={

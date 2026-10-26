@@ -3,10 +3,9 @@ import { Button, type ButtonSize, type ButtonVariant } from '@ui-kit/Button';
 import { useCopyToClipboard } from '@ui-kit/hooks/useCopyToClipboard';
 import { Icon } from '@ui-kit/Icon';
 import { Tooltip, tooltipAnchorProps } from '@ui-kit/Tooltip';
+import { showForManualCopy } from '@ui-kit/utils/clipboard';
 import clsx, { type ClassValue } from 'clsx';
 import { useId } from 'react';
-
-import { showForManualCopy } from './manual_copy';
 
 export interface CopyButtonProps {
 	/** Read at click time, not at mount: the reforge toast re-exports the whole sim on every click. */

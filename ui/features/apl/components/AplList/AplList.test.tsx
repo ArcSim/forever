@@ -514,6 +514,27 @@ describe('AplList on the action groups pane', () => {
 		expect(sequenceNames(player.aplRotation.groups[0].actions)).toEqual(['x', 'z']);
 	});
 
+	it('goes on from the text dialog to the name dialog for a group', async () => {
+		vi.stubGlobal('navigator', {});
+		const text = aplClipToText({ kind: 'group', item: APLGroup.create({ name: 'one', actions: [row('z')] }) });
+		setup({ groups: [APLGroup.create({ name: 'one', actions: [row('x')] })] });
+		mount(<GroupList />);
+
+		await pasteFromToolbar();
+		fireEvent.change(within(screen.getByRole('dialog')).getByRole('textbox'), { target: { value: text } });
+		await act(async () => {
+			fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.paste' }));
+		});
+		const dialog = screen.getByRole('dialog');
+		expect(within(dialog).getByRole('textbox')).toHaveProperty('value', 'one (2)');
+		await act(async () => {
+			fireEvent.click(within(dialog).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.paste' }));
+		});
+
+		expect(player.aplRotation.groups.map(group => group.name)).toEqual(['one', 'one (2)']);
+		expect(sequenceNames(player.aplRotation.groups[1].actions)).toEqual(['z']);
+	});
+
 	it('adds an action to a group through the add button inside its children', () => {
 		setup({ groups: [APLGroup.create({ name: 'one', actions: [] })] });
 		mount(<GroupList />);

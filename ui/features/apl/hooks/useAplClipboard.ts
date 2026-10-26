@@ -1,13 +1,14 @@
 import type { AplNameDialogProps } from '@features/apl/components/AplNameDialog';
 import type { AplPasteDialogProps } from '@features/apl/components/AplPasteDialog';
-import { type AplClip, aplClipFromText, type AplClipItems, type AplClipKind, aplClipToText, freeName } from '@features/apl/model/clipboard';
+import { freeNameDialog } from '@features/apl/hooks/useRenamedCopy';
+import { type AplClip, aplClipFromText, type AplClipItems, type AplClipKind, aplClipToText } from '@features/apl/model/clipboard';
 import i18n from '@i18n/config';
-import { writeToClipboard } from '@ui-kit/CopyButton';
 import { toastManager } from '@ui-kit/Toast';
+import { writeToClipboard } from '@ui-kit/utils/clipboard';
 import { useState } from 'react';
 
-const LABELS: Record<AplClipKind, { item: string; places: string; name: string }> = {
-	action: { item: 'rotation_tab.apl.priorityList.name', places: 'rotation_tab.apl.clipboard.places.action', name: '' },
+const LABELS: Record<AplClipKind, { item: string; places: string; name?: string }> = {
+	action: { item: 'rotation_tab.apl.priorityList.name', places: 'rotation_tab.apl.clipboard.places.action' },
 	group: {
 		item: 'rotation_tab.apl.actionGroups.name',
 		places: 'rotation_tab.apl.tabs.actionGroups',
@@ -55,7 +56,6 @@ export const useAplPaste = <K extends AplClipKind>(kind: K, list: AplPasteTarget
 	const [typing, setTyping] = useState(false);
 	const [naming, setNaming] = useState<AplClipItems['group' | 'variable'] | null>(null);
 	const pasteLabel = i18n.t('rotation_tab.apl.floatingActionBar.paste', { itemName: i18n.t(LABELS[kind].item) });
-	const takenNames = () => list.items.map(item => (item as { name?: string }).name ?? '');
 
 	const land = (text: string) => {
 		const clip = aplClipFromText(text);
@@ -76,19 +76,16 @@ export const useAplPaste = <K extends AplClipKind>(kind: K, list: AplPasteTarget
 	return {
 		paste: () => void readClipboardText().then(text => (text === undefined ? setTyping(true) : land(text))),
 		textDialog: { open: typing, title: pasteLabel, onSubmit: land, onClose: () => setTyping(false) },
-		nameDialog: {
-			open: naming !== null,
+		nameDialog: freeNameDialog({
 			title: pasteLabel,
 			inputLabel: LABELS[kind].name ? i18n.t(LABELS[kind].name) : '',
 			confirmLabel: pasteLabel,
-			defaultValue: naming ? freeName(naming.name, takenNames()) : undefined,
-			existingNames: naming ? takenNames() : [],
+			name: naming?.name,
+			taken: naming ? list.items.map(item => (item as AplClipItems['group' | 'variable']).name) : [],
 			onSubmit: name => {
-				if (!naming) return;
-				naming.name = name;
-				list.append(naming as AplClipItems[K]);
+				if (naming) list.append({ ...naming, name } as AplClipItems[K]);
 			},
 			onClose: () => setNaming(null),
-		},
+		}),
 	};
 };
