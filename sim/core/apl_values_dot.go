@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	// "math" // Disabled for now, with the DoT increase values below.
 	"time"
 
 	"github.com/wowsims/forever/sim/core/proto"

@@ -1408,6 +1408,30 @@ func TestValueDotPercentIncrease(t *testing.T) {
 }
 */
 
+func TestValueDotIncreaseDisabled(t *testing.T) {
+	_, _, rot := setupFakeRageRotation()
+	id := fakeRendActionID.ToProto()
+	configs := map[string]*proto.APLValue{
+		"Dot Percent Increase": {
+			Uuid:  &proto.UUID{Value: "dot-percent-increase"},
+			Value: &proto.APLValue_DotPercentIncrease{DotPercentIncrease: &proto.APLValueDotPercentIncrease{SpellId: id}},
+		},
+		"Dot Tick Rate Percent Increase": {
+			Uuid:  &proto.UUID{Value: "dot-tick-rate-percent-increase"},
+			Value: &proto.APLValue_DotTickRatePercentIncrease{DotTickRatePercentIncrease: &proto.APLValueDotPercentIncrease{SpellId: id}},
+		},
+	}
+
+	for name, config := range configs {
+		if value := rot.newAPLValue(config); value != nil {
+			t.Errorf("%s: got a value, want none", name)
+		}
+		if warnings := rot.uuidValidations[config.Uuid]; len(warnings) != 1 || warnings[0].LogLevel != proto.LogLevel_Warning {
+			t.Errorf("%s: validations = %v, want one warning", name, warnings)
+		}
+	}
+}
+
 func TestValueSpellExpectedDpet(t *testing.T) {
 	sim, fw, rot := setupFakeRageRotation()
 	rend := fw.GetSpell(fakeRendActionID)
