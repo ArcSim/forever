@@ -1,7 +1,7 @@
 import { VERSIONS_MANIFEST_URL } from '@sim/constants/other';
 
 export type FooterLink = { name: string; url: string };
-export type FooterCommunityGroup = { title: string; links: FooterLink[] };
+export type FooterCommunityGroup = { title: string; links: FooterLink[]; columns: 1 | 2 };
 export type FooterVersion = { title: string; url: string; status: 'live' | 'wip' };
 
 /** The part of the shared versions manifest (schema version 1) the landing footer reads. */
@@ -25,6 +25,7 @@ export const FALLBACK_FOOTER: FooterContent = {
 	communities: [
 		{
 			title: 'Forever Community Servers',
+			columns: 1,
 			links: [
 				{ name: 'WoW Forever NA', url: 'https://discord.gg/wowforeverna' },
 				{ name: 'WoW Forever EU PVE', url: 'https://discord.gg/JAQMAGUyft' },
@@ -33,6 +34,7 @@ export const FALLBACK_FOOTER: FooterContent = {
 		},
 		{
 			title: 'Class Discords',
+			columns: 2,
 			links: [
 				{ name: 'Death Knight', url: 'https://discord.gg/yGbC7dRxEs' },
 				{ name: 'Druid', url: 'https://discord.gg/SMwmrBV' },
@@ -56,7 +58,8 @@ const isString = (value: unknown): value is string => typeof value === 'string';
 const isArrayOf = <T>(value: unknown, isItem: (item: unknown) => item is T): value is T[] => Array.isArray(value) && value.every(isItem);
 
 const isLink = (value: unknown): value is FooterLink => isObject(value) && isString(value.name) && isString(value.url);
-const isGroup = (value: unknown): value is FooterCommunityGroup => isObject(value) && isString(value.title) && isArrayOf(value.links, isLink);
+const isGroup = (value: unknown): value is Omit<FooterCommunityGroup, 'columns'> & { columns?: unknown } =>
+	isObject(value) && isString(value.title) && isArrayOf(value.links, isLink) && (value.columns === undefined || value.columns === 1 || value.columns === 2);
 const isVersion = (value: unknown): value is FooterVersion =>
 	isObject(value) && isString(value.title) && isString(value.url) && (value.status === 'live' || value.status === 'wip');
 
@@ -68,7 +71,11 @@ export const parseFooterContent = (manifest: unknown): FooterContent | null => {
 	if (!isObject(legal) || typeof legal.copyrightStartYear !== 'number' || !isString(legal.copyrightHolder)) return null;
 	return {
 		versions: versions.map(({ title, url, status }) => ({ title, url, status })),
-		communities: communities.map(({ title, links }) => ({ title, links: links.map(({ name, url }) => ({ name, url })) })),
+		communities: communities.map(({ title, links, columns }) => ({
+			title,
+			links: links.map(({ name, url }) => ({ name, url })),
+			columns: columns === 2 ? 2 : 1,
+		})),
 		legal: { copyrightStartYear: legal.copyrightStartYear, copyrightHolder: legal.copyrightHolder },
 	};
 };
