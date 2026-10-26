@@ -480,9 +480,14 @@ export class UnitMetrics {
 		return this.petActionId != null;
 	}
 
+	// The actions with button presses by the rotation on the filtered target, the ones APM counts.
+	apmActions(filter?: SimResultFilter): Array<ActionMetrics> {
+		return this.actions.map(action => action.forTarget(filter)).filter(action => action.manualCasts != 0);
+	}
+
 	// Actions per minute: the rotation's button presses on the filtered target, pets left out.
 	actionsPerMinute(filter?: SimResultFilter): number {
-		return sum(this.actions.map(action => action.forTarget(filter).manualCastsPerMinute));
+		return sum(this.apmActions(filter).map(action => action.manualCastsPerMinute));
 	}
 
 	// Returns the unit index of the target of this unit, as selected by the filter.
@@ -869,10 +874,6 @@ export class ActionMetrics {
 
 	get isPassiveAction() {
 		return this.data.isPassive;
-	}
-
-	get isPressed() {
-		return this.data.isPressed;
 	}
 
 	get totalDamagePercent() {
@@ -1477,7 +1478,6 @@ export class ActionMetrics {
 			ActionMetricsProto.create({
 				isMelee: firstAction.isMeleeAction,
 				isPassive: isAllPassiveSpells,
-				isPressed: actions.some(action => action.isPressed),
 				targets: mergedTargets.map(t => t.data),
 				spellSchool: firstAction.spellSchool || undefined,
 			}),

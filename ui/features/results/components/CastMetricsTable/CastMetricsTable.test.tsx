@@ -11,12 +11,11 @@ let result: SimResultData | null = null;
 vi.mock('../../hooks/useSimResult', () => ({ useSimResult: () => result }));
 vi.mock('../MetricsTable/MetricsActionCell', () => ({ MetricsActionCell: ({ name }: { name: string }) => <span>{name}</span> }));
 
-const tableRows = (container: HTMLElement, testId: string) =>
-	metricRows(container.querySelector<HTMLElement>(`[data-testid="${testId}"]`)!).map(row => [row.cells[0].textContent, row.hasAttribute('data-child')]);
+const rowsOf = (container: HTMLElement, testId: string) => metricRows(container.querySelector<HTMLElement>(`[data-testid="${testId}"]`)!);
+const tableRows = (container: HTMLElement, testId: string) => rowsOf(container, testId).map(row => [row.cells[0].textContent, row.hasAttribute('data-child')]);
 
 const playerRows = (container: HTMLElement) => tableRows(container, 'cast-metrics-root');
-const playerCells = (container: HTMLElement) =>
-	metricRows(container.querySelector<HTMLElement>('[data-testid="cast-metrics-root"]')!).map(row => [...row.cells].map(cell => cell.textContent));
+const playerCells = (container: HTMLElement) => rowsOf(container, 'cast-metrics-root').map(row => [...row.cells].map(cell => cell.textContent));
 const petTable = (container: HTMLElement) => container.querySelector('[data-testid="pet-cast-metrics-root"]');
 
 const renderBreakdown = () =>
