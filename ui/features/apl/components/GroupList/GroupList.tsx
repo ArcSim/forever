@@ -1,7 +1,8 @@
 import { AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListToolbar } from '@features/apl/components/AplListToolbar';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
-import { pasteAplClip } from '@features/apl/components/clipboard';
+import { AplPasteDialog } from '@features/apl/components/AplPasteDialog';
+import { useAplPaste } from '@features/apl/hooks/useAplClipboard';
 import { useRenamedCopy } from '@features/apl/hooks/useRenamedCopy';
 import { APL_GROUPS, aplItemId } from '@features/apl/model/apply_move';
 import { freshUuids } from '@features/apl/model/fresh_uuids';
@@ -20,8 +21,9 @@ const newGroup = (name: string) => APLGroup.create({ name, actions: [], variable
 /**
  * The rotation's action groups, one tree item each with its actions under it.
  *
- * Both creating and copying a group ask for a name first, because a group is referenced by name —
- * so unlike every other list here, neither action can just append a clone.
+ * Creating, copying and pasting a group all ask for a name first, because a group is referenced by
+ * name, so unlike every other list here none of them can just append a clone. A copy and a paste
+ * fill the dialog with the next free name (`freeName`).
  */
 export const GroupList = () => {
 	const player = usePlayer();
@@ -34,6 +36,7 @@ export const GroupList = () => {
 			}),
 		newItem: () => newGroup(i18n.t('rotation_tab.apl.actionGroups.newGroupName')),
 	});
+	const pasting = useAplPaste('group', groups);
 	const copying = useRenamedCopy(player, {
 		itemName: groupName(),
 		inputLabel: i18n.t('rotation_tab.apl.actionGroups.attributes.name'),
@@ -78,9 +81,11 @@ export const GroupList = () => {
 					existingNames: () => groups.items.map(group => group.name),
 				}}
 				onCreate={name => groups.append(newGroup(name!))}
-				onPaste={() => pasteAplClip('group', groups)}
+				onPaste={pasting.paste}
 			/>
 			<AplNameDialog {...copying.dialog} />
+			<AplNameDialog {...pasting.nameDialog} />
+			<AplPasteDialog {...pasting.textDialog} />
 		</div>
 	);
 };

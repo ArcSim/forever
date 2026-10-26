@@ -1,10 +1,11 @@
 import { AplItemActions, AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListItem } from '@features/apl/components/AplListItem';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
-import { copyAplClip, pasteAplClip } from '@features/apl/components/clipboard';
+import { AplPasteDialog } from '@features/apl/components/AplPasteDialog';
 import { ListItemHeader } from '@features/apl/components/ListItemHeader';
 import { uuidValidations } from '@features/apl/components/ListItemHeader/utils';
 import { NameDisplay } from '@features/apl/components/NameDisplay';
+import { copyAplClip, useAplPaste } from '@features/apl/hooks/useAplClipboard';
 import { useAplInput } from '@features/apl/hooks/useAplInput';
 import { useVariableExtraction } from '@features/apl/hooks/useVariableExtraction';
 import { aplItemId } from '@features/apl/model/apply_move';
@@ -54,6 +55,7 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 			config.getValue(player)!.actions[index].action!.condition = reference;
 		},
 	);
+	const pasting = useAplPaste('action', actions);
 	const groupLabel = i18n.t('rotation_tab.apl.actionGroups.name');
 	const label = i18n.t('rotation_tab.apl.priorityList.name');
 
@@ -129,7 +131,8 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 					<Tree.AddButton
 						label={i18n.t('rotation_tab.apl.floatingActionBar.paste', { itemName: label })}
 						icon="paste"
-						onClick={() => pasteAplClip('action', actions)}
+						testId="apl-paste"
+						onClick={pasting.paste}
 					/>
 				</span>
 			</Tree.Item.Children>
@@ -150,6 +153,7 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 				onClose={() => setRenaming(false)}
 			/>
 			<AplNameDialog {...extraction.dialog} />
+			<AplPasteDialog {...pasting.textDialog} />
 		</AplList.Item>
 	);
 };

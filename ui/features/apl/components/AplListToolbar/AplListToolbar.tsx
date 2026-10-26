@@ -26,7 +26,7 @@ export interface AplListToolbarViewProps {
 }
 
 /**
- * The sticky "new / reset" bar under an APL list.
+ * The sticky "new / paste / reset" bar under an APL list; the paste button shows only when `onPaste` is given.
  */
 export const AplListToolbarView = ({ itemName, nameDialog, onCreate, onPaste, onReset, className }: AplListToolbarViewProps) => {
 	const newLabel = i18n.t('rotation_tab.apl.floatingActionBar.new', { itemName });

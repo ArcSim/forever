@@ -1,3 +1,4 @@
+import { writeToClipboard } from '@ui-kit/CopyButton/manual_copy';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const COPIED_DURATION_MS = 1500;
@@ -22,7 +23,7 @@ export const useCopyToClipboard = (getContent: () => string): CopyToClipboard =>
 		if (clickedRef.current) return;
 
 		clickedRef.current = true;
-		navigator.clipboard.writeText(getContentRef.current()).catch(console.error);
+		void writeToClipboard(getContentRef.current());
 		setCopied(true);
 		timerRef.current = setTimeout(() => {
 			clickedRef.current = false;

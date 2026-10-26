@@ -1,4 +1,5 @@
 import type { AplNameDialogProps } from '@features/apl/components/AplNameDialog';
+import { freeName } from '@features/apl/model/clipboard';
 import type { APLRotation } from '@generated/proto/apl';
 import i18n from '@i18n/config';
 import type { Player } from '@sim/player/player';
@@ -25,7 +26,8 @@ export interface RenamedCopy {
  *
  * Neither can be duplicated the way every other list duplicates a row, because two entries sharing
  * a name are two entries the rotation cannot tell apart. Both lists therefore intercept `copy`,
- * ask for the new name and insert the renamed clone next to the original.
+ * ask for the new name and insert the renamed clone next to the original. The dialog starts on the
+ * next free name (`freeName`), as a paste's does in `useAplPaste`.
  */
 export const useRenamedCopy = <T>(player: Player<any>, { itemName, inputLabel, read, write, nameOf, copy }: RenamedCopyOptions<T>): RenamedCopy => {
 	const [copying, setCopying] = useState<number | null>(null);
@@ -39,7 +41,7 @@ export const useRenamedCopy = <T>(player: Player<any>, { itemName, inputLabel, r
 			open: copying !== null,
 			title: i18n.t('rotation_tab.apl.floatingActionBar.new', { itemName }),
 			inputLabel,
-			placeholder: copying === null ? undefined : items[copying] && nameOf(items[copying]),
+			defaultValue: copying === null || !items[copying] ? undefined : freeName(nameOf(items[copying]), items.map(nameOf)),
 			existingNames: items.map(nameOf),
 			onSubmit: name =>
 				player.modifyAplRotation(rotation => {

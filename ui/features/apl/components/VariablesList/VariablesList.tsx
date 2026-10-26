@@ -1,7 +1,8 @@
 import { AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListToolbar } from '@features/apl/components/AplListToolbar';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
-import { pasteAplClip } from '@features/apl/components/clipboard';
+import { AplPasteDialog } from '@features/apl/components/AplPasteDialog';
+import { useAplPaste } from '@features/apl/hooks/useAplClipboard';
 import { useRenamedCopy } from '@features/apl/hooks/useRenamedCopy';
 import { APL_VARIABLES, aplItemId } from '@features/apl/model/apply_move';
 import { freshUuids } from '@features/apl/model/fresh_uuids';
@@ -28,6 +29,7 @@ export const VariablesList = () => {
 			}),
 		newItem: () => APLValueVariable.create({ name: i18n.t('rotation_tab.apl.variables.newVariableName'), value: undefined }),
 	});
+	const pasting = useAplPaste('variable', variables);
 	const copying = useRenamedCopy(player, {
 		itemName: variableName(),
 		inputLabel: i18n.t('rotation_tab.apl.variables.attributes.name'),
@@ -68,9 +70,11 @@ export const VariablesList = () => {
 					existingNames: () => variables.items.map(variable => variable.name),
 				}}
 				onCreate={name => variables.append(APLValueVariable.create({ name: name!, value: undefined }))}
-				onPaste={() => pasteAplClip('variable', variables)}
+				onPaste={pasting.paste}
 			/>
 			<AplNameDialog {...copying.dialog} />
+			<AplNameDialog {...pasting.nameDialog} />
+			<AplPasteDialog {...pasting.textDialog} />
 		</div>
 	);
 };

@@ -4815,15 +4815,35 @@
 								"empty": {
 									"type": "string"
 								},
-								"unreadable": {
-									"type": "string"
+								"paste_dialog": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"description": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "description"]
+								},
+								"places": {
+									"type": "object",
+									"properties": {
+										"action": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["action"]
 								},
 								"wrong_kind": {
 									"type": "string"
 								}
 							},
 							"additionalProperties": false,
-							"required": ["copied", "empty", "unreadable", "wrong_kind"]
+							"required": ["copied", "empty", "paste_dialog", "places", "wrong_kind"]
 						},
 						"floatingActionBar": {
 							"type": "object",

@@ -1,11 +1,11 @@
 import { AplItemActions, AplList } from '@features/apl/components/AplList';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
-import { copyAplClip } from '@features/apl/components/clipboard';
 import { AplValidations } from '@features/apl/components/ListItemHeader';
 import { uuidValidations } from '@features/apl/components/ListItemHeader/utils';
 import { NameDisplay } from '@features/apl/components/NameDisplay';
 import { ValuePicker } from '@features/apl/components/ValuePicker';
 import { AplProvider, useApl } from '@features/apl/context/AplContext';
+import { copyAplClip } from '@features/apl/hooks/useAplClipboard';
 import { useAplInput } from '@features/apl/hooks/useAplInput';
 import { rowSource } from '@features/apl/model/row_source';
 import type { InputConfig } from '@features/inputs/input';

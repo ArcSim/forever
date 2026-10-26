@@ -37,6 +37,12 @@ describe('APL clipboard text', () => {
 		expect((pastedVariable!.item as APLValueVariable).name).toBe('low_mana');
 	});
 
+	it('drops fields this build does not know, so text from another build still pastes', () => {
+		const pasted = aplClipFromText('{"kind": "group", "value": {"name": "Cooldowns", "fieldFromAnotherBuild": 1}}');
+		expect(pasted?.kind).toBe('group');
+		expect((pasted!.item as APLGroup).name).toBe('Cooldowns');
+	});
+
 	it('refuses text that is not a copied action, group or variable', () => {
 		expect(aplClipFromText('not json')).toBeUndefined();
 		expect(aplClipFromText('{}')).toBeUndefined();
@@ -48,8 +54,13 @@ describe('APL clipboard text', () => {
 });
 
 describe('freeName', () => {
-	it('keeps a free name and numbers a taken one past every taken number', () => {
+	it('keeps a free name and otherwise takes the first free number', () => {
 		expect(freeName('Cooldowns', ['Opener'])).toBe('Cooldowns');
 		expect(freeName('Cooldowns', ['Cooldowns', 'Cooldowns (2)'])).toBe('Cooldowns (3)');
+		expect(freeName('Cooldowns', ['Cooldowns', 'Cooldowns (3)'])).toBe('Cooldowns (2)');
+	});
+
+	it('numbers a numbered name from its base, never nesting the suffix', () => {
+		expect(freeName('Berserk (2)', ['Berserk', 'Berserk (2)'])).toBe('Berserk (3)');
 	});
 });

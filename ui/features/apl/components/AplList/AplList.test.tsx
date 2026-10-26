@@ -1,5 +1,6 @@
 import { GroupList } from '@features/apl/components/GroupList';
 import { PriorityPane } from '@features/apl/components/PriorityPane';
+import { aplClipToText } from '@features/apl/model/clipboard';
 import { APLAction, APLGroup, APLListItem, APLPrepullAction, APLRotation, APLValue } from '@generated/proto/apl';
 import { SimHostProvider } from '@sim/context/SimHostContext';
 import { dragEvent, FakeIntersectionObserver, place } from '@testing/apl/dom';
@@ -441,28 +442,42 @@ describe('AplList on the action groups pane', () => {
 		expect(player.aplRotation.groups.map(group => group.name)).toEqual(['two', 'one']);
 	});
 
-	it('pastes a copied group at once under the next free name, and warns when the clipboard holds an action', async () => {
+	const pasteFromToolbar = () =>
+		act(async () => {
+			fireEvent.click(within(screen.getByTestId('apl-floating-action-bar-root')).getByTestId('apl-paste'));
+		});
+
+	it('pastes a copied group under the name the dialog starts on, the next free one', async () => {
 		stubClipboard();
-		const toast = vi.spyOn(toastManager, 'add');
 		setup({ groups: [APLGroup.create({ name: 'one', actions: [row('x')] })] });
 		mount(<GroupList />);
 
 		await openActions(groupItems()[0]);
 		await clickAction('apl-item-clipboard');
+		await pasteFromToolbar();
+		const dialog = screen.getByRole('dialog');
+		expect(within(dialog).getByRole('textbox')).toHaveProperty('value', 'one (2)');
 		await act(async () => {
-			fireEvent.click(screen.getByTestId('apl-paste'));
+			fireEvent.click(within(dialog).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.paste' }));
 		});
+
 		expect(player.aplRotation.groups.map(group => group.name)).toEqual(['one', 'one (2)']);
 		expect(sequenceNames(player.aplRotation.groups[1].actions)).toEqual(['x']);
-		expect(screen.queryByRole('dialog')).toBeNull();
+	});
+
+	it('warns and adds nothing when the clipboard holds an action and the paste is for a group', async () => {
+		stubClipboard();
+		const toast = vi.spyOn(toastManager, 'add');
+		setup({ groups: [APLGroup.create({ name: 'one', actions: [row('x')] })] });
+		mount(<GroupList />);
 
 		await openActions(actionRows(groupItems()[0])[0]);
 		await clickAction('apl-item-clipboard');
-		await act(async () => {
-			fireEvent.click(screen.getByTestId('apl-paste'));
-		});
+		await pasteFromToolbar();
+
 		expect(toast).toHaveBeenLastCalledWith(expect.objectContaining({ variant: 'warning', body: 'rotation_tab.apl.clipboard.wrong_kind' }));
-		expect(player.aplRotation.groups).toHaveLength(2);
+		expect(player.aplRotation.groups).toHaveLength(1);
+		expect(screen.queryByRole('dialog')).toBeNull();
 	});
 
 	it("pastes an action copied from one group into another group's actions", async () => {
@@ -473,7 +488,7 @@ describe('AplList on the action groups pane', () => {
 		await openActions(actionRows(groupItems()[0])[0]);
 		await clickAction('apl-item-clipboard');
 		await act(async () => {
-			fireEvent.click(within(groupItems()[1]).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.paste' }));
+			fireEvent.click(within(groupItems()[1]).getByTestId('apl-paste'));
 		});
 
 		const [one, two] = player.aplRotation.groups;
@@ -481,12 +496,30 @@ describe('AplList on the action groups pane', () => {
 		expect(sequenceNames(two.actions)).toEqual(['y', 'x']);
 	});
 
+	it('takes the copied text in a dialog when the page cannot read the clipboard', async () => {
+		vi.stubGlobal('navigator', {});
+		const text = aplClipToText({ kind: 'action', item: row('z') });
+		setup({ groups: [APLGroup.create({ name: 'one', actions: [row('x')] })] });
+		mount(<GroupList />);
+
+		await act(async () => {
+			fireEvent.click(within(groupItems()[0]).getByTestId('apl-paste'));
+		});
+		const dialog = screen.getByRole('dialog');
+		fireEvent.change(within(dialog).getByRole('textbox'), { target: { value: text } });
+		await act(async () => {
+			fireEvent.click(within(dialog).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.paste' }));
+		});
+
+		expect(sequenceNames(player.aplRotation.groups[0].actions)).toEqual(['x', 'z']);
+	});
+
 	it('adds an action to a group through the add button inside its children', () => {
 		setup({ groups: [APLGroup.create({ name: 'one', actions: [] })] });
 		mount(<GroupList />);
 
 		act(() => {
-			fireEvent.click(within(groupItems()[0]).getByRole('button', { name: 'rotation_tab.apl.floatingActionBar.new' }));
+			fireEvent.click(within(groupItems()[0]).getByTestId('tree-add'));
 		});
 
 		expect(player.aplRotation.groups[0].actions).toHaveLength(1);

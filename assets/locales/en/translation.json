@@ -1340,8 +1340,14 @@
 			"clipboard": {
 				"copied": "{{itemName}} copied to the clipboard.",
 				"empty": "The clipboard holds no copied {{itemName}}.",
-				"unreadable": "The browser does not allow reading the clipboard here.",
-				"wrong_kind": "The clipboard holds a copied {{held}}. Paste it under {{heldList}}."
+				"paste_dialog": {
+					"label": "Copied text",
+					"description": "This page cannot read the clipboard. Paste the copied text here with Ctrl+V."
+				},
+				"places": {
+					"action": "Priority List, or in a group's actions"
+				},
+				"wrong_kind": "The clipboard holds a copied {{held}}. Paste it under {{places}}."
 			},
 			"floatingActionBar": {
 				"new": "New {{itemName}}",
