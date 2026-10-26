@@ -195,7 +195,7 @@ func applyRaceEffects(agent Agent) {
 		applySkyborneSharedRacials(character)
 
 		// The sim tracks no health regeneration, so Energized raises mana regeneration only.
-		var regen, applied float64
+		regen, applied := 1.5, 1.5
 		energizedAura := character.RegisterAura(Aura{
 			Label:    "Energized",
 			ActionID: ActionID{SpellID: 1270842},
@@ -232,7 +232,7 @@ func applyRaceEffects(agent Agent) {
 	case proto.Race_RaceWindshaperSkyborne:
 		applySkyborneSharedRacials(character)
 
-		var speed, applied float64
+		speed, applied := 1.15, 1.15
 		elementalBlessingAura := character.RegisterAura(Aura{
 			Label:    "Elemental Blessing",
 			ActionID: ActionID{SpellID: 1259688},
@@ -294,6 +294,7 @@ func registerSkyborneCasts(character *Character, spellID int32, castTime time.Du
 }
 
 // Command 20576 raises the damage of hunter and warlock pets by 5%. The game build has no row for it.
+// The pets exist from construction, and a pet's PseudoStats set after finalize do not survive a reset.
 func applyCommand(character *Character) {
 	if character.Class != proto.Class_ClassHunter && character.Class != proto.Class_ClassWarlock {
 		return
