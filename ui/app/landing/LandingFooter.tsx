@@ -1,11 +1,18 @@
 import i18n from '@i18n/config';
-import { DISCORD_URL, GITHUB_ORG_URL } from '@sim/constants/other';
+import { ADDON_URL, DISCORD_URL, GITHUB_ORG_URL, PATREON_URL } from '@sim/constants/other';
 import { Button } from '@ui-kit/Button';
 import { Icon } from '@ui-kit/Icon';
 import { useEffect, useState } from 'react';
 
 import { FALLBACK_FOOTER, fetchFooterContent, type FooterCommunityGroup, type FooterContent } from './footer_content';
 import { LandingBrand } from './LandingBrand';
+
+const SOCIAL_LINKS = [
+	{ href: DISCORD_URL, icon: 'discord', label: 'landing.header.discord' },
+	{ href: GITHUB_ORG_URL, icon: 'github', label: 'landing.header.github' },
+	{ href: ADDON_URL, icon: 'wow', label: 'landing.header.addon' },
+	{ href: PATREON_URL, icon: 'patreon', label: 'landing.header.patreon' },
+] as const;
 
 // A group with more links than this lays them out in two columns
 const SPLIT_GROUP_SIZE = 6;
@@ -60,22 +67,18 @@ export const LandingFooter = () => {
 					<div className="col-span-full flex flex-col items-start gap-4 lg:col-span-1">
 						<LandingBrand />
 						<div className="flex gap-4">
-							<Button
-								href={DISCORD_URL}
-								target="_blank"
-								variant="unstyled"
-								aria-label={i18n.t('landing.header.discord')}
-								className="ui-landing-footer-link">
-								<Icon name="discord" style="brands" size="lg" />
-							</Button>
-							<Button
-								href={GITHUB_ORG_URL}
-								target="_blank"
-								variant="unstyled"
-								aria-label={i18n.t('landing.header.github')}
-								className="ui-landing-footer-link">
-								<Icon name="github" style="brands" size="lg" />
-							</Button>
+							{SOCIAL_LINKS.map(({ href, icon, label }) => (
+								<Button
+									key={icon}
+									href={href}
+									target="_blank"
+									variant="unstyled"
+									aria-label={i18n.t(label)}
+									title={i18n.t(label)}
+									className="ui-landing-footer-link">
+									<Icon name={icon} style="brands" size="lg" />
+								</Button>
+							))}
 						</div>
 					</div>
 					<FooterGroup id="landing-footer-sims" title={i18n.t('landing.footer.sims')}>

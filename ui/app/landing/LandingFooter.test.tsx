@@ -1,4 +1,5 @@
 import i18n from '@i18n/config';
+import { ADDON_URL, DISCORD_URL, GITHUB_ORG_URL, PATREON_URL } from '@sim/constants/other';
 import { VERSIONS_MANIFEST, withVersionsManifest } from '@testing/versions_manifest';
 import { render, screen } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -53,5 +54,21 @@ describe('LandingFooter', () => {
 		expect(mop.getAttribute('href')).toBe('https://www.wowsims.com/mop/');
 		expect(mop.getAttribute('target')).toBeNull();
 		expect(screen.getByText('Next Expansion').closest('a')).toBeNull();
+	});
+
+	it('links Discord, GitHub, the addon and Patreon in new tabs', () => {
+		restoreFetch = withVersionsManifest(new Error('offline'));
+		render(<LandingFooter />);
+		const links: [string, string][] = [
+			['landing.header.discord', DISCORD_URL],
+			['landing.header.github', GITHUB_ORG_URL],
+			['landing.header.addon', ADDON_URL],
+			['landing.header.patreon', PATREON_URL],
+		];
+		links.forEach(([label, url]) => {
+			const link = screen.getByRole('link', { name: i18n.t(label) });
+			expect(link.getAttribute('href')).toBe(url);
+			expect(link.getAttribute('target')).toBe('_blank');
+		});
 	});
 });
