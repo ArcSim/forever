@@ -11,48 +11,6 @@ export type FooterContent = {
 	legal: { copyrightStartYear: number; copyrightHolder: string };
 };
 
-// Shown until the manifest loads, and kept when it fails or has a schema this page does not know
-export const FALLBACK_FOOTER: FooterContent = {
-	versions: [
-		{ title: 'Forever', url: 'https://www.wowsims.com/forever/', status: 'live' },
-		{ title: 'Mists of Pandaria', url: 'https://www.wowsims.com/mop/', status: 'live' },
-		{ title: 'Cataclysm', url: 'https://www.wowsims.com/cata/', status: 'live' },
-		{ title: 'Wrath of the Lich King', url: 'https://www.wowsims.com/wotlk/', status: 'live' },
-		{ title: 'The Burning Crusade', url: 'https://www.wowsims.com/tbc/', status: 'live' },
-		{ title: 'Classic/Vanilla', url: 'https://www.wowsims.com/classic/', status: 'live' },
-		{ title: 'Season of Discovery', url: 'https://www.wowsims.com/sod/', status: 'live' },
-	],
-	communities: [
-		{
-			title: 'Forever Community Servers',
-			columns: 1,
-			links: [
-				{ name: 'WoW Forever NA', url: 'https://discord.gg/wowforeverna' },
-				{ name: 'WoW Forever EU PVE', url: 'https://discord.gg/JAQMAGUyft' },
-				{ name: 'WoW Forever EU PVP', url: 'https://discord.gg/foreverclassic' },
-			],
-		},
-		{
-			title: 'Class Discords',
-			columns: 2,
-			links: [
-				{ name: 'Death Knight', url: 'https://discord.gg/yGbC7dRxEs' },
-				{ name: 'Druid', url: 'https://discord.gg/SMwmrBV' },
-				{ name: 'Hunter', url: 'https://discord.gg/nzeYUcVH8v' },
-				{ name: 'Mage', url: 'https://discord.gg/tEdQhsH' },
-				{ name: 'Monk', url: 'https://discord.gg/FdkpqgPwHZ' },
-				{ name: 'Paladin', url: 'https://discord.gg/lightclubclassic' },
-				{ name: 'Priest', url: 'https://discord.gg/priestclassic' },
-				{ name: 'Rogue', url: 'https://discord.gg/ADaqUftwyj' },
-				{ name: 'Shaman', url: 'https://discord.gg/NvbYJNpJEE' },
-				{ name: 'Warlock', url: 'https://discord.gg/nAA64gvKyB' },
-				{ name: 'Warrior', url: 'https://discord.gg/RbCZJtw' },
-			],
-		},
-	],
-	legal: { copyrightStartYear: 2021, copyrightHolder: 'WoWSims team' },
-};
-
 const isObject = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 const isString = (value: unknown): value is string => typeof value === 'string';
 const isArrayOf = <T>(value: unknown, isItem: (item: unknown) => item is T): value is T[] => Array.isArray(value) && value.every(isItem);

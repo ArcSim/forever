@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { withVersionsManifest } from '@testing/versions_manifest';
+import { VERSIONS_MANIFEST, withVersionsManifest } from '@testing/versions_manifest';
 
 import { LandingPage } from './LandingPage';
 
@@ -8,7 +8,7 @@ const meta = {
 	component: LandingPage,
 	tags: ['autodocs'],
 	parameters: { spec: 'none' },
-	beforeEach: () => withVersionsManifest(new Error('offline')),
+	beforeEach: () => withVersionsManifest(VERSIONS_MANIFEST),
 } satisfies Meta<typeof LandingPage>;
 
 export default meta;

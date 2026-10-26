@@ -20,19 +20,18 @@ afterEach(() => restoreFetch());
 const year = new Date().getFullYear();
 
 describe('LandingFooter', () => {
-	it('shows the built-in content when the manifest cannot be fetched', async () => {
+	it('renders nothing when the manifest cannot be fetched', async () => {
 		restoreFetch = withVersionsManifest(new Error('offline'));
-		render(<LandingFooter />);
-		expect(await screen.findByRole('link', { name: 'Death Knight' })).toBeTruthy();
-		expect(screen.getByRole('contentinfo').textContent).toContain(`© 2021-${year} WoWSims team`);
+		const { container } = render(<LandingFooter />);
+		await new Promise(resolve => setTimeout(resolve, 0));
+		expect(container.childElementCount).toBe(0);
 	});
 
-	it('keeps the built-in content for a manifest schema it does not know', async () => {
+	it('renders nothing for a manifest schema it does not know', async () => {
 		restoreFetch = withVersionsManifest({ ...VERSIONS_MANIFEST, schemaVersion: 2 });
-		render(<LandingFooter />);
+		const { container } = render(<LandingFooter />);
 		await new Promise(resolve => setTimeout(resolve, 0));
-		expect(screen.queryByRole('link', { name: 'Example Realm' })).toBeNull();
-		expect(screen.getByRole('link', { name: 'Forever' })).toBeTruthy();
+		expect(container.childElementCount).toBe(0);
 	});
 
 	it('shows the versions, communities and legal line from the manifest', async () => {
@@ -42,7 +41,6 @@ describe('LandingFooter', () => {
 		expect(realm.getAttribute('href')).toBe('https://discord.gg/example');
 		expect(realm.getAttribute('target')).toBe('_blank');
 		expect(screen.getByRole('navigation', { name: 'Partner Servers' })).toBeTruthy();
-		expect(screen.queryByRole('link', { name: 'Death Knight' })).toBeNull();
 		expect(screen.getByRole('contentinfo').textContent).toContain(`© 2020-${year} WoWSims contributors`);
 	});
 
@@ -56,9 +54,10 @@ describe('LandingFooter', () => {
 		expect(screen.getByText('Next Expansion').closest('a')).toBeNull();
 	});
 
-	it('links Discord, GitHub, the addon and Patreon in new tabs', () => {
-		restoreFetch = withVersionsManifest(new Error('offline'));
+	it('links Discord, GitHub, the addon and Patreon in new tabs', async () => {
+		restoreFetch = withVersionsManifest(VERSIONS_MANIFEST);
 		render(<LandingFooter />);
+		await screen.findByRole('contentinfo');
 		const links: [string, string][] = [
 			['landing.header.discord', DISCORD_URL],
 			['landing.header.github', GITHUB_ORG_URL],

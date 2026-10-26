@@ -3,7 +3,7 @@ import { ADDON_URL, DISCORD_URL, GITHUB_ORG_URL, PATREON_URL } from '@sim/consta
 import { Button } from '@ui-kit/Button';
 import { useEffect, useState } from 'react';
 
-import { FALLBACK_FOOTER, fetchFooterContent, type FooterContent } from './footer_content';
+import { fetchFooterContent, type FooterContent } from './footer_content';
 import { LandingBrand } from './LandingBrand';
 
 const SOCIAL_LINKS = [
@@ -22,9 +22,12 @@ const FooterGroup = ({ id, title, split, children }: { id: string; title: string
 	</nav>
 );
 
-/** The footer every WoWSims site shares: its content comes from wowsims.com/versions.json and its styles from wowsims.com/footer.css. */
+/**
+ * The footer every WoWSims site shares: its content comes from wowsims.com/versions.json and its styles from
+ * wowsims.com/footer.css. Nothing renders until the manifest loads, or when it cannot be read.
+ */
 export const LandingFooter = () => {
-	const [content, setContent] = useState<FooterContent>(FALLBACK_FOOTER);
+	const [content, setContent] = useState<FooterContent | null>(null);
 
 	useEffect(() => {
 		const controller = new AbortController();
@@ -34,6 +37,7 @@ export const LandingFooter = () => {
 		return () => controller.abort();
 	}, []);
 
+	if (!content) return null;
 	const { legal } = content;
 
 	return (

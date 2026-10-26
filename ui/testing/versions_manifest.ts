@@ -1,6 +1,6 @@
 import { VERSIONS_MANIFEST_URL } from '@sim/constants/other';
 
-/** A schema version 1 manifest as wowsims.com publishes it, with one 'wip' version and one short community group. */
+/** A schema version 1 manifest as wowsims.com publishes it, with one 'wip' version, a short community group and a two-column one. */
 export const VERSIONS_MANIFEST = {
 	schemaVersion: 1,
 	homepage: 'https://www.wowsims.com',
@@ -14,7 +14,17 @@ export const VERSIONS_MANIFEST = {
 		copyrightHolder: 'WoWSims contributors',
 		disclaimer: 'A fan-made project, not affiliated with Blizzard Entertainment.',
 	},
-	communities: [{ title: 'Partner Servers', links: [{ name: 'Example Realm', url: 'https://discord.gg/example' }] }],
+	communities: [
+		{ title: 'Partner Servers', links: [{ name: 'Example Realm', url: 'https://discord.gg/example' }] },
+		{
+			title: 'Class Discords',
+			columns: 2,
+			links: ['Death Knight', 'Druid', 'Hunter', 'Mage', 'Monk', 'Paladin', 'Priest'].map(name => ({
+				name,
+				url: `https://discord.gg/${name.toLowerCase().replace(' ', '')}`,
+			})),
+		},
+	],
 };
 
 /**
