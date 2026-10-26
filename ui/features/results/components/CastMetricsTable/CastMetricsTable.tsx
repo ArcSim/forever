@@ -12,7 +12,7 @@ const helper = createMetricsColumnHelper<ActionMetrics>();
 // One pair of groups functions per toggle state, built once, so `useActionRows` sees stable functions.
 const castGroupsOf = (hidePassives: boolean) => {
 	const castsOf = (unit: UnitMetrics, resultData: SimResultData) =>
-		unit.actions.filter(action => action.casts != 0 && (!hidePassives || action.isCastable)).map(action => action.forTarget(resultData.filter));
+		unit.actions.filter(action => action.casts != 0 && (!hidePassives || action.isPressed)).map(action => action.forTarget(resultData.filter));
 	const playerOf = (resultData: SimResultData): UnitMetrics | undefined => resultData.result.getRaidIndexedPlayers(resultData.filter)[0];
 
 	return {

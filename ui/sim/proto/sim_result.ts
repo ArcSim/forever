@@ -866,8 +866,8 @@ export class ActionMetrics {
 		return this.data.isPassive;
 	}
 
-	get isCastable() {
-		return this.data.isCastable;
+	get isPressed() {
+		return this.data.isPressed;
 	}
 
 	get totalDamagePercent() {
@@ -1463,7 +1463,7 @@ export class ActionMetrics {
 			ActionMetricsProto.create({
 				isMelee: firstAction.isMeleeAction,
 				isPassive: isAllPassiveSpells,
-				isCastable: actions.some(action => action.isCastable),
+				isPressed: actions.some(action => action.isPressed),
 				targets: mergedTargets.map(t => t.data),
 				spellSchool: firstAction.spellSchool || undefined,
 			}),

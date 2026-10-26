@@ -122,7 +122,7 @@ type CharacterIterationMetrics struct {
 type ActionMetrics struct {
 	IsMelee     bool // True if melee action, false if spell action.
 	IsPassive   bool // True if action is applied/cast as a result of another action
-	IsCastable  bool // True if the unit presses the action itself: a rotation spell, or a pet's own ability.
+	IsPressed   bool // True if the unit presses the action itself: a rotation spell, or a pet's own ability.
 	SpellSchool SpellSchool
 	Rank        int32 // The spell's rank, which the UI names the action with; 0 for an unranked spell.
 
@@ -207,7 +207,7 @@ func (actionMetrics *ActionMetrics) ToProto(actionID ActionID) *proto.ActionMetr
 		Id:          id,
 		IsMelee:     actionMetrics.IsMelee,
 		IsPassive:   actionMetrics.IsPassive,
-		IsCastable:  actionMetrics.IsCastable,
+		IsPressed:   actionMetrics.IsPressed,
 		Targets:     targetMetrics,
 		SpellSchool: int32(actionMetrics.SpellSchool),
 	}
@@ -419,17 +419,37 @@ func (unit *Unit) NewGenericMetric(actionID ActionID) *ResourceMetrics {
 	return unit.Metrics.NewResourceMetrics(actionID, proto.ResourceType_ResourceTypeGenericResource)
 }
 
-// Whether the spell's unit presses it. A player presses an APL spell, and a hit spell whose APL spell
-// shares its action under another tag: Heroic Strike, Cleave and Raptor Strike are pressed through a
-// tag 1 queue spell that records no metrics. A pet's abilities carry no APL flag, since the pet's own
-// logic casts them, so on a pet everything but its auto attacks, its movement, its procs and its passive
-// spells is pressed.
-func castable(spell *Spell) bool {
+// Whether the spell's unit presses it. A player presses an APL spell, a SpellFlagPressed spell, and a hit
+// spell whose APL spell shares its action under another tag (Heroic Strike, Cleave, Raptor Strike and
+// Maul queue through such a spell, which records no metrics). A pet's abilities carry no APL flag, since
+// the pet's own logic casts them, so on a pet everything but its auto attack actions, its movement, its
+// procs and its passive spells is pressed. The answer is cached on the spell.
+func pressed(spell *Spell) bool {
+	if spell.pressedState == 0 {
+		spell.pressedState = 1
+		if computePressed(spell) {
+			spell.pressedState = 2
+		}
+	}
+	return spell.pressedState == 2
+}
+
+func computePressed(spell *Spell) bool {
+	if spell.Flags.Matches(SpellFlagPressed) {
+		return true
+	}
 	unit := spell.Unit
 	if unit.Type == PetUnit {
+		if spell == unit.moveSpell || spell.Flags.Matches(SpellFlagProc|SpellFlagPassiveSpell) {
+			return false
+		}
 		aa := &unit.AutoAttacks
-		return spell != aa.MHAuto() && spell != aa.OHAuto() && spell != aa.RangedAuto() && spell != unit.moveSpell &&
-			!spell.Flags.Matches(SpellFlagProc|SpellFlagPassiveSpell)
+		for _, auto := range []*Spell{aa.MHAuto(), aa.OHAuto(), aa.RangedAuto()} {
+			if auto != nil && auto.ActionID.SameActionIgnoreTag(spell.ActionID) {
+				return false
+			}
+		}
+		return true
 	}
 	return slices.ContainsFunc(unit.Spellbook, func(s *Spell) bool {
 		return s.Flags.Matches(SpellFlagAPL) && s.ActionID.SameActionIgnoreTag(spell.ActionID)
@@ -449,12 +469,12 @@ func (unitMetrics *UnitMetrics) addSpellMetrics(spell *Spell, actionID ActionID,
 		actionMetrics = &ActionMetrics{
 			IsMelee:     spell.Flags.Matches(SpellFlagMeleeMetrics),
 			IsPassive:   spell.Flags.Matches(SpellFlagPassiveSpell),
-			IsCastable:  castable(spell),
 			SpellSchool: spell.SpellSchool,
 			Rank:        spell.Rank,
 		}
 		unitMetrics.actions[actionID] = actionMetrics
 	}
+	actionMetrics.IsPressed = actionMetrics.IsPressed || pressed(spell)
 
 	if len(actionMetrics.Targets) == 0 {
 		actionMetrics.Targets = make([]TargetedActionMetrics, len(spellMetrics))

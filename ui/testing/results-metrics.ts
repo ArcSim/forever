@@ -21,7 +21,7 @@ export const actionMetric = (name: string, overrides: Record<string, unknown> = 
 		spellSchool: null,
 		casts: 10,
 		isPassiveAction: false,
-		isCastable: true,
+		isPressed: true,
 		landedHits: 10,
 		landedTicks: 0,
 		landedRolls: 10,

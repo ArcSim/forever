@@ -24,14 +24,14 @@ describe('CastMetricsTable', () => {
 	});
 
 	it('leaves out an action the player does not press while passives are hidden, which they are by default', () => {
-		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isCastable: false })]);
+		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isPressed: false })]);
 		const { container } = render(<CastMetricsTable />);
 
 		expect(playerRows(container)).toEqual([['Mortal Strike', false]]);
 	});
 
 	it('lists every action with casts once passives are shown', () => {
-		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isCastable: false })]);
+		result = castMetricsResult([metric('Mortal Strike', { casts: 20 }), metric('Melee', { isPressed: false })]);
 		const { container } = render(
 			<HidePassivesContext.Provider value={false}>
 				<CastMetricsTable />
@@ -45,7 +45,7 @@ describe('CastMetricsTable', () => {
 	});
 
 	it('puts the pet under its own table, without its melee while passives are hidden', () => {
-		result = castMetricsResult([metric('Steady Shot')], [pet('Claw'), pet('Melee', { isCastable: false })]);
+		result = castMetricsResult([metric('Steady Shot')], [pet('Claw'), pet('Melee', { isPressed: false })]);
 		const { container } = render(<CastMetricsTable />);
 
 		expect(playerRows(container)).toEqual([['Steady Shot', false]]);
@@ -61,7 +61,7 @@ describe('CastMetricsTable', () => {
 		expect(petTable(withoutPets.container)).toBeNull();
 		withoutPets.unmount();
 
-		result = castMetricsResult([metric('Steady Shot')], [pet('Melee', { isCastable: false })]);
+		result = castMetricsResult([metric('Steady Shot')], [pet('Melee', { isPressed: false })]);
 		const { container } = render(<CastMetricsTable />);
 		expect(petTable(container)).toBeNull();
 	});
