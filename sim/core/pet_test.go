@@ -75,7 +75,7 @@ func TestCommandRaisesHunterAndWarlockPetDamage(t *testing.T) {
 		proto.Class_ClassWarlock: 1.05,
 		proto.Class_ClassShaman:  1,
 	} {
-		if got := petDamage(class, proto.Race_RaceOrc) / petDamage(class, proto.Race_RaceTroll); got != want {
+		if got := petDamage(class, proto.Race_RaceOrc) / petDamage(class, proto.Race_RaceTroll); !core.WithinToleranceFloat64(want, got, 1e-9) {
 			t.Errorf("an orc %s's pet deals x%0.4f a troll's damage, want x%v", class, got, want)
 		}
 	}

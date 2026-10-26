@@ -50,8 +50,10 @@ func applyRaceEffects(agent Agent) {
 		applyExpansiveMind(character)
 		applyEureka(character)
 	case proto.Race_RaceHuman:
+		// TODO: The 26 October development notes set The Human Spirit 20598 to 10% and Ruthless 20597 to
+		// 1%; the game build still states 5% and 2%.
 		character.MultiplyStat(stats.Spirit, 1.1)
-		character.AddStats(stats.Stats{stats.PhysicalCritPercent: 1, stats.SpellCritPercent: 1}) // Ruthless 20597
+		character.AddStats(stats.Stats{stats.PhysicalCritPercent: 1, stats.SpellCritPercent: 1})
 	case proto.Race_RaceNightElf:
 		character.PseudoStats.BaseDodgeChance += 0.01
 		character.PseudoStats.MovementSpeedMultiplier *= 1.02
@@ -194,27 +196,17 @@ func applyRaceEffects(agent Agent) {
 	case proto.Race_RaceHighOrderSkyborne:
 		applySkyborneSharedRacials(character)
 
-		// The sim tracks no health regeneration, so Energized raises mana regeneration only.
-		regen, applied := 1.5, 1.5
-		energizedAura := character.RegisterAura(Aura{
-			Label:    "Energized",
-			ActionID: ActionID{SpellID: 1270842},
-			Duration: time.Second * 15,
-			OnGain: func(aura *Aura, sim *Simulation) {
-				applied = regen
-				if aura.Unit.HasManaBar() {
-					aura.Unit.MultiplyManaRegenSpeed(sim, applied)
-				}
-			},
-			OnExpire: func(aura *Aura, sim *Simulation) {
-				if aura.Unit.HasManaBar() {
-					aura.Unit.MultiplyManaRegenSpeed(sim, 1/applied)
-				}
-			},
+		// The sim tracks no health regeneration, so Energized raises mana regeneration only. Innervate
+		// takes its place: Read Leyline cannot be cast under it, and an Innervate that lands ends Energized.
+		// TODO: 15 s at +50% (+100% Attuned) is from the 26 October development notes; the game build
+		// states 30 s at +100% for 1270842.
+		energizedAura := registerSkyborneCasts(character, 1259705, time.Second*2, Aura{Label: "Energized", ActionID: ActionID{SpellID: 1270842}}, 1.5, 2, func(sim *Simulation, multiplier float64) {
+			if character.HasManaBar() {
+				character.MultiplyManaRegenSpeed(sim, multiplier)
+			}
+		}, func(_ *Simulation, _ *Unit) bool {
+			return !character.HasActiveAuraWithTag(innervateTag)
 		})
-
-		// Innervate takes Energized's place: Read Leyline cannot be cast under it, and an Innervate that
-		// lands ends Energized.
 		character.Env.RegisterPostFinalizeEffect(func() {
 			for _, innervate := range character.GetAurasWithTag(innervateTag) {
 				innervate.ApplyOnGain(func(_ *Aura, sim *Simulation) {
@@ -222,34 +214,12 @@ func applyRaceEffects(agent Agent) {
 				})
 			}
 		})
-
-		registerSkyborneCasts(character, 1259705, time.Second*2, energizedAura, func(_ *Simulation, _ *Unit) bool {
-			return !character.HasActiveAuraWithTag(innervateTag)
-		}, func(sim *Simulation, buffed bool) {
-			regen = Ternary(buffed, 2.0, 1.5)
-			energizedAura.Activate(sim)
-		})
 	case proto.Race_RaceWindshaperSkyborne:
 		applySkyborneSharedRacials(character)
 
-		speed, applied := 1.15, 1.15
-		elementalBlessingAura := character.RegisterAura(Aura{
-			Label:    "Elemental Blessing",
-			ActionID: ActionID{SpellID: 1259688},
-			Duration: time.Second * 15,
-			OnGain: func(aura *Aura, sim *Simulation) {
-				applied = speed
-				aura.Unit.MultiplyMovementSpeed(sim, applied)
-			},
-			OnExpire: func(aura *Aura, sim *Simulation) {
-				aura.Unit.MultiplyMovementSpeed(sim, 1/applied)
-			},
-		})
-
-		registerSkyborneCasts(character, 1259686, time.Millisecond*500, elementalBlessingAura, nil, func(sim *Simulation, buffed bool) {
-			speed = Ternary(buffed, 1.3, 1.15)
-			elementalBlessingAura.Activate(sim)
-		})
+		// TODO: 15 s at +15% (+30% Charged) is from the 26 October development notes; the game build
+		// states 30 s at +10% for 1259688.
+		registerSkyborneCasts(character, 1259686, time.Millisecond*500, Aura{Label: "Elemental Blessing", ActionID: ActionID{SpellID: 1259688}}, 1.15, 1.3, character.MultiplyMovementSpeed, nil)
 	}
 }
 
@@ -259,17 +229,31 @@ const innervateTag = "Innervate"
 func applySkyborneSharedRacials(character *Character) {
 	applyDamageVersus(character, proto.MobType_MobTypeElemental)
 
-	character.PseudoStats.AttackSpeedMultiplier *= 1.02 // Wind Blessed 1259710
+	// TODO: Wind Blessed 1259710 is 2% in the 26 October development notes; the game build states 3%.
+	character.PseudoStats.AttackSpeedMultiplier *= 1.02
 	character.PseudoStats.CastSpeedMultiplier *= 1.02
 }
 
 // Read Leyline and Skysight each register twice on one cooldown: the plain cast, and tag 1 for a
 // character under the hour-long buff a cast at a Ley Line (Attuned) or at an elemental convergence
 // (Charged) grants, which doubles the effect. The buff lasts through death, so the APL picks the cast
-// the player holds for the whole fight.
-func registerSkyborneCasts(character *Character, spellID int32, castTime time.Duration, aura *Aura, castCondition CanCastCondition, activate func(sim *Simulation, buffed bool)) {
+// the player holds for the whole fight. The aura lasts 15 s at the cast's multiplier, and an activation
+// with no cast takes the plain one.
+func registerSkyborneCasts(character *Character, spellID int32, castTime time.Duration, config Aura, plain, buffed float64, multiply func(sim *Simulation, multiplier float64), castCondition CanCastCondition) *Aura {
+	value, applied := plain, plain
+	config.Duration = time.Second * 15
+	config.OnGain = func(_ *Aura, sim *Simulation) {
+		applied = value
+		multiply(sim, applied)
+	}
+	config.OnExpire = func(_ *Aura, sim *Simulation) {
+		multiply(sim, 1/applied)
+		value = plain
+	}
+	aura := character.RegisterAura(config)
+
 	timer := character.NewTimer()
-	for tag, buffed := range []bool{false, true} {
+	for tag, multiplier := range []float64{plain, buffed} {
 		character.RegisterSpell(SpellConfig{
 			ActionID: ActionID{SpellID: spellID, Tag: int32(tag)},
 			Flags:    SpellFlagAPL | SpellFlagNoOnCastComplete,
@@ -285,12 +269,14 @@ func registerSkyborneCasts(character *Character, spellID int32, castTime time.Du
 			},
 			ExtraCastCondition: castCondition,
 			ApplyEffects: func(sim *Simulation, _ *Unit, _ *Spell) {
-				activate(sim, buffed)
+				value = multiplier
+				aura.Activate(sim)
 			},
 
 			RelatedSelfBuff: aura,
 		})
 	}
+	return aura
 }
 
 // Command 20576 raises the damage of hunter and warlock pets by 5%. The game build has no row for it.

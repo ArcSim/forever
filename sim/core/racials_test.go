@@ -314,7 +314,7 @@ func TestGnomeEurekaReadsEachClassRow(t *testing.T) {
 // on a channel started before the buff and on one that runs on past its end. A periodic spell that is
 // not a channel takes no bonus, on the mask or off it.
 func TestGnomeWarlockEurekaChannel(t *testing.T) {
-	sim, fw := setupFakeWarlockSim(proto.Race_RaceGnome)
+	sim, fw := setupFakeWarlockSim(proto.Race_RaceGnome, &proto.IndividualBuffs{})
 	target := fw.CurrentTarget
 
 	eurekaSpell := fw.GetSpell(ActionID{SpellID: 1259821})
@@ -465,14 +465,15 @@ func TestSkyborneRacials(t *testing.T) {
 		hasReadLeyLine := fw.GetSpell(ActionID{SpellID: 1259705}) != nil
 		hasSkysight := fw.GetSpell(ActionID{SpellID: 1259686}) != nil
 		if hasReadLeyLine != (race == proto.Race_RaceHighOrderSkyborne) || hasSkysight != (race == proto.Race_RaceWindshaperSkyborne) {
-			t.Errorf("%s: Read Ley Line is the High Order's and Skysight the Windshapers', got %t / %t", race, hasReadLeyLine, hasSkysight)
+			t.Errorf("%s: Read Leyline is the High Order's and Skysight the Windshapers', got %t / %t", race, hasReadLeyLine, hasSkysight)
 		}
 	}
 }
 
 // Read Leyline and Skysight each hold a plain cast and a tag 1 cast for an Attuned or Charged
 // character, on one cooldown: the plain one lasts 15 s at half the tagged one's bonus, and the aura
-// takes its bonus back off when it expires.
+// takes its bonus back off when it expires. An activation with no cast takes the plain bonus, also
+// after a tagged cast.
 func TestSkyborneCastsShareACooldown(t *testing.T) {
 	for _, tc := range []struct {
 		race    proto.Race
@@ -486,7 +487,7 @@ func TestSkyborneCastsShareACooldown(t *testing.T) {
 		{proto.Race_RaceWindshaperSkyborne, 1259686, "Elemental Blessing", func(fw *fakeDotWarlock) float64 { return fw.PseudoStats.MovementSpeedMultiplier }, 1.15, 1.3},
 	} {
 		for tag, want := range []float64{tc.plain, tc.buffed} {
-			sim, fw := setupFakeWarlockSim(tc.race)
+			sim, fw := setupFakeWarlockSim(tc.race, &proto.IndividualBuffs{})
 			before := tc.value(fw)
 			cast := fw.GetSpell(ActionID{SpellID: tc.spellID, Tag: int32(tag)})
 			other := fw.GetSpell(ActionID{SpellID: tc.spellID, Tag: int32(1 - tag)})
@@ -510,30 +511,19 @@ func TestSkyborneCastsShareACooldown(t *testing.T) {
 			if got := tc.value(fw); !WithinToleranceFloat64(before, got, 1e-9) {
 				t.Errorf("%s tag %d: after %s ends the multiplier should be back at %v, got %v", tc.race, tag, tc.aura, before, got)
 			}
+
+			aura.Activate(sim)
+			if got := tc.value(fw) / before; !WithinToleranceFloat64(tc.plain, got, 1e-9) {
+				t.Errorf("%s tag %d: %s raised with no cast should multiply by %v, got x%0.4f", tc.race, tag, tc.aura, tc.plain, got)
+			}
+			aura.Deactivate(sim)
 		}
 	}
 }
 
 // Read Leyline cannot be cast under Innervate, and an Innervate that lands ends Energized.
 func TestInnervateReplacesEnergized(t *testing.T) {
-	sim := NewSim(&proto.RaidSimRequest{
-		SimOptions: &proto.SimOptions{RandomSeed: 100},
-		Raid: SinglePlayerRaidProto(&proto.Player{
-			Name:      "Warlock",
-			Class:     proto.Class_ClassWarlock,
-			Race:      proto.Race_RaceHighOrderSkyborne,
-			Buffs:     &proto.IndividualBuffs{Innervates: 1},
-			Spec:      &proto.Player_Warlock{},
-			Equipment: &proto.EquipmentSpec{},
-			Rotation:  &proto.APLRotation{Type: proto.APLRotation_TypeAPL},
-		}, &proto.PartyBuffs{}, &proto.RaidBuffs{}, &proto.Debuffs{}),
-		Encounter: &proto.Encounter{
-			Targets:  []*proto.Target{{Name: "target", Level: 63}},
-			Duration: 180,
-		},
-	}, simsignals.CreateSignals())
-	sim.Reset()
-	fw := sim.Raid.Parties[0].Players[0].(*fakeDotWarlock)
+	sim, fw := setupFakeWarlockSim(proto.Race_RaceHighOrderSkyborne, &proto.IndividualBuffs{Innervates: 1})
 
 	innervates := fw.GetAurasWithTag(innervateTag)
 	if len(innervates) == 0 {
@@ -542,6 +532,9 @@ func TestInnervateReplacesEnergized(t *testing.T) {
 	readLeyline := fw.GetSpell(ActionID{SpellID: 1259705})
 	energized := fw.GetAura("Energized")
 
+	if !readLeyline.CanCast(sim, fw.CurrentTarget) {
+		t.Fatalf("Read Leyline should cast with no Innervate up")
+	}
 	readLeyline.SkipCastAndApplyEffects(sim, fw.CurrentTarget)
 	if !energized.IsActive() {
 		t.Fatalf("Read Leyline should raise Energized")
@@ -744,7 +737,7 @@ func (fw *fakeDotWarlock) OnEncounterStart(_ *Simulation) {}
 
 func setupTouchOfTheGraveWarlock(t *testing.T) (*Simulation, *fakeDotWarlock, *Aura) {
 	t.Helper()
-	sim, fw := setupFakeWarlockSim(proto.Race_RaceUndead)
+	sim, fw := setupFakeWarlockSim(proto.Race_RaceUndead, &proto.IndividualBuffs{})
 	aura := fw.GetAura("Touch of the Grave")
 	if aura == nil || !aura.IsActive() || aura.Icd == nil {
 		t.Fatalf("An undead warlock should carry an active Touch of the Grave with its cooldown")
@@ -752,14 +745,14 @@ func setupTouchOfTheGraveWarlock(t *testing.T) (*Simulation, *fakeDotWarlock, *A
 	return sim, fw, aura
 }
 
-func setupFakeWarlockSim(race proto.Race) (*Simulation, *fakeDotWarlock) {
+func setupFakeWarlockSim(race proto.Race, buffs *proto.IndividualBuffs) (*Simulation, *fakeDotWarlock) {
 	sim := NewSim(&proto.RaidSimRequest{
 		SimOptions: &proto.SimOptions{RandomSeed: 100},
 		Raid: SinglePlayerRaidProto(&proto.Player{
 			Name:      "Warlock",
 			Class:     proto.Class_ClassWarlock,
 			Race:      race,
-			Buffs:     &proto.IndividualBuffs{},
+			Buffs:     buffs,
 			Spec:      &proto.Player_Warlock{},
 			Equipment: &proto.EquipmentSpec{},
 			Rotation:  &proto.APLRotation{Type: proto.APLRotation_TypeAPL},
