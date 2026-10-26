@@ -62,8 +62,6 @@ type aplTune struct {
 	biteEnd bool
 	biteLow string
 	rakeCut string
-	// shadowmeld casts Shadowmeld into Ravage, a Night Elf's, on cooldown once Ravage is affordable.
-	shadowmeld bool
 	// energized casts Read Ley Line, a High Order Skyborne's, in a free GCD once the mana is under
 	// energizedMana; "cd" casts it on cooldown.
 	energized     bool
@@ -174,13 +172,6 @@ func catAPL(tune aplTune) *proto.APLRotation {
 		// land: in front of the target, or a target that cannot be shredded.
 		castWhen(spellClaw, and(not(pooling), cmp(proto.APLValueCompare_OpGe, currentEnergy(), spellCost(spellShred)))),
 	}
-	if tune.shadowmeld {
-		// Ahead of Shred: Ravage is 350% weapon damage plus 98 for 60 energy, Shred 155% plus 80 for 42.
-		ravage := and(inCat, spellReady(spellShadowmeld), not(pooling), or(clearcasting,
-			cmp(proto.APLValueCompare_OpGe, currentEnergy(), spellCost(spellRavage))))
-		builders = append([]*proto.APLListItem{sequenceWhen(vars.def("Shadowmeld into Ravage", ravage),
-			spellAction(spellShadowmeld), spellAction(spellRavage))}, builders...)
-	}
 	// Elune's Light is a Night Elf's; the Energized list is a High Order Skyborne's.
 	var cooldownLines []*proto.APLListItem
 	if !tune.energized {
@@ -204,10 +195,6 @@ func catAPL(tune aplTune) *proto.APLRotation {
 	}
 	if tune.ccShred {
 		spend := and(inCat, clearcasting)
-		if tune.shadowmeld {
-			// Ravage saves more than Shred, so a ready Shadowmeld keeps Clearcasting for it.
-			spend = and(spend, not(spellReady(spellShadowmeld)))
-		}
 		spend = vars.def("Clearcasting into Shred", spend)
 		list = append(list, castWhen(spellShred, spend), castWhen(spellClaw, and(spend, not(spellCanCast(spellShred)))))
 	}
@@ -367,18 +354,10 @@ func weaveAPL(tune weaveTune) *proto.APLRotation {
 }
 
 const (
-	spellShadowmeld int32 = 20580
-	spellProwl      int32 = 9913
-	spellRavage     int32 = 9867
-	spellPounce     int32 = 9827
+	spellProwl  int32 = 9913
+	spellRavage int32 = 9867
+	spellPounce int32 = 9827
 )
-
-// shadowmeldAPL is Monocat with Shadowmeld into Ravage on cooldown, for a Night Elf.
-func shadowmeldAPL() *proto.APLRotation {
-	tune := bestCatAPL
-	tune.shadowmeld = true
-	return catAPL(tune)
-}
 
 // energizedAPL is Monocat with Read Ley Line, for a High Order Skyborne.
 func energizedAPL() *proto.APLRotation {
@@ -415,12 +394,11 @@ func catAPLPresets() map[string]*proto.APLRotation {
 		}
 	}
 	return map[string]*proto.APLRotation{
-		"default":    defaultRotation,
-		"shadowmeld": shadowmeldAPL(),
-		"energized":  energizedAPL(),
-		"bearweave":  bearweaveAPL(),
-		"ravage":     openerAPL(spellRavage),
-		"pounce":     openerAPL(spellPounce),
+		"default":   defaultRotation,
+		"energized": energizedAPL(),
+		"bearweave": bearweaveAPL(),
+		"ravage":    openerAPL(spellRavage),
+		"pounce":    openerAPL(spellPounce),
 	}
 }
 

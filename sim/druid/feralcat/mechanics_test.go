@@ -622,26 +622,58 @@ func resetCooldown(spell *core.Spell) {
 	}
 }
 
-// Shadowmeld 20580 lets a Night Elf Ravage in combat; the Ravage ends it, and in combat its cooldown is
-// 2 minutes.
-func TestShadowmeldAllowsRavageInCombat(t *testing.T) {
-	sim, cat := newCat(t, "", nil)
-	sim.CurrentTime = 10 * time.Second
-	fillResource(sim, cat)
-	if cat.Ravage.CanCast(sim, cat.CurrentTarget) {
-		t.Fatal("ravage could be cast without stealth")
-	}
-	if !cat.Shadowmeld.Cast(sim, cat.CurrentTarget) {
-		t.Fatal("shadowmeld did not cast in combat")
-	}
-	if !cat.Ravage.Cast(sim, cat.CurrentTarget) {
-		t.Fatal("ravage did not cast from shadowmeld")
-	}
-	if cat.ShadowmeldAura.IsActive() {
-		t.Error("ravage left the druid in shadowmeld")
-	}
-	if got := cat.Shadowmeld.ReadyAt() - sim.CurrentTime; got != 2*time.Minute {
-		t.Errorf("shadowmeld is ready in %v, want 2m", got)
+func TestProwlAttacksRejectShadowmeld(t *testing.T) {
+	for _, ability := range []struct {
+		name  string
+		spell func(*FeralDruid) *druid.DruidSpell
+	}{
+		{"Ravage", func(cat *FeralDruid) *druid.DruidSpell { return cat.Ravage }},
+		{"Pounce", func(cat *FeralDruid) *druid.DruidSpell { return cat.Pounce }},
+	} {
+		for _, at := range []time.Duration{-time.Second, 10 * time.Second} {
+			t.Run(fmt.Sprintf("%s/%s", ability.name, at), func(t *testing.T) {
+				sim, cat := newCat(t, "", nil)
+				sim.CurrentTime = at
+				fillResource(sim, cat)
+				attack := ability.spell(cat)
+				if attack.CanCast(sim, cat.CurrentTarget) {
+					t.Fatal("attack was available without Prowl")
+				}
+				if cat.Shadowmeld.Flags.Matches(core.SpellFlagAPL) {
+					t.Fatal("Shadowmeld was exposed in the APL spell picker")
+				}
+				if !cat.Shadowmeld.Cast(sim, cat.CurrentTarget) {
+					t.Fatal("Shadowmeld did not cast")
+				}
+				energy, gcd := cat.CurrentEnergy(), cat.GCD.ReadyAt()
+				if attack.CanCast(sim, cat.CurrentTarget) || attack.Cast(sim, cat.CurrentTarget) {
+					t.Fatal("Shadowmeld enabled an attack requiring Prowl")
+				}
+				if cat.CurrentEnergy() != energy || cat.GCD.ReadyAt() != gcd || !cat.ShadowmeldAura.IsActive() {
+					t.Fatal("rejected attack changed energy, the GCD or Shadowmeld")
+				}
+				if got := cat.Shadowmeld.ReadyAt() - sim.CurrentTime; got != 2*time.Minute {
+					t.Errorf("Shadowmeld is ready in %v, want 2m", got)
+				}
+				t.Logf("%s at %s: Shadowmeld active, attack rejected, energy and GCD unchanged", ability.name, at)
+			})
+		}
+		t.Run(ability.name+"/Prowl", func(t *testing.T) {
+			sim, cat := newCat(t, "", nil)
+			sim.CurrentTime = -time.Second
+			if !cat.Prowl.Cast(sim, cat.CurrentTarget) {
+				t.Fatal("Prowl did not cast before combat")
+			}
+			sim.CurrentTime = time.Second
+			fillResource(sim, cat)
+			if !ability.spell(cat).Cast(sim, cat.CurrentTarget) {
+				t.Fatal("attack did not cast from Prowl")
+			}
+			if cat.ProwlAura.IsActive() {
+				t.Fatal("attack left Prowl active")
+			}
+			t.Logf("%s cast from Prowl and ended it", ability.name)
+		})
 	}
 }
 

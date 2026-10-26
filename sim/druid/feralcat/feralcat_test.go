@@ -41,7 +41,6 @@ func TestFeralCat(t *testing.T) {
 		OtherRotations: []core.RotationCombo{
 			core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "jvmes"),
 			core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "bearweave"),
-			core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "shadowmeld"),
 		},
 		Consumables: &proto.ConsumesSpec{},
 		ItemFilter: core.ItemFilter{
