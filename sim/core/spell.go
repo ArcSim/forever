@@ -154,7 +154,6 @@ type Spell struct {
 	SpellMetrics      []SpellMetrics
 	splitSpellMetrics [][]SpellMetrics // Used to split metrics by some condition.
 	casts             int              // Sum of casts on all targets, for efficient CPM calculation
-	pressedState      uint8            // What pressed() answered: 0 until first asked, then 1 for no and 2 for yes.
 
 	// Performs the actions of this spell.
 	ApplyEffects ApplySpellResults

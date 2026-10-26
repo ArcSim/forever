@@ -130,6 +130,7 @@ type ActionMetrics struct {
 	Targets []TargetedActionMetrics
 
 	rangeSources [][]*hitRanges // One slice per spell and split feeding this action, indexed by target.
+	pressedSeen  []*Spell       // The spells feeding this action that IsPressed has already asked pressed() about.
 }
 
 const numHitKinds = int(proto.HitKind_HitKindShield) + 1
@@ -423,18 +424,8 @@ func (unit *Unit) NewGenericMetric(actionID ActionID) *ResourceMetrics {
 // spell whose APL spell shares its action under another tag (Heroic Strike, Cleave, Raptor Strike and
 // Maul queue through such a spell, which records no metrics). A pet's abilities carry no APL flag, since
 // the pet's own logic casts them, so on a pet everything but its auto attack actions, its movement, its
-// procs and its passive spells is pressed. The answer is cached on the spell.
+// procs and its passive spells is pressed.
 func pressed(spell *Spell) bool {
-	if spell.pressedState == 0 {
-		spell.pressedState = 1
-		if computePressed(spell) {
-			spell.pressedState = 2
-		}
-	}
-	return spell.pressedState == 2
-}
-
-func computePressed(spell *Spell) bool {
 	if spell.Flags.Matches(SpellFlagPressed) {
 		return true
 	}
@@ -474,7 +465,11 @@ func (unitMetrics *UnitMetrics) addSpellMetrics(spell *Spell, actionID ActionID,
 		}
 		unitMetrics.actions[actionID] = actionMetrics
 	}
-	actionMetrics.IsPressed = actionMetrics.IsPressed || pressed(spell)
+	// Asked once per spell, since the scan of the spellbook would otherwise run every iteration.
+	if !actionMetrics.IsPressed && !slices.Contains(actionMetrics.pressedSeen, spell) {
+		actionMetrics.pressedSeen = append(actionMetrics.pressedSeen, spell)
+		actionMetrics.IsPressed = pressed(spell)
+	}
 
 	if len(actionMetrics.Targets) == 0 {
 		actionMetrics.Targets = make([]TargetedActionMetrics, len(spellMetrics))
