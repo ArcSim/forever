@@ -1378,6 +1378,9 @@
 						"moving": {
 							"type": "string"
 						},
+						"moving_from_spell": {
+							"type": "string"
+						},
 						"prepull": {
 							"type": "string"
 						},
@@ -1404,6 +1407,7 @@
 						"shoot",
 						"refund",
 						"moving",
+						"moving_from_spell",
 						"prepull",
 						"encounter_start",
 						"minor_run_speed",

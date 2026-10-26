@@ -420,18 +420,22 @@ func (unit *Unit) NewGenericMetric(actionID ActionID) *ResourceMetrics {
 	return unit.Metrics.NewResourceMetrics(actionID, proto.ResourceType_ResourceTypeGenericResource)
 }
 
-// Whether the spell's unit presses it. A player presses an APL spell, a SpellFlagPressed spell, and a hit
-// spell whose APL spell shares its action under another tag (Heroic Strike, Cleave, Raptor Strike and
-// Maul queue through such a spell, which records no metrics). A pet's abilities carry no APL flag, since
-// the pet's own logic casts them, so on a pet everything but its auto attack actions, its movement, its
-// procs and its passive spells is pressed.
-func pressed(spell *Spell) bool {
+// Whether the spell's unit presses the action the spell feeds. A player presses an APL spell, a
+// SpellFlagPressed spell, a hit spell whose APL spell shares its action under another tag (Heroic Strike,
+// Cleave, Raptor Strike and Maul queue through such a spell, which records no metrics), and the walks it
+// starts by hand, the move spell's split 0; a walk a spell causes, split 1, is not pressed. A pet's
+// abilities carry no APL flag, since the pet's own logic casts them, so on a pet everything but its auto
+// attack actions, its movement, its procs and its passive spells is pressed.
+func pressed(spell *Spell, actionID ActionID) bool {
+	unit := spell.Unit
+	if spell == unit.moveSpell {
+		return unit.Type == PlayerUnit && actionID.Tag == 0
+	}
 	if spell.Flags.Matches(SpellFlagPressed) {
 		return true
 	}
-	unit := spell.Unit
 	if unit.Type == PetUnit {
-		if spell == unit.moveSpell || spell.Flags.Matches(SpellFlagProc|SpellFlagPassiveSpell) {
+		if spell.Flags.Matches(SpellFlagProc | SpellFlagPassiveSpell) {
 			return false
 		}
 		aa := &unit.AutoAttacks
@@ -468,7 +472,7 @@ func (unitMetrics *UnitMetrics) addSpellMetrics(spell *Spell, actionID ActionID,
 	// Asked once per spell, since the scan of the spellbook would otherwise run every iteration.
 	if !actionMetrics.IsPressed && !slices.Contains(actionMetrics.pressedSeen, spell) {
 		actionMetrics.pressedSeen = append(actionMetrics.pressedSeen, spell)
-		actionMetrics.IsPressed = pressed(spell)
+		actionMetrics.IsPressed = pressed(spell, actionID)
 	}
 
 	if len(actionMetrics.Targets) == 0 {

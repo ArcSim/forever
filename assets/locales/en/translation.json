@@ -387,6 +387,7 @@
 			"shoot": "Shoot",
 			"refund": "Refund",
 			"moving": "Moving",
+			"moving_from_spell": "Moving (from a spell)",
 			"prepull": "Prepull",
 			"encounter_start": "Encounter Start",
 			"minor_run_speed": "Minor Run Speed (8%)",
