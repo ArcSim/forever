@@ -514,6 +514,20 @@ func TestSkyborneCastsShareACooldown(t *testing.T) {
 	}
 }
 
+// Both Read Leyline casts are major cooldowns that never fire on their own.
+func TestReadLeylineIsAnAPLOnlyCooldown(t *testing.T) {
+	sim, fw := setupFakeWarlockSim(proto.Race_RaceHighOrderSkyborne)
+	for _, tag := range []int32{0, 1} {
+		mcd := fw.GetMajorCooldown(ActionID{SpellID: 1259705, Tag: tag})
+		if mcd == nil {
+			t.Fatalf("Read Leyline tag %d should be a major cooldown", tag)
+		}
+		if mcd.ShouldActivate(sim, &fw.Character) {
+			t.Errorf("Read Leyline tag %d should never activate on its own", tag)
+		}
+	}
+}
+
 // Read Leyline cannot be cast under Innervate, and an Innervate that lands ends Energized.
 func TestInnervateReplacesEnergized(t *testing.T) {
 	sim := NewSim(&proto.RaidSimRequest{

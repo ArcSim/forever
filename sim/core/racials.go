@@ -223,12 +223,20 @@ func applyRaceEffects(agent Agent) {
 			}
 		})
 
-		registerSkyborneCasts(character, 1259705, time.Second*2, energizedAura, func(_ *Simulation, _ *Unit) bool {
+		readLeyline := registerSkyborneCasts(character, 1259705, time.Second*2, energizedAura, func(_ *Simulation, _ *Unit) bool {
 			return !character.HasActiveAuraWithTag(innervateTag)
 		}, func(sim *Simulation, buffed bool) {
 			regen = Ternary(buffed, 2.0, 1.5)
 			energizedAura.Activate(sim)
 		})
+		// Never cast on its own: the APL decides whether the player holds Attuned.
+		for _, spell := range readLeyline {
+			character.AddMajorCooldown(MajorCooldown{
+				Spell:          spell,
+				Type:           CooldownTypeMana,
+				ShouldActivate: func(*Simulation, *Character) bool { return false },
+			})
+		}
 	case proto.Race_RaceWindshaperSkyborne:
 		applySkyborneSharedRacials(character)
 
@@ -267,10 +275,11 @@ func applySkyborneSharedRacials(character *Character) {
 // character under the hour-long buff a cast at a Ley Line (Attuned) or at an elemental convergence
 // (Charged) grants, which doubles the effect. The buff lasts through death, so the APL picks the cast
 // the player holds for the whole fight.
-func registerSkyborneCasts(character *Character, spellID int32, castTime time.Duration, aura *Aura, castCondition CanCastCondition, activate func(sim *Simulation, buffed bool)) {
+func registerSkyborneCasts(character *Character, spellID int32, castTime time.Duration, aura *Aura, castCondition CanCastCondition, activate func(sim *Simulation, buffed bool)) [2]*Spell {
+	var spells [2]*Spell
 	timer := character.NewTimer()
 	for tag, buffed := range []bool{false, true} {
-		character.RegisterSpell(SpellConfig{
+		spells[tag] = character.RegisterSpell(SpellConfig{
 			ActionID: ActionID{SpellID: spellID, Tag: int32(tag)},
 			Flags:    SpellFlagAPL | SpellFlagNoOnCastComplete,
 			Cast: CastConfig{
@@ -291,6 +300,7 @@ func registerSkyborneCasts(character *Character, spellID int32, castTime time.Du
 			RelatedSelfBuff: aura,
 		})
 	}
+	return spells
 }
 
 // Command 20576 raises the damage of hunter and warlock pets by 5%. The game build has no row for it.
