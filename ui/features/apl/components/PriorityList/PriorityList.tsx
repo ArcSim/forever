@@ -2,6 +2,7 @@ import { AplItemActions, AplList, AplSectionTitle } from '@features/apl/componen
 import { AplListItem } from '@features/apl/components/AplListItem';
 import { AplListToolbar } from '@features/apl/components/AplListToolbar';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
+import { copyAplClip, pasteAplClip } from '@features/apl/components/clipboard';
 import { ListItemHeader } from '@features/apl/components/ListItemHeader';
 import { uuidValidations } from '@features/apl/components/ListItemHeader/utils';
 import { useVariableExtraction } from '@features/apl/hooks/useVariableExtraction';
@@ -74,6 +75,7 @@ export const PriorityList = () => {
 										<AplItemActions
 											label={label}
 											onCopy={() => rows.copy(index)}
+											onCopyToClipboard={() => copyAplClip({ kind: 'action', item: config.getValue(player) })}
 											onExtract={() => extraction.extract(index)}
 											canExtract={() => extraction.canExtract(index)}
 											onDelete={() => rows.remove(index)}
@@ -87,7 +89,7 @@ export const PriorityList = () => {
 						})}
 					</AplList.Rows>
 				)}
-				<AplListToolbar className="self-stretch" itemName={label} onCreate={() => rows.create()} />
+				<AplListToolbar className="self-stretch" itemName={label} onCreate={() => rows.create()} onPaste={() => pasteAplClip('action', rows)} />
 				<AplNameDialog {...extraction.dialog} />
 			</Tree.Item.Children>
 		</AplList.Item>

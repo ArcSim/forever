@@ -1,6 +1,7 @@
 import { AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListToolbar } from '@features/apl/components/AplListToolbar';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
+import { pasteAplClip } from '@features/apl/components/clipboard';
 import { useRenamedCopy } from '@features/apl/hooks/useRenamedCopy';
 import { APL_GROUPS, aplItemId } from '@features/apl/model/apply_move';
 import { freshUuids } from '@features/apl/model/fresh_uuids';
@@ -48,11 +49,6 @@ export const GroupList = () => {
 		},
 	});
 
-	const appendGroup = (name?: string) =>
-		player.modifyAplRotation(rotation => {
-			rotation.groups = [...(rotation.groups || []), newGroup(name!)];
-		});
-
 	return (
 		// The tab panel is a flex column with a gap; this stays a single flex item so that gap doesn't land between the header and the tree.
 		<div className="flex flex-col">
@@ -81,7 +77,8 @@ export const GroupList = () => {
 					inputLabel: i18n.t('rotation_tab.apl.actionGroups.attributes.name'),
 					existingNames: () => groups.items.map(group => group.name),
 				}}
-				onCreate={appendGroup}
+				onCreate={name => groups.append(newGroup(name!))}
+				onPaste={() => pasteAplClip('group', groups)}
 			/>
 			<AplNameDialog {...copying.dialog} />
 		</div>

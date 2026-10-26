@@ -1,5 +1,6 @@
 import { AplItemActions, AplList } from '@features/apl/components/AplList';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
+import { copyAplClip } from '@features/apl/components/clipboard';
 import { AplValidations } from '@features/apl/components/ListItemHeader';
 import { uuidValidations } from '@features/apl/components/ListItemHeader/utils';
 import { NameDisplay } from '@features/apl/components/NameDisplay';
@@ -59,7 +60,14 @@ export const VariableItem = ({ id, player, config, onCopy, onDelete }: VariableI
 			label={variableLabel}
 			title={<NameDisplay name={variable?.name || ''} onRename={() => setRenaming(true)} />}
 			aside={<AplValidations getValidations={subject => uuidValidations(subject, config.getValue(subject)?.value?.uuid?.value)} />}
-			actions={<AplItemActions label={variableLabel} onCopy={onCopy} onDelete={onDelete} />}
+			actions={
+				<AplItemActions
+					label={variableLabel}
+					onCopy={onCopy}
+					onCopyToClipboard={() => copyAplClip({ kind: 'variable', item: config.getValue(player) })}
+					onDelete={onDelete}
+				/>
+			}
 			testId="apl-variable-root">
 			<Tree.Item.Body>
 				<Field {...frameProps} density="compact" className={[frameProps.className, 'm-0']} testId="apl-list-item-picker-root" disabled={disabled}>

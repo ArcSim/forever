@@ -1,6 +1,7 @@
 import { AplItemActions, AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListItem } from '@features/apl/components/AplListItem';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
+import { copyAplClip, pasteAplClip } from '@features/apl/components/clipboard';
 import { ListItemHeader } from '@features/apl/components/ListItemHeader';
 import { uuidValidations } from '@features/apl/components/ListItemHeader/utils';
 import { NameDisplay } from '@features/apl/components/NameDisplay';
@@ -62,7 +63,14 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 			id={id}
 			label={groupLabel}
 			title={<NameDisplay name={group?.name || ''} onRename={() => setRenaming(true)} />}
-			actions={<AplItemActions label={groupLabel} onCopy={onCopy} onDelete={onDelete} />}
+			actions={
+				<AplItemActions
+					label={groupLabel}
+					onCopy={onCopy}
+					onCopyToClipboard={() => copyAplClip({ kind: 'group', item: config.getValue(player) })}
+					onDelete={onDelete}
+				/>
+			}
 			disabled={disabled}
 			testId="apl-group-editor-root">
 			<Tree.Item.Children testId="apl-group-actions">
@@ -97,6 +105,7 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 										<AplItemActions
 											label={label}
 											onCopy={() => actions.copy(index)}
+											onCopyToClipboard={() => copyAplClip({ kind: 'action', item: itemConfig.getValue(player) })}
 											onExtract={() => extraction.extract(index)}
 											canExtract={() => extraction.canExtract(index)}
 											onDelete={() => actions.remove(index)}
@@ -110,12 +119,19 @@ export const GroupEditor = ({ id, player, config, groupIndex, onCopy, onDelete }
 						})}
 					</AplList.Rows>
 				)}
-				<Tree.AddButton
-					label={i18n.t('rotation_tab.apl.floatingActionBar.new', { itemName: label })}
-					icon="plus"
-					tone="success"
-					onClick={() => actions.create()}
-				/>
+				<span className="flex items-center gap-1">
+					<Tree.AddButton
+						label={i18n.t('rotation_tab.apl.floatingActionBar.new', { itemName: label })}
+						icon="plus"
+						tone="success"
+						onClick={() => actions.create()}
+					/>
+					<Tree.AddButton
+						label={i18n.t('rotation_tab.apl.floatingActionBar.paste', { itemName: label })}
+						icon="paste"
+						onClick={() => pasteAplClip('action', actions)}
+					/>
+				</span>
 			</Tree.Item.Children>
 			<AplNameDialog
 				open={renaming}

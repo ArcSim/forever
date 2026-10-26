@@ -2,10 +2,11 @@ import i18n from '@i18n/config';
 import { Button, type ButtonSize, type ButtonVariant } from '@ui-kit/Button';
 import { useCopyToClipboard } from '@ui-kit/hooks/useCopyToClipboard';
 import { Icon } from '@ui-kit/Icon';
-import { toastManager } from '@ui-kit/Toast';
 import { Tooltip, tooltipAnchorProps } from '@ui-kit/Tooltip';
 import clsx, { type ClassValue } from 'clsx';
 import { useId } from 'react';
+
+import { showForManualCopy } from './manual_copy';
 
 export interface CopyButtonProps {
 	/** Read at click time, not at mount: the reforge toast re-exports the whole sim on every click. */
@@ -29,11 +30,7 @@ export const CopyButton = ({ getContent, variant = null, size, className, text, 
 	const onClick = () => {
 		// `navigator.clipboard` is absent on an insecure origin: this toasts the payload for a manual copy instead and never enters the copied window, so a second click toasts again.
 		if (navigator.clipboard == undefined) {
-			toastManager.add({
-				variant: 'error',
-				autohide: false,
-				body: <pre className="max-h-40 overflow-auto break-all whitespace-pre-wrap select-all">{getContent()}</pre>,
-			});
+			showForManualCopy(getContent());
 		} else {
 			if (copied) return;
 			copy();

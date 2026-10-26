@@ -1,6 +1,7 @@
 import { AplList, AplSectionTitle } from '@features/apl/components/AplList';
 import { AplListToolbar } from '@features/apl/components/AplListToolbar';
 import { AplNameDialog } from '@features/apl/components/AplNameDialog';
+import { pasteAplClip } from '@features/apl/components/clipboard';
 import { useRenamedCopy } from '@features/apl/hooks/useRenamedCopy';
 import { APL_VARIABLES, aplItemId } from '@features/apl/model/apply_move';
 import { freshUuids } from '@features/apl/model/fresh_uuids';
@@ -66,11 +67,8 @@ export const VariablesList = () => {
 					inputLabel: i18n.t('rotation_tab.apl.variables.attributes.name'),
 					existingNames: () => variables.items.map(variable => variable.name),
 				}}
-				onCreate={name =>
-					player.modifyAplRotation(rotation => {
-						rotation.valueVariables = [...(rotation.valueVariables || []), APLValueVariable.create({ name: name!, value: undefined })];
-					})
-				}
+				onCreate={name => variables.append(APLValueVariable.create({ name: name!, value: undefined }))}
+				onPaste={() => pasteAplClip('variable', variables)}
 			/>
 			<AplNameDialog {...copying.dialog} />
 		</div>
