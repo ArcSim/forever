@@ -171,3 +171,40 @@ func TestCastOutOfReachWarns(t *testing.T) {
 		})
 	}
 }
+
+// A manual cast is a button press by the rotation. A spell that another spell casts keeps its own casts
+// but adds no press.
+func TestManualCastsCountOnlyWhatTheRotationPresses(t *testing.T) {
+	const pressedID, triggeredID = 910105, 910106
+	var pressed, triggered *Spell
+	ct := newChannelTest(func(ct *channelTest, char *Character) *Spell {
+		triggered = char.RegisterSpell(SpellConfig{
+			ActionID:     ActionID{SpellID: triggeredID},
+			Flags:        SpellFlagPassiveSpell | SpellFlagProc,
+			ApplyEffects: func(*Simulation, *Unit, *Spell) {},
+		})
+		pressed = char.RegisterSpell(SpellConfig{
+			ActionID: ActionID{SpellID: pressedID},
+			Flags:    SpellFlagAPL,
+			Cast:     CastConfig{DefaultCast: Cast{GCD: GCDDefault}},
+			ApplyEffects: func(sim *Simulation, target *Unit, _ *Spell) {
+				triggered.Cast(sim, target)
+			},
+		})
+		return fakeShoot(char, &ct.shots)
+	})
+	pressed.finalize()
+	triggered.finalize()
+
+	ct.start(ct.castOf(pressed))
+	ct.runUntil(10 * time.Second)
+
+	unit := ct.fw.CurrentTarget.UnitIndex
+	got, trig := pressed.SpellMetrics[unit], triggered.SpellMetrics[unit]
+	if got.Casts == 0 || got.ManualCasts != got.Casts {
+		t.Errorf("pressed spell: ManualCasts = %d, Casts = %d, want both equal and above 0", got.ManualCasts, got.Casts)
+	}
+	if trig.Casts != got.Casts || trig.ManualCasts != 0 {
+		t.Errorf("triggered spell: ManualCasts = %d, Casts = %d, want 0 and %d", trig.ManualCasts, trig.Casts, got.Casts)
+	}
+}

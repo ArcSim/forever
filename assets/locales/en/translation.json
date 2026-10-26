@@ -3251,6 +3251,10 @@
 					"label": "TPS",
 					"tooltip": "Threat Per Second"
 				},
+				"apm": {
+					"label": "APM",
+					"tooltip": "Actions Per Minute: the spells, abilities and items the rotation casts by hand per minute. Procs, auto attacks and pets are not counted."
+				},
 				"dtps": {
 					"label": "DTPS",
 					"tooltip": "Damage Taken Per Second"

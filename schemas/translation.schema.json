@@ -10984,6 +10984,19 @@
 									"additionalProperties": false,
 									"required": ["label", "tooltip"]
 								},
+								"apm": {
+									"type": "object",
+									"properties": {
+										"label": {
+											"type": "string"
+										},
+										"tooltip": {
+											"type": "string"
+										}
+									},
+									"additionalProperties": false,
+									"required": ["label", "tooltip"]
+								},
 								"dtps": {
 									"type": "object",
 									"properties": {
@@ -11090,7 +11103,7 @@
 								}
 							},
 							"additionalProperties": false,
-							"required": ["dps", "hps", "tps", "dtps", "tmi", "cod", "dur", "tto", "oom"]
+							"required": ["dps", "hps", "tps", "apm", "dtps", "tmi", "cod", "dur", "tto", "oom"]
 						},
 						"stop": {
 							"type": "string"
