@@ -397,9 +397,9 @@ func newDot(config Dot) *Dot {
 		}
 		sim.AddPendingAction(dot.tickAction)
 		if dot.isChanneled {
-			// Starting a channel ends the one running, with no further tick; it ends before this one takes
-			// the channel state, which its end clears.
-			if running := dot.Spell.Unit.ChanneledDot; running != nil && running != dot {
+			// Starting a channel ends the unit's running one with no further tick. That end clears the
+			// channel state and the rotation's interrupt condition, so it runs before this channel takes them.
+			if running := dot.Spell.Unit.ChanneledDot; running != nil {
 				running.stopTicking(sim)
 				running.Deactivate(sim)
 			}

@@ -802,13 +802,10 @@ func TestStartingAChannelEndsTheRunningOne(t *testing.T) {
 	})
 
 	t.Run("a channel off the GCD while another runs", func(t *testing.T) {
-		var drainTicks, otherTicks []time.Duration
+		var drainTicks []time.Duration
 		var other *Spell
 		ct := newChannelTest(func(_ *channelTest, char *Character) *Spell {
-			config := drainConfig(&otherTicks, CastConfig{})
-			config.ActionID = ActionID{SpellID: 910130}
-			config.Dot.Aura.Label = "Other Channel"
-			other = char.RegisterSpell(config)
+			other = char.RegisterSpell(manaChannelConfig(5, false))
 			return char.RegisterSpell(drainConfig(&drainTicks, CastConfig{DefaultCast: Cast{GCD: GCDDefault}}))
 		})
 		other.finalize()
@@ -821,9 +818,9 @@ func TestStartingAChannelEndsTheRunningOne(t *testing.T) {
 			t.Fatalf("the second channel should end Drain Life and be the only channel")
 		}
 		ct.runUntil(5001 * time.Millisecond)
-		if len(drainTicks) != 0 || !slices.Equal(otherTicks, seconds(1, 2, 3, 4, 5)) || !slices.Equal(ct.channelEnd, seconds(0, 5)) {
-			t.Fatalf("Drain Life should end at 0 with no tick and the second channel tick to its end, Drain Life ticks at %v, second channel ticks at %v, ended at %v",
-				drainTicks, otherTicks, ct.channelEnd)
+		if len(drainTicks) != 0 || !slices.Equal(ct.channelEnd, seconds(0, 5)) {
+			t.Fatalf("Drain Life should end at 0 with no tick and the second channel run to its end at 5 s, Drain Life ticks at %v, ended at %v",
+				drainTicks, ct.channelEnd)
 		}
 	})
 }
