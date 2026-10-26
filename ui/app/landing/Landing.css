@@ -32,6 +32,10 @@
 		@apply flex items-center text-sm whitespace-nowrap text-white hover:text-brand focus-visible:text-brand max-md:py-2;
 	}
 
+	.ui-landing-footer-link {
+		@apply text-white/80 no-underline hover:text-brand focus-visible:text-brand;
+	}
+
 	.ui-landing-nav-badge {
 		@apply flex items-center hover:opacity-85 focus-visible:opacity-85 max-md:py-2;
 	}
