@@ -7763,6 +7763,9 @@
 								},
 								"groups": {
 									"type": "string"
+								},
+								"stances": {
+									"type": "string"
 								}
 							},
 							"additionalProperties": false,
@@ -7807,7 +7810,8 @@
 								"external_cooldowns",
 								"external_debuffs",
 								"variables",
-								"groups"
+								"groups",
+								"stances"
 							]
 						},
 						"item_swap_sets": {
