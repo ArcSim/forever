@@ -153,9 +153,7 @@ func (warlock *Warlock) applyMalevolence() {
 
 	rank := spellData.Malevolence.Rank(warlock.Talents.Malevolence)
 	spelldata.ParseStatic(&warlock.Character, rank)
-	if warlock.Succubus != nil {
-		spelldata.ParseStatic(&warlock.Succubus.Character, rank)
-	}
+	spelldata.ParseStatic(&warlock.Succubus.Character, rank)
 }
 
 func (warlock *Warlock) applyNightfall() {
