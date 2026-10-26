@@ -3253,7 +3253,7 @@
 				},
 				"apm": {
 					"label": "APM",
-					"tooltip": "Actions Per Minute: the spells, abilities and items the rotation casts by hand per minute. Procs, auto attacks and pets are not counted."
+					"tooltip": "Actions Per Minute: the spells, abilities, items and moves the rotation does by hand per minute. Abilities that queue for the next swing, such as Heroic Strike, count once when pressed. Procs, auto attacks and pets are not counted."
 				},
 				"dtps": {
 					"label": "DTPS",

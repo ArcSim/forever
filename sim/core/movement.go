@@ -55,6 +55,17 @@ func (unit *Unit) initMovement() {
 	})
 }
 
+// Runs a walk the rotation starts by hand and counts one ManualCast on the move when it sets one off from
+// standing, the cast the move spell itself makes. Turning a walk under way adds none, and a walk a spell
+// starts, such as Charge, Intercept or Blink, and a pet's walk go through MoveTo and count none.
+func (unit *Unit) pressMove(move func()) {
+	standing := unit.movementAction == nil
+	move()
+	if standing && unit.movementAction != nil {
+		unit.moveSpell.CountManualCast(unit.CurrentTarget)
+	}
+}
+
 func (unit *Unit) MoveTo(moveRange float64, sim *Simulation) {
 	if moveRange == unit.DistanceFromTarget {
 		return

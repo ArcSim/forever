@@ -208,3 +208,34 @@ func TestManualCastsCountOnlyWhatTheRotationPresses(t *testing.T) {
 		t.Errorf("triggered spell: ManualCasts = %d, Casts = %d, want 0 and %d", trig.ManualCasts, trig.Casts, got.Casts)
 	}
 }
+
+// A walk the rotation sets off from standing is one press of the move. A walk a spell starts, such as Charge,
+// and a turn of a walk under way add none, though the first walk and the spell's own are both casts.
+func TestManualCastsCountTheMovesTheRotationStarts(t *testing.T) {
+	ct := newShootTest()
+	move := ct.rot.newActionMove(&proto.APLActionMove{RangeFromTarget: constValue("20")})
+	moveFor := ct.rot.newActionMoveDuration(&proto.APLActionMoveDuration{Duration: constValue("2s")})
+	metrics := func() SpellMetrics { return ct.fw.moveSpell.SpellMetrics[ct.fw.CurrentTarget.UnitIndex] }
+
+	move.Execute(ct.sim)
+	if got := metrics(); got.ManualCasts != 1 || got.Casts != 1 {
+		t.Errorf("a Move from standing: ManualCasts = %d, Casts = %d, want 1 and 1", got.ManualCasts, got.Casts)
+	}
+
+	moveFor.Execute(ct.sim)
+	if got := metrics(); got.ManualCasts != 1 || got.Casts != 1 {
+		t.Errorf("a MoveDuration that turns the walk under way: ManualCasts = %d, Casts = %d, want 1 and 1", got.ManualCasts, got.Casts)
+	}
+
+	ct.fw.StopMoving(ct.sim)
+	ct.fw.MoveTo(5, ct.sim)
+	if got := metrics(); got.ManualCasts != 1 || got.Casts != 2 {
+		t.Errorf("a walk a spell starts: ManualCasts = %d, Casts = %d, want 1 and 2", got.ManualCasts, got.Casts)
+	}
+
+	ct.fw.StopMoving(ct.sim)
+	moveFor.Execute(ct.sim)
+	if got := metrics(); got.ManualCasts != 2 || got.Casts != 3 {
+		t.Errorf("a MoveDuration from standing: ManualCasts = %d, Casts = %d, want 2 and 3", got.ManualCasts, got.Casts)
+	}
+}
