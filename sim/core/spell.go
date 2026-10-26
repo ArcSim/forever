@@ -112,9 +112,6 @@ type Spell struct {
 	// The game files' SpellClassOptions: the family and mask bit its talents name this spell by.
 	ClassFlags ClassFlags
 
-	// What pressed() answered: 0 until first asked, then 1 for no and 2 for yes.
-	pressedState uint8
-
 	// Speed in yards/second. Spell missile speeds can be found in the game data.
 	// Example: https://wow.tools/dbc/?dbc=spellmisc&build=3.4.0.44996
 	MissileSpeed float64
@@ -157,6 +154,7 @@ type Spell struct {
 	SpellMetrics      []SpellMetrics
 	splitSpellMetrics [][]SpellMetrics // Used to split metrics by some condition.
 	casts             int              // Sum of casts on all targets, for efficient CPM calculation
+	pressedState      uint8            // What pressed() answered: 0 until first asked, then 1 for no and 2 for yes.
 
 	// Performs the actions of this spell.
 	ApplyEffects ApplySpellResults
