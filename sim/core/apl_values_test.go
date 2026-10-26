@@ -1361,6 +1361,8 @@ func TestValueDots(t *testing.T) {
 	}
 }
 
+// Disabled for now, with the DoT increase values in apl_values_dot.go.
+/*
 func TestValueDotPercentIncrease(t *testing.T) {
 	sim, fw, rot := setupFakeRageRotation()
 	rend := fw.GetSpell(fakeRendActionID)
@@ -1404,6 +1406,7 @@ func TestValueDotPercentIncrease(t *testing.T) {
 		t.Fatalf("Dot Tick Rate Percent Increase on an active dot without haste = %f, want 0", got)
 	}
 }
+*/
 
 func TestValueSpellExpectedDpet(t *testing.T) {
 	sim, fw, rot := setupFakeRageRotation()

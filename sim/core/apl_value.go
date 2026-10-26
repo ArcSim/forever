@@ -270,10 +270,12 @@ func (rot *APLRotation) newAPLValueWithContext(config *proto.APLValue, groupVari
 		value = rot.newValueDotTimeToNextTick(config.GetDotTimeToNextTick(), config.Uuid)
 	case *proto.APLValue_DotBaseDuration:
 		value = rot.newValueDotBaseDuration(config.GetDotBaseDuration(), config.Uuid)
-	case *proto.APLValue_DotPercentIncrease:
-		value = rot.newValueDotPercentIncrease(config.GetDotPercentIncrease(), config.Uuid)
-	case *proto.APLValue_DotTickRatePercentIncrease:
-		value = rot.newValueDotTickRatePercentIncrease(config.GetDotTickRatePercentIncrease(), config.Uuid)
+	// Disabled for now: combat restrictions in game keep addons from tracking a DoT's damage or tick rate
+	// increase, so APLs cannot use these values.
+	// case *proto.APLValue_DotPercentIncrease:
+	// 	value = rot.newValueDotPercentIncrease(config.GetDotPercentIncrease(), config.Uuid)
+	// case *proto.APLValue_DotTickRatePercentIncrease:
+	// 	value = rot.newValueDotTickRatePercentIncrease(config.GetDotTickRatePercentIncrease(), config.Uuid)
 
 	// Sequences
 	case *proto.APLValue_SequenceIsComplete:
