@@ -38,7 +38,7 @@ const (
 	spellEnrage     int32 = 5229
 	spellMaul       int32 = 9881
 	spellInnervate  int32 = 29166
-	// Read Ley Line, the High Order Skyborne's racial: Energized, twice the mana regeneration for 15s.
+	// Read Leyline, the High Order Skyborne's racial: Energized, 50% more mana regeneration for 15s.
 	spellEnergized int32 = 1259705
 )
 

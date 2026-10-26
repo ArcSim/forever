@@ -1506,35 +1506,35 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-FullBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 872.71565
-  tps: 1483.02633
+  dps: 864.20197
+  tps: 1470.1928
   dtps: 6965.57979
-  hps: 104.06422
+  hps: 103.93222
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-FullBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 537.85633
-  tps: 899.18103
+  dps: 531.32326
+  tps: 889.31842
   dtps: 352.19338
-  hps: 91.19998
+  hps: 91.06798
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-FullBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 513.70538
-  tps: 922.5127
+  dps: 507.56115
+  tps: 913.29636
   dtps: 342.25001
-  hps: 180.13212
+  hps: 179.98812
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-NoBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 287.09506
-  tps: 514.86827
+  dps: 284.2596
+  tps: 510.61509
   dtps: 12250.60608
   hps: 34.55083
  }
@@ -1542,8 +1542,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-NoBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 224.95291
-  tps: 370.12945
+  dps: 222.77161
+  tps: 366.8575
   dtps: 610.42909
   hps: 27.83992
  }
@@ -1551,8 +1551,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-BleedAssumed-default-NoBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 215.8458
-  tps: 398.4752
+  dps: 213.69796
+  tps: 395.25344
   dtps: 602.96863
   hps: 83.51977
  }
@@ -1560,35 +1560,35 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-FullBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 859.55088
-  tps: 1463.27917
+  dps: 851.1999
+  tps: 1450.6897
   dtps: 6965.57979
-  hps: 104.06422
+  hps: 103.93222
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-FullBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 534.25049
-  tps: 893.77227
+  dps: 527.76166
+  tps: 883.97602
   dtps: 352.19338
-  hps: 91.19998
+  hps: 91.06798
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-FullBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 502.88785
-  tps: 906.28641
+  dps: 496.87634
+  tps: 897.26914
   dtps: 342.25001
-  hps: 180.13212
+  hps: 179.98812
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-NoBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 281.09838
-  tps: 505.87325
+  dps: 278.32038
+  tps: 501.70625
   dtps: 12250.60608
   hps: 34.55083
  }
@@ -1596,8 +1596,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-NoBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 223.53951
-  tps: 368.00934
+  dps: 221.3735
+  tps: 364.76033
   dtps: 610.42909
   hps: 27.83992
  }
@@ -1605,8 +1605,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-DefaultTalents-Standard-default-NoBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 211.6056
-  tps: 392.11489
+  dps: 209.50363
+  tps: 388.96194
   dtps: 602.96863
   hps: 83.51977
  }
@@ -1614,35 +1614,35 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-FullBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 872.92587
-  tps: 1475.47799
+  dps: 864.40196
+  tps: 1462.62911
   dtps: 6965.57979
-  hps: 104.06422
+  hps: 103.93222
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-FullBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 515.31903
-  tps: 856.11473
+  dps: 509.03019
+  tps: 846.61847
   dtps: 352.23719
-  hps: 89.73468
+  hps: 89.60268
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-FullBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 492.79022
-  tps: 881.28239
+  dps: 486.74466
+  tps: 872.21404
   dtps: 342.25001
-  hps: 176.90536
+  hps: 176.76136
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-NoBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 287.09506
-  tps: 510.12021
+  dps: 284.2596
+  tps: 505.86704
   dtps: 12250.60608
   hps: 34.55083
  }
@@ -1650,8 +1650,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-NoBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 220.23658
-  tps: 357.34653
+  dps: 218.06706
+  tps: 354.09225
   dtps: 610.32544
   hps: 26.42314
  }
@@ -1659,8 +1659,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-BleedAssumed-default-NoBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 211.94555
-  tps: 384.53082
+  dps: 209.79507
+  tps: 381.30509
   dtps: 602.91845
   hps: 79.26943
  }
@@ -1668,35 +1668,35 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-FullBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 859.7611
-  tps: 1455.73083
+  dps: 851.39989
+  tps: 1443.12601
   dtps: 6965.57979
-  hps: 104.06422
+  hps: 103.93222
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-FullBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 512.36635
-  tps: 851.68572
+  dps: 506.11543
+  tps: 842.24634
   dtps: 352.23719
-  hps: 89.73468
+  hps: 89.60268
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-FullBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 483.93219
-  tps: 867.99535
+  dps: 478.00039
+  tps: 859.09764
   dtps: 342.25001
-  hps: 176.90536
+  hps: 176.76136
  }
 }
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-NoBuffs-0.0yards-LongMultiTarget"
  value: {
-  dps: 281.09838
-  tps: 501.12519
+  dps: 278.32038
+  tps: 496.95819
   dtps: 12250.60608
   hps: 34.55083
  }
@@ -1704,8 +1704,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-NoBuffs-0.0yards-LongSingleTarget"
  value: {
-  dps: 218.92936
-  tps: 355.3857
+  dps: 216.77338
+  tps: 352.15174
   dtps: 610.32544
   hps: 26.42314
  }
@@ -1713,8 +1713,8 @@ dps_results: {
 dps_results: {
  key: "TestFeralBear-Settings-Tauren-default-Hybrid-Standard-default-NoBuffs-0.0yards-ShortSingleTarget"
  value: {
-  dps: 208.02389
-  tps: 378.64833
+  dps: 205.91405
+  tps: 375.48356
   dtps: 602.91845
   hps: 79.26943
  }

@@ -1495,6 +1495,12 @@
 						"damage": {
 							"type": "string"
 						},
+						"attuned": {
+							"type": "string"
+						},
+						"charged": {
+							"type": "string"
+						},
 						"wasted": {
 							"type": "string"
 						},
@@ -1589,6 +1595,8 @@
 						"crit",
 						"agi",
 						"damage",
+						"attuned",
+						"charged",
 						"wasted",
 						"raid",
 						"queue",
