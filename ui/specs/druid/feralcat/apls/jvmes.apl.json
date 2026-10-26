@@ -61,57 +61,8 @@
       "notes": "After the MCP opener, return to the main weapon in a safe Cat global window",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "activeItemSwapSet": {
-                        "swapSet": "Swap1"
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpGe",
-                        "lhs": {
-                          "currentTime": {}
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "30s"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpGe",
-                        "lhs": {
-                          "gcdTimeToReady": {}
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "0.8s"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 13494
-                      }
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Ready to return to the main weapon"
           }
         },
         "itemSwap": {
@@ -220,231 +171,8 @@
       "notes": "Berserk before a builder; pool energy or use Clearcasting for later uses",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "gcdTimeToReady": {}
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "0s"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "spellIsKnown": {
-                        "spellId": {
-                          "spellId": 417141
-                        }
-                      }
-                    },
-                    {
-                      "auraIsActive": {
-                        "auraId": {
-                          "spellId": 768
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "spellTimeToReady": {
-                            "spellId": {
-                              "spellId": 417141
-                            }
-                          }
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "0s"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "spellCanCast": {
-                        "spellId": {
-                          "spellId": 417141
-                        }
-                      }
-                    },
-                    {
-                      "not": {
-                        "val": {
-                          "and": {
-                            "vals": [
-                              {
-                                "variableRef": {
-                                  "name": "Final-global Bite"
-                                }
-                              },
-                              {
-                                "spellCanCast": {
-                                  "spellId": {
-                                    "spellId": 22829
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "or": {
-                        "vals": [
-                          {
-                            "and": {
-                              "vals": [
-                                {
-                                  "auraIsActive": {
-                                    "auraId": {
-                                      "spellId": 9913
-                                    }
-                                  }
-                                },
-                                {
-                                  "spellCanCast": {
-                                    "spellId": {
-                                      "spellId": 9867
-                                    }
-                                  }
-                                }
-                              ]
-                            }
-                          },
-                          {
-                            "and": {
-                              "vals": [
-                                {
-                                  "not": {
-                                    "val": {
-                                      "auraIsActive": {
-                                        "auraId": {
-                                          "spellId": 9913
-                                        }
-                                      }
-                                    }
-                                  }
-                                },
-                                {
-                                  "or": {
-                                    "vals": [
-                                      {
-                                        "variableRef": {
-                                          "name": "Berserk into Rake"
-                                        }
-                                      },
-                                      {
-                                        "variableRef": {
-                                          "name": "Berserk into Shred or Claw"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                }
-                              ]
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "not": {
-                        "val": {
-                          "and": {
-                            "vals": [
-                              {
-                                "and": {
-                                  "vals": [
-                                    {
-                                      "auraIsActive": {
-                                        "auraId": {
-                                          "spellId": 768
-                                        }
-                                      }
-                                    },
-                                    {
-                                      "and": {
-                                        "vals": [
-                                          {
-                                            "cmp": {
-                                              "op": "OpGe",
-                                              "lhs": {
-                                                "currentComboPoints": {}
-                                              },
-                                              "rhs": {
-                                                "variableRef": {
-                                                  "name": "Fight-end Bite CP"
-                                                }
-                                              }
-                                            }
-                                          },
-                                          {
-                                            "cmp": {
-                                              "op": "OpLe",
-                                              "lhs": {
-                                                "currentEnergy": {}
-                                              },
-                                              "rhs": {
-                                                "variableRef": {
-                                                  "name": "Fight-end Bite energy ceiling"
-                                                }
-                                              }
-                                            }
-                                          },
-                                          {
-                                            "cmp": {
-                                              "op": "OpLt",
-                                              "lhs": {
-                                                "remainingTime": {}
-                                              },
-                                              "rhs": {
-                                                "variableRef": {
-                                                  "name": "Rip minimum fight left"
-                                                }
-                                              }
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    }
-                                  ]
-                                }
-                              },
-                              {
-                                "spellCanCast": {
-                                  "spellId": {
-                                    "spellId": 22829
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "variableRef": {
-                      "name": "Pool for followup Berserk"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Ready to use Berserk"
           }
         },
         "castSpell": {
@@ -475,38 +203,8 @@
       "notes": "After the opening attack, activate the equipped MCP",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "activeItemSwapSet": {
-                  "swapSet": "Swap1"
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 9913
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpLe",
-                  "lhs": {
-                    "unitDistance": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "5"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Ready to activate MCP"
           }
         },
         "castSpell": {
@@ -579,200 +277,8 @@
       "notes": "Use Major Mana Potion when it fits and the remaining fight needs mana",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "selectedPotion": {
-                        "potionId": {
-                          "itemId": 13444
-                        }
-                      }
-                    },
-                    {
-                      "spellIsKnown": {
-                        "spellId": {
-                          "itemId": 13444
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "gcdTimeToReady": {}
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "0s"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "spellTimeToReady": {
-                            "spellId": {
-                              "itemId": 13444
-                            }
-                          }
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "0s"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpGe",
-                        "lhs": {
-                          "math": {
-                            "op": "OpSub",
-                            "lhs": {
-                              "maxMana": {}
-                            },
-                            "rhs": {
-                              "currentMana": {}
-                            }
-                          }
-                        },
-                        "rhs": {
-                          "math": {
-                            "op": "OpAdd",
-                            "lhs": {
-                              "const": {
-                                "val": "2250"
-                              }
-                            },
-                            "rhs": {
-                              "math": {
-                                "op": "OpMul",
-                                "lhs": {
-                                  "currentManaRegen": {}
-                                },
-                                "rhs": {
-                                  "const": {
-                                    "val": "5"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "or": {
-                  "vals": [
-                    {
-                      "not": {
-                        "val": {
-                          "and": {
-                            "vals": [
-                              {
-                                "auraIsKnown": {
-                                  "sourceUnit": {
-                                    "type": "CurrentTarget"
-                                  },
-                                  "auraId": {
-                                    "spellId": 20355,
-                                    "tag": -1
-                                  }
-                                }
-                              },
-                              {
-                                "auraIsActive": {
-                                  "sourceUnit": {
-                                    "type": "CurrentTarget"
-                                  },
-                                  "auraId": {
-                                    "spellId": 20355,
-                                    "tag": -1
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLt",
-                        "lhs": {
-                          "currentMana": {}
-                        },
-                        "rhs": {
-                          "math": {
-                            "op": "OpAdd",
-                            "lhs": {
-                              "math": {
-                                "op": "OpMul",
-                                "lhs": {
-                                  "math": {
-                                    "op": "OpDiv",
-                                    "lhs": {
-                                      "min": {
-                                        "vals": [
-                                          {
-                                            "remainingTime": {}
-                                          },
-                                          {
-                                            "const": {
-                                              "val": "120s"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    "rhs": {
-                                      "const": {
-                                        "val": "1s"
-                                      }
-                                    }
-                                  }
-                                },
-                                "rhs": {
-                                  "const": {
-                                    "val": "20"
-                                  }
-                                }
-                              }
-                            },
-                            "rhs": {
-                              "math": {
-                                "op": "OpMul",
-                                "lhs": {
-                                  "spellCurrentCost": {
-                                    "spellId": {
-                                      "spellId": 1322605
-                                    }
-                                  }
-                                },
-                                "rhs": {
-                                  "const": {
-                                    "val": "1"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Mana potion fits and is needed"
           }
         },
         "castSpell": {
@@ -786,47 +292,11 @@
       }
     },
     {
-      "notes": "Elune\u2019s Light is available, outside Berserk and away from its next use",
+      "notes": "Elune’s Light is available, outside Berserk and away from its next use",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "spellIsKnown": {
-                  "spellId": {
-                    "spellId": 1259799
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 417141
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGt",
-                  "lhs": {
-                    "spellTimeToReady": {
-                      "spellId": {
-                        "spellId": 417141
-                      }
-                    }
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "15s"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Ready to use Elune's Light"
           }
         },
         "castSpell": {
@@ -855,55 +325,8 @@
       "notes": "Use Thistle Tea at or below its energy ceiling",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "or": {
-                  "vals": [
-                    {
-                      "selectedConjured": {
-                        "conjuredId": {
-                          "itemId": 7676
-                        }
-                      }
-                    },
-                    {
-                      "selectedConjured": {
-                        "conjuredId": {
-                          "itemId": 12662
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "auraIsActive": {
-                        "auraId": {
-                          "spellId": 768
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "currentEnergy": {}
-                        },
-                        "rhs": {
-                          "variableRef": {
-                            "name": "Tea energy ceiling"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Tea is selected and energy is low"
           }
         },
         "castSpell": {
@@ -917,67 +340,8 @@
       "notes": "Use Demonic Rune after Tea when missing 1500 mana",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "selectedConjured": {
-                  "conjuredId": {
-                    "itemId": 12662
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGt",
-                  "lhs": {
-                    "spellTimeToReady": {
-                      "spellId": {
-                        "itemId": 7676
-                      }
-                    }
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "0s"
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGe",
-                  "lhs": {
-                    "math": {
-                      "op": "OpSub",
-                      "lhs": {
-                        "maxMana": {}
-                      },
-                      "rhs": {
-                        "currentMana": {}
-                      }
-                    }
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "1500"
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGt",
-                  "lhs": {
-                    "currentHealth": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "2000"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Rune can restore mana after Tea"
           }
         },
         "castSpell": {
@@ -1008,61 +372,8 @@
       "notes": "Bite near fight end when Rip is no longer worthwhile",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "auraIsActive": {
-                  "auraId": {
-                    "spellId": 768
-                  }
-                }
-              },
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "cmp": {
-                        "op": "OpGe",
-                        "lhs": {
-                          "currentComboPoints": {}
-                        },
-                        "rhs": {
-                          "variableRef": {
-                            "name": "Fight-end Bite CP"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLe",
-                        "lhs": {
-                          "currentEnergy": {}
-                        },
-                        "rhs": {
-                          "variableRef": {
-                            "name": "Fight-end Bite energy ceiling"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLt",
-                        "lhs": {
-                          "remainingTime": {}
-                        },
-                        "rhs": {
-                          "variableRef": {
-                            "name": "Rip minimum fight left"
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Fight-end Bite is worthwhile"
           }
         },
         "castSpell": {
@@ -1209,51 +520,8 @@
       "notes": "Use Claw when Shred cannot land",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "auraIsActive": {
-                  "auraId": {
-                    "spellId": 768
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "spellCanCast": {
-                      "spellId": {
-                        "spellId": 9830
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGe",
-                  "lhs": {
-                    "currentEnergy": {}
-                  },
-                  "rhs": {
-                    "spellCurrentCost": {
-                      "spellId": {
-                        "spellId": 9830
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "variableRef": {
-                      "name": "Pool for followup Berserk"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Claw can replace Shred"
           }
         },
         "castSpell": {
@@ -1267,39 +535,8 @@
       "notes": "Throw EZ-Thro Thorium Grenade in a free window after the opener",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "spellIsKnown": {
-                  "spellId": {
-                    "itemId": 260816
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 9913
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "variableRef": {
-                  "name": "Utility window"
-                }
-              },
-              {
-                "spellIsReady": {
-                  "spellId": {
-                    "itemId": 260816
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Grenade fits the utility window"
           }
         },
         "castSpell": {
@@ -1313,83 +550,8 @@
       "notes": "Read Ley Line is ready: restore needed mana in a free utility window",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "spellIsKnown": {
-                  "spellId": {
-                    "spellId": 1259705
-                  }
-                }
-              },
-              {
-                "auraIsActive": {
-                  "auraId": {
-                    "spellId": 768
-                  }
-                }
-              },
-              {
-                "spellIsReady": {
-                  "spellId": {
-                    "spellId": 1259705
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 16870
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 417141
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpLe",
-                  "lhs": {
-                    "currentEnergy": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "30"
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpLt",
-                  "lhs": {
-                    "currentMana": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "1400"
-                    }
-                  }
-                }
-              },
-              {
-                "variableRef": {
-                  "name": "Utility window"
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Read Ley Line can restore needed mana"
           }
         },
         "castSpell": {
@@ -1403,124 +565,8 @@
       "notes": "Innervate when mana is low and enough fight time remains",
       "action": {
         "condition": {
-          "and": {
-            "vals": [
-              {
-                "auraIsActive": {
-                  "auraId": {
-                    "spellId": 768
-                  }
-                }
-              },
-              {
-                "spellIsReady": {
-                  "spellId": {
-                    "spellId": 29166
-                  }
-                }
-              },
-              {
-                "and": {
-                  "vals": [
-                    {
-                      "cmp": {
-                        "op": "OpLt",
-                        "lhs": {
-                          "currentMana": {}
-                        },
-                        "rhs": {
-                          "const": {
-                            "val": "1400"
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "cmp": {
-                        "op": "OpLt",
-                        "lhs": {
-                          "currentMana": {}
-                        },
-                        "rhs": {
-                          "math": {
-                            "op": "OpMul",
-                            "lhs": {
-                              "remainingTime": {}
-                            },
-                            "rhs": {
-                              "const": {
-                                "val": "50"
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpLe",
-                  "lhs": {
-                    "gcdTimeToReady": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "0s"
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpLe",
-                  "lhs": {
-                    "currentEnergy": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "30"
-                    }
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 16870
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "not": {
-                  "val": {
-                    "auraIsActive": {
-                      "auraId": {
-                        "spellId": 417141
-                      }
-                    }
-                  }
-                }
-              },
-              {
-                "cmp": {
-                  "op": "OpGe",
-                  "lhs": {
-                    "remainingTime": {}
-                  },
-                  "rhs": {
-                    "const": {
-                      "val": "15s"
-                    }
-                  }
-                }
-              }
-            ]
+          "variableRef": {
+            "name": "Innervate can restore needed mana"
           }
         },
         "castSpell": {
@@ -2516,6 +1562,1056 @@
                     "auraId": {
                       "spellId": 16870
                     }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ready to return to the main weapon",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "and": {
+                "vals": [
+                  {
+                    "activeItemSwapSet": {
+                      "swapSet": "Swap1"
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpGe",
+                      "lhs": {
+                        "currentTime": {}
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "30s"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpGe",
+                      "lhs": {
+                        "gcdTimeToReady": {}
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "0.8s"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 13494
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ready to use Berserk",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "and": {
+                "vals": [
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "gcdTimeToReady": {}
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "0s"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "spellIsKnown": {
+                      "spellId": {
+                        "spellId": 417141
+                      }
+                    }
+                  },
+                  {
+                    "auraIsActive": {
+                      "auraId": {
+                        "spellId": 768
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "spellTimeToReady": {
+                          "spellId": {
+                            "spellId": 417141
+                          }
+                        }
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "0s"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "spellCanCast": {
+                      "spellId": {
+                        "spellId": 417141
+                      }
+                    }
+                  },
+                  {
+                    "not": {
+                      "val": {
+                        "and": {
+                          "vals": [
+                            {
+                              "variableRef": {
+                                "name": "Final-global Bite"
+                              }
+                            },
+                            {
+                              "spellCanCast": {
+                                "spellId": {
+                                  "spellId": 22829
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "or": {
+                      "vals": [
+                        {
+                          "and": {
+                            "vals": [
+                              {
+                                "auraIsActive": {
+                                  "auraId": {
+                                    "spellId": 9913
+                                  }
+                                }
+                              },
+                              {
+                                "spellCanCast": {
+                                  "spellId": {
+                                    "spellId": 9867
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "and": {
+                            "vals": [
+                              {
+                                "not": {
+                                  "val": {
+                                    "auraIsActive": {
+                                      "auraId": {
+                                        "spellId": 9913
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              {
+                                "or": {
+                                  "vals": [
+                                    {
+                                      "variableRef": {
+                                        "name": "Berserk into Rake"
+                                      }
+                                    },
+                                    {
+                                      "variableRef": {
+                                        "name": "Berserk into Shred or Claw"
+                                      }
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "not": {
+                      "val": {
+                        "and": {
+                          "vals": [
+                            {
+                              "and": {
+                                "vals": [
+                                  {
+                                    "auraIsActive": {
+                                      "auraId": {
+                                        "spellId": 768
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "and": {
+                                      "vals": [
+                                        {
+                                          "cmp": {
+                                            "op": "OpGe",
+                                            "lhs": {
+                                              "currentComboPoints": {}
+                                            },
+                                            "rhs": {
+                                              "variableRef": {
+                                                "name": "Fight-end Bite CP"
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "cmp": {
+                                            "op": "OpLe",
+                                            "lhs": {
+                                              "currentEnergy": {}
+                                            },
+                                            "rhs": {
+                                              "variableRef": {
+                                                "name": "Fight-end Bite energy ceiling"
+                                              }
+                                            }
+                                          }
+                                        },
+                                        {
+                                          "cmp": {
+                                            "op": "OpLt",
+                                            "lhs": {
+                                              "remainingTime": {}
+                                            },
+                                            "rhs": {
+                                              "variableRef": {
+                                                "name": "Rip minimum fight left"
+                                              }
+                                            }
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "spellCanCast": {
+                                "spellId": {
+                                  "spellId": 22829
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "variableRef": {
+                    "name": "Pool for followup Berserk"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ready to activate MCP",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "activeItemSwapSet": {
+                "swapSet": "Swap1"
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 9913
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpLe",
+                "lhs": {
+                  "unitDistance": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "5"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Mana potion fits and is needed",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "and": {
+                "vals": [
+                  {
+                    "selectedPotion": {
+                      "potionId": {
+                        "itemId": 13444
+                      }
+                    }
+                  },
+                  {
+                    "spellIsKnown": {
+                      "spellId": {
+                        "itemId": 13444
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "gcdTimeToReady": {}
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "0s"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "spellTimeToReady": {
+                          "spellId": {
+                            "itemId": 13444
+                          }
+                        }
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "0s"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpGe",
+                      "lhs": {
+                        "math": {
+                          "op": "OpSub",
+                          "lhs": {
+                            "maxMana": {}
+                          },
+                          "rhs": {
+                            "currentMana": {}
+                          }
+                        }
+                      },
+                      "rhs": {
+                        "math": {
+                          "op": "OpAdd",
+                          "lhs": {
+                            "const": {
+                              "val": "2250"
+                            }
+                          },
+                          "rhs": {
+                            "math": {
+                              "op": "OpMul",
+                              "lhs": {
+                                "currentManaRegen": {}
+                              },
+                              "rhs": {
+                                "const": {
+                                  "val": "5"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "or": {
+                "vals": [
+                  {
+                    "not": {
+                      "val": {
+                        "and": {
+                          "vals": [
+                            {
+                              "auraIsKnown": {
+                                "sourceUnit": {
+                                  "type": "CurrentTarget"
+                                },
+                                "auraId": {
+                                  "spellId": 20355,
+                                  "tag": -1
+                                }
+                              }
+                            },
+                            {
+                              "auraIsActive": {
+                                "sourceUnit": {
+                                  "type": "CurrentTarget"
+                                },
+                                "auraId": {
+                                  "spellId": 20355,
+                                  "tag": -1
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLt",
+                      "lhs": {
+                        "currentMana": {}
+                      },
+                      "rhs": {
+                        "math": {
+                          "op": "OpAdd",
+                          "lhs": {
+                            "math": {
+                              "op": "OpMul",
+                              "lhs": {
+                                "math": {
+                                  "op": "OpDiv",
+                                  "lhs": {
+                                    "min": {
+                                      "vals": [
+                                        {
+                                          "remainingTime": {}
+                                        },
+                                        {
+                                          "const": {
+                                            "val": "120s"
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "rhs": {
+                                    "const": {
+                                      "val": "1s"
+                                    }
+                                  }
+                                }
+                              },
+                              "rhs": {
+                                "const": {
+                                  "val": "20"
+                                }
+                              }
+                            }
+                          },
+                          "rhs": {
+                            "math": {
+                              "op": "OpMul",
+                              "lhs": {
+                                "spellCurrentCost": {
+                                  "spellId": {
+                                    "spellId": 1322605
+                                  }
+                                }
+                              },
+                              "rhs": {
+                                "const": {
+                                  "val": "1"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Ready to use Elune's Light",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "spellIsKnown": {
+                "spellId": {
+                  "spellId": 1259799
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 417141
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGt",
+                "lhs": {
+                  "spellTimeToReady": {
+                    "spellId": {
+                      "spellId": 417141
+                    }
+                  }
+                },
+                "rhs": {
+                  "const": {
+                    "val": "15s"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Tea is selected and energy is low",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "or": {
+                "vals": [
+                  {
+                    "selectedConjured": {
+                      "conjuredId": {
+                        "itemId": 7676
+                      }
+                    }
+                  },
+                  {
+                    "selectedConjured": {
+                      "conjuredId": {
+                        "itemId": 12662
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "and": {
+                "vals": [
+                  {
+                    "auraIsActive": {
+                      "auraId": {
+                        "spellId": 768
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "currentEnergy": {}
+                      },
+                      "rhs": {
+                        "variableRef": {
+                          "name": "Tea energy ceiling"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Rune can restore mana after Tea",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "selectedConjured": {
+                "conjuredId": {
+                  "itemId": 12662
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGt",
+                "lhs": {
+                  "spellTimeToReady": {
+                    "spellId": {
+                      "itemId": 7676
+                    }
+                  }
+                },
+                "rhs": {
+                  "const": {
+                    "val": "0s"
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGe",
+                "lhs": {
+                  "math": {
+                    "op": "OpSub",
+                    "lhs": {
+                      "maxMana": {}
+                    },
+                    "rhs": {
+                      "currentMana": {}
+                    }
+                  }
+                },
+                "rhs": {
+                  "const": {
+                    "val": "1500"
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGt",
+                "lhs": {
+                  "currentHealth": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "2000"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Fight-end Bite is worthwhile",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "auraIsActive": {
+                "auraId": {
+                  "spellId": 768
+                }
+              }
+            },
+            {
+              "and": {
+                "vals": [
+                  {
+                    "cmp": {
+                      "op": "OpGe",
+                      "lhs": {
+                        "currentComboPoints": {}
+                      },
+                      "rhs": {
+                        "variableRef": {
+                          "name": "Fight-end Bite CP"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLe",
+                      "lhs": {
+                        "currentEnergy": {}
+                      },
+                      "rhs": {
+                        "variableRef": {
+                          "name": "Fight-end Bite energy ceiling"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLt",
+                      "lhs": {
+                        "remainingTime": {}
+                      },
+                      "rhs": {
+                        "variableRef": {
+                          "name": "Rip minimum fight left"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Claw can replace Shred",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "auraIsActive": {
+                "auraId": {
+                  "spellId": 768
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "spellCanCast": {
+                    "spellId": {
+                      "spellId": 9830
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGe",
+                "lhs": {
+                  "currentEnergy": {}
+                },
+                "rhs": {
+                  "spellCurrentCost": {
+                    "spellId": {
+                      "spellId": 9830
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "variableRef": {
+                    "name": "Pool for followup Berserk"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Grenade fits the utility window",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "spellIsKnown": {
+                "spellId": {
+                  "itemId": 260816
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 9913
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "variableRef": {
+                "name": "Utility window"
+              }
+            },
+            {
+              "spellIsReady": {
+                "spellId": {
+                  "itemId": 260816
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Read Ley Line can restore needed mana",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "spellIsKnown": {
+                "spellId": {
+                  "spellId": 1259705
+                }
+              }
+            },
+            {
+              "auraIsActive": {
+                "auraId": {
+                  "spellId": 768
+                }
+              }
+            },
+            {
+              "spellIsReady": {
+                "spellId": {
+                  "spellId": 1259705
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 16870
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 417141
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpLe",
+                "lhs": {
+                  "currentEnergy": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "30"
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpLt",
+                "lhs": {
+                  "currentMana": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "1400"
+                  }
+                }
+              }
+            },
+            {
+              "variableRef": {
+                "name": "Utility window"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Innervate can restore needed mana",
+      "value": {
+        "and": {
+          "vals": [
+            {
+              "auraIsActive": {
+                "auraId": {
+                  "spellId": 768
+                }
+              }
+            },
+            {
+              "spellIsReady": {
+                "spellId": {
+                  "spellId": 29166
+                }
+              }
+            },
+            {
+              "and": {
+                "vals": [
+                  {
+                    "cmp": {
+                      "op": "OpLt",
+                      "lhs": {
+                        "currentMana": {}
+                      },
+                      "rhs": {
+                        "const": {
+                          "val": "1400"
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "cmp": {
+                      "op": "OpLt",
+                      "lhs": {
+                        "currentMana": {}
+                      },
+                      "rhs": {
+                        "math": {
+                          "op": "OpMul",
+                          "lhs": {
+                            "remainingTime": {}
+                          },
+                          "rhs": {
+                            "const": {
+                              "val": "50"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpLe",
+                "lhs": {
+                  "gcdTimeToReady": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "0s"
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpLe",
+                "lhs": {
+                  "currentEnergy": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "30"
+                  }
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 16870
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "not": {
+                "val": {
+                  "auraIsActive": {
+                    "auraId": {
+                      "spellId": 417141
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "cmp": {
+                "op": "OpGe",
+                "lhs": {
+                  "remainingTime": {}
+                },
+                "rhs": {
+                  "const": {
+                    "val": "15s"
                   }
                 }
               }
