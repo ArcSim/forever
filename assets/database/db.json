@@ -10539,10 +10539,6 @@
 {"id":282011,"name":"Restored Healing Potion","icon":"inv_potion_14"},
 {"id":282013,"name":"Restored Mana Potion","icon":"inv_potion_17"},
 {"id":284868,"name":"Holy Hand Grenade of Alterac","icon":"spell_shadow_mindbomb"},
-{"id":289082,"name":"Elixir of Endless Intellect","icon":"inv_potion_43"},
-{"id":289083,"name":"Elixir of Endless Power","icon":"inv_potion_50"},
-{"id":289084,"name":"Elixir of Endless Healing","icon":"inv_potion_78"},
-{"id":289087,"name":"Elixir of Endless Opportunity","icon":"inv_potion_36"},
 {"id":289321,"name":"Elixir of Endless Mana","icon":"inv_potion_71"}
 ],
 "spellIcons":[
@@ -13401,10 +13397,6 @@
 {"id":282011,"type":1,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Restored Healing Potion","lvl":60,"categoryId":4,"effectIds":[1343653],"itemEffects":[{"buffId":1312698,"onUse":{"categoryId":4,"categoryCooldownMs":120000}}],"potionClasses":[2]},
 {"id":282013,"type":1,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Restored Mana Potion","lvl":60,"categoryId":4,"effectIds":[1343657],"itemEffects":[{"buffId":1312702,"onUse":{"categoryId":4,"categoryCooldownMs":120000}}],"potionClasses":[1]},
 {"id":284868,"type":5,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Holy Hand Grenade of Alterac","lvl":52,"categoryId":24,"itemEffects":[{"buffId":1317268,"onUse":{"categoryId":24,"categoryCooldownMs":60000}}]},
-{"id":289082,"type":11,"stats":[0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Elixir of Endless Intellect","lvl":30,"categoryId":2593,"itemEffects":[{"buffId":1327736,"onUse":{"categoryId":2593,"categoryCooldownMs":3000}}],"groupKey":"29/3","groupName":"Intellect"},
-{"id":289083,"type":11,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Elixir of Endless Power","lvl":30,"categoryId":2593,"itemEffects":[{"buffId":1327737,"onUse":{"categoryId":2593,"categoryCooldownMs":3000}}],"groupKey":"79/127","groupName":"Other"},
-{"id":289084,"type":11,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Elixir of Endless Healing","lvl":30,"categoryId":2593,"itemEffects":[{"buffId":1327738,"onUse":{"categoryId":2593,"categoryCooldownMs":3000}}],"groupKey":"136/127","groupName":"Other"},
-{"id":289087,"type":11,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Elixir of Endless Opportunity","lvl":30,"categoryId":2593,"itemEffects":[{"buffId":1327753,"onUse":{"categoryId":2593,"categoryCooldownMs":3000}}],"groupKey":"290/0","groupName":"Critical Strike","pseudoStats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
 {"id":289321,"type":11,"stats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"name":"Elixir of Endless Mana","lvl":30,"categoryId":2593,"itemEffects":[{"buffId":1328032,"onUse":{"categoryId":2593,"categoryCooldownMs":3000}}],"groupKey":"110/0","groupName":"Other"}
 ],
 "spellEffects":[
