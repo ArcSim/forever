@@ -9,8 +9,7 @@ const (
 	// The spell cannot be cast while the caster is in any shapeshift form.
 	ATTR_NOT_SHAPESHIFTED uint32 = 0x10000
 
-	// The spell cannot be dodged, parried or blocked (No Active Defense). Ambush, Garrote, Ravage,
-	// Pounce, Overpower and the judgement casts carry it; Backstab does not.
+	// The spell cannot be dodged, parried or blocked (No Active Defense).
 	ATTR_NO_ACTIVE_DEFENSE uint32 = 0x200000
 
 	// The two bits the game files mark a channel with. Arcane Missiles and Blizzard carry the first,

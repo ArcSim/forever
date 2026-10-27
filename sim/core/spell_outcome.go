@@ -856,12 +856,8 @@ func (spell *Spell) OutcomeExpectedPhysicalCrit(_ *Simulation, result *SpellResu
 func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	hand := attackTable.Hand(spell)
 	missChance := spell.GetPhysicalMissChance(attackTable)
-	noActiveDefense := spell.Flags.Matches(SpellFlagNoActiveDefense)
-	parriesAndBlocks := spell.Unit.PseudoStats.InFrontOfTarget && !noActiveDefense
-	dodgeChance := TernaryFloat64(noActiveDefense, 0, max(0, hand.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction))
-	parryChance := TernaryFloat64(parriesAndBlocks, max(0, hand.BaseParryChance-spell.DodgeParrySuppression()), 0)
+	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(hand)
 	glanceChance := hand.BaseGlanceChance
-	blockChance := TernaryFloat64(parriesAndBlocks, hand.BaseBlockChance, 0)
 	whiteCritCap := 1.0 - missChance - dodgeChance - parryChance - glanceChance - blockChance
 	critChance := min(spell.PhysicalCritChance(attackTable), whiteCritCap)
 	averageMultiplier := 1.0 - missChance - dodgeChance - parryChance + (spell.CritDamageMultiplier(attackTable)-1)*critChance - glanceChance*(1.0-(hand.GlanceMultiplierMin+hand.GlanceMultiplierMax)/2) - blockChance*result.blockedFraction()
@@ -871,15 +867,25 @@ func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult
 func (spell *Spell) OutcomeExpectedMeleeWeaponSpecialHitAndCrit(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	hand := attackTable.Hand(spell)
 	missChance := spell.physicalMissChanceNoDWPenalty(attackTable)
-	noActiveDefense := spell.Flags.Matches(SpellFlagNoActiveDefense)
-	parriesAndBlocks := spell.Unit.PseudoStats.InFrontOfTarget && !noActiveDefense
-	dodgeChance := TernaryFloat64(noActiveDefense, 0, max(0, hand.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction))
-	parryChance := TernaryFloat64(parriesAndBlocks, max(0, hand.BaseParryChance-spell.DodgeParrySuppression()), 0)
-	blockChance := TernaryFloat64(parriesAndBlocks, hand.BaseBlockChance, 0)
+	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(hand)
 	critChance := spell.PhysicalCritChance(attackTable)
 	averageMultiplier := (1.0-missChance-dodgeChance-parryChance-blockChance)*(1.0+(spell.CritDamageMultiplier(attackTable)-1)*critChance) +
 		blockChance*(1.0-result.blockedFraction())
 	result.Damage *= averageMultiplier
+}
+
+// The dodge, parry and block chances an expected melee outcome subtracts: none for a spell flagged No Active
+// Defense, and parry and block only from the front.
+func (spell *Spell) expectedDodgeParryBlock(hand *AttackTableHand) (dodge, parry, block float64) {
+	if spell.Flags.Matches(SpellFlagNoActiveDefense) {
+		return 0, 0, 0
+	}
+	dodge = max(0, hand.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction)
+	if spell.Unit.PseudoStats.InFrontOfTarget {
+		parry = max(0, hand.BaseParryChance-spell.DodgeParrySuppression())
+		block = hand.BaseBlockChance
+	}
+	return dodge, parry, block
 }
 
 func (result *SpellResult) blockedFraction() float64 {
