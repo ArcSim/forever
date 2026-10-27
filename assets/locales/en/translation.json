@@ -1841,7 +1841,7 @@
 				"is_expertise_capped": {
 					"label": "Is Expertise Capped",
 					"tooltip": "<b>True</b> if the current target can neither dodge nor parry the spell, otherwise <b>False</b>.",
-					"full_description": "<p>Parry counts only when you are in front of the target. Spells and ranged attacks cannot be dodged or parried and always return <b>True</b>.</p><p>The check reads only the spell's defense type, so it still counts dodge and parry for specials that never roll them, such as Backstab, Ambush and Overpower.</p>"
+					"full_description": "<p>Parry counts only when you are in front of the target. Spells and ranged attacks cannot be dodged or parried and always return <b>True</b>.</p><p>Specials that cannot be dodged, parried or blocked, such as Ambush, Garrote, Overpower and the seal judgements, also return <b>True</b>.</p>"
 				},
 				"is_ready": {
 					"label": "Is Ready",
@@ -2713,11 +2713,13 @@
 			"title": "Addon Import",
 			"description": "Import settings from the",
 			"addon_link": "WoWSims Exporter In-Game Addon",
-			"feature_description": "This feature imports gear, race, talents, and professions. It does NOT import buffs, debuffs, consumes, rotation, or custom stats.",
+			"feature_description": "This feature imports gear, race, professions and rotation. The class is required, and anything missing from the pasted text keeps its current value. It does NOT import buffs, debuffs, consumes, or custom stats.",
 			"instructions": "To import, paste the output from the addon below and click, 'Import'.",
 			"upload_button": "Upload File",
 			"import_button": "Import",
 			"error_invalid_export": "Please use a valid Addon export.",
+			"error_nothing_to_import": "The pasted text has no gear, race, professions or rotation to import.",
+			"error_invalid_rotation": "The rotation in the pasted text is not a valid rotation.",
 			"outdated": "Addon is not up to date. Addon version : '{{version}}', Latest version : '{{latest}}'",
 			"below_max_level": "The character you imported is level {{level}}. The Sim is intended to be used for max level only, so you might be missing certain items."
 		},
