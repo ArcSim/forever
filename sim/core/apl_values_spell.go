@@ -451,7 +451,9 @@ func (value *APLValueSpellInFlight) String() string {
 
 // The expected damage of one full cast if cast now, its hit and its ticks, over the time the cast
 // costs the caster: the cast time or channel, or the GCD when that is longer. Only what lands before the
-// fight ends counts, and a channel costs only the ticks it gets in.
+// fight ends counts, and a channel costs only the ticks it gets in. Every cast is taken to land: the
+// hit's expected damage uses OutcomeExpectedMagicCrit and the ticks their always-hit or crit outcome.
+// DoT clipping and mana are left out, and travel time only moves the landing.
 type APLValueSpellExpectedDpet struct {
 	DefaultAPLValueImpl
 	spell     *Spell

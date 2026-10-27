@@ -108,14 +108,18 @@ func (spell *Spell) CanQueue(sim *Simulation, target *Unit) bool {
 		return false
 	}
 
-	// Under a hardcast that holds the rotation, a spell off the GCD and a major cooldown are not queued: they
-	// decide in the cast-end pass, once the cast has landed. A spell off the GCD goes there after the spell
-	// queued after the hardcast, a major cooldown ahead of it or, on the GCD, in its place.
-	if (spell.DefaultCast.EffectiveTime() == 0 || spell.Flags.Matches(SpellFlagMCD)) && spell.Unit.hardcastHoldsRotation(sim) {
+	if spell.waitsForCastEnd(sim) {
 		return false
 	}
 
 	return spell.meetsCost(sim, false)
+}
+
+// Under a hardcast that holds the rotation, a spell off the GCD and a major cooldown are not queued: they
+// decide in the cast-end pass, once the cast has landed. A spell off the GCD goes there after the spell
+// queued after the hardcast, a major cooldown ahead of it or, on the GCD, in its place.
+func (spell *Spell) waitsForCastEnd(sim *Simulation) bool {
+	return (spell.DefaultCast.EffectiveTime() == 0 || spell.Flags.Matches(SpellFlagMCD)) && spell.Unit.hardcastHoldsRotation(sim)
 }
 
 // Helper function for APL checks to prevent infinite loops
@@ -204,13 +208,26 @@ type rotationCast struct {
 }
 
 // A cast by the rotation or a major cooldown: once it completes it restarts the wand's timer. The record
-// outlives the call only while the cast is still running.
+// outlives the call only while the cast is still running. A press that starts counts one ManualCast on its
+// target; a cast that calls Cast directly (a proc, a swing, a spell another spell casts) counts none. A
+// press that queues another spell for the next swing, which the swing then casts directly, credits the
+// queued spell through CountManualCast.
 func (spell *Spell) castForRotation(sim *Simulation, target *Unit, channelAction *APLActionChannelSpell) {
 	unit := spell.Unit
 	unit.rotationCast = rotationCast{spell: spell, channelAction: channelAction}
-	if !spell.Cast(sim, target) || unit.Hardcast.Expires <= sim.CurrentTime {
+	cast := spell.Cast(sim, target)
+	if cast {
+		spell.CountManualCast(target)
+	}
+	if !cast || unit.Hardcast.Expires <= sim.CurrentTime {
 		unit.endRotationCast()
 	}
+}
+
+// Counts one press the player makes by hand on this spell. A press that is not the cast of this spell itself,
+// such as the one that queues it for the next swing, credits it here.
+func (spell *Spell) CountManualCast(target *Unit) {
+	spell.SpellMetrics[target.UnitIndex].ManualCasts++
 }
 
 func (unit *Unit) endRotationCast() {

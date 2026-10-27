@@ -78,12 +78,11 @@ func (hunter *Hunter) NewHunterPet() *HunterPet {
 
 	hp := &HunterPet{
 		Pet: core.NewPet(core.PetConfig{
-			Name:                  family.Name,
-			Owner:                 &hunter.Character,
-			BaseStats:             petBaseStats,
-			StatInheritance:       hunter.makeStatInheritance(),
-			EnabledOnStart:        true,
-			StartsAtOwnerDistance: true,
+			Name:            family.Name,
+			Owner:           &hunter.Character,
+			BaseStats:       petBaseStats,
+			StatInheritance: hunter.makeStatInheritance(),
+			EnabledOnStart:  true,
 		}),
 		hunterOwner: hunter,
 		family:      family,
@@ -219,6 +218,8 @@ func (hp *HunterPet) OnEncounterStart(_ *core.Simulation) {
 
 func (hp *HunterPet) ExecuteCustomRotation(sim *core.Simulation) {
 	target := hp.CurrentTarget
+	// The pet starts beside the hunter and walks in to melee range before it acts, closing with
+	// Charge, Dash or Dive when it has one.
 	if hp.DistanceFromTarget > core.MaxMeleeRange {
 		for _, closer := range hp.closers {
 			if closer.CanCast(sim, target) {

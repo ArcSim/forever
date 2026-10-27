@@ -179,21 +179,11 @@ func newAPLActionEntry(condition APLValue, impl APLActionImpl) *APLAction {
 	action := &APLAction{
 		condition: condition,
 		impl:      impl,
+		spell:     castSpellOf(impl),
 	}
 	switch impl := impl.(type) {
-	case *APLActionCastSpell:
-		action.spell = impl.spell
-	case *APLActionCastFriendlySpell:
-		action.spell = impl.spell
-	case *APLActionChannelSpell:
-		action.spell = impl.spell
-	case *APLActionMultidot:
-		action.spell = impl.spell
-	case *APLActionMultishield:
-		action.spell = impl.spell
 	case *APLActionStrictMultidot:
 		impl.entry = action
-		action.spell = impl.spell
 	case *APLActionGroupReference:
 		impl.entry = action
 	case *APLActionMove:
@@ -203,10 +193,8 @@ func newAPLActionEntry(condition APLValue, impl APLActionImpl) *APLAction {
 }
 
 func removeFromMajorCooldowns(action APLActionImpl, character *Character) {
-	if castSpellAction, ok := action.(*APLActionCastSpell); ok {
-		character.removeInitialMajorCooldown(castSpellAction.spell.ActionID)
-	} else if castFriendlySpellAction, ok := action.(*APLActionCastFriendlySpell); ok {
-		character.removeInitialMajorCooldown(castFriendlySpellAction.spell.ActionID)
+	if spell := castSpellOf(action); spell != nil {
+		character.removeInitialMajorCooldown(spell.ActionID)
 	}
 }
 

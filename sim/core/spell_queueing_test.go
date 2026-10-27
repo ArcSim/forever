@@ -467,6 +467,24 @@ func TestRotationPicksAtCastEndBeforeLanding(t *testing.T) {
 		}
 	})
 
+	t.Run("a Strict Sequence holds a major cooldown step after a hardcast for the cast-end pass", func(t *testing.T) {
+		potion := &testCooldown{}
+		cb := newHardcastTest(potion)
+		castOf := func(spell *Spell) *proto.APLAction {
+			return &proto.APLAction{Action: &proto.APLAction_CastSpell{CastSpell: &proto.APLActionCastSpell{SpellId: spell.ActionID.ToProto()}}}
+		}
+		strictSequence := cb.rot.newActionStrictSequence(&proto.APLActionStrictSequence{Actions: []*proto.APLAction{castOf(cb.slow), castOf(potion.spell)}})
+		cb.start(&gatedAction{APLActionImpl: strictSequence, ready: func(sim *Simulation) bool { return sim.CurrentTime == 0 }}, cb.castOf(cb.nuke))
+
+		cb.runUntil(castEnd)
+		if !slices.Equal(potion.castAt, []time.Duration{castEnd}) || !slices.Equal(cb.order, []string{"cooldown", "nuke"}) {
+			t.Fatalf("the sequence's potion step, ready from 1.5 s, should go at the 2 s cast end ahead of the instant below the sequence, the potion at %v, in the order %v", potion.castAt, cb.order)
+		}
+		if len(cb.rot.controllingActions) != 0 {
+			t.Fatalf("the Strict Sequence should hand the rotation back once its last step went off")
+		}
+	})
+
 	t.Run("a prepull cast ending at the pull gets its pick at 0 before it lands", func(t *testing.T) {
 		// The pick at 0 goes before the cast's outcome, as at any cast end; a prepull action at 0 completes
 		// the cast first, so it runs after the pick.
@@ -716,4 +734,40 @@ func TestRotationReadsOwnCastAsLanded(t *testing.T) {
 			t.Fatalf("once the cast pays at 2 s mana should read as it is, %.1f, read %.1f", ct.fw.CurrentMana(), mana.GetFloat(ct.sim))
 		}
 	})
+}
+
+// A rotation with a move keeps looking through the GCD once an event wakes it: after an event at 0.5 s under the
+// GCD of the instant cast at the pull (as an Auto Shot, a swing or a proc would), a walk whose condition turns true
+// at 0.9 s starts then rather than at the GCD's end.
+func TestMoveConditionTurningTrueDuringTheGcdStartsTheWalk(t *testing.T) {
+	cb := newHardcastTest()
+	fromNinth := cb.rot.newAPLValue(&proto.APLValue{Value: &proto.APLValue_Cmp{Cmp: &proto.APLValueCompare{
+		Op:  proto.APLValueCompare_OpGe,
+		Lhs: &proto.APLValue{Value: &proto.APLValue_CurrentTime{CurrentTime: &proto.APLValueCurrentTime{}}},
+		Rhs: constValue("0.9s"),
+	}}})
+	nukeAtPull := &gatedAction{APLActionImpl: cb.castOf(cb.nuke), ready: func(sim *Simulation) bool { return sim.CurrentTime == 0 }}
+	cb.rot.priorityList = nil
+	for _, action := range []*APLAction{
+		newAPLActionEntry(fromNinth, cb.rot.newActionMove(&proto.APLActionMove{RangeFromTarget: constValue("20")})),
+		newAPLActionEntry(nil, nukeAtPull),
+	} {
+		action.Finalize(cb.rot)
+		cb.rot.priorityList = append(cb.rot.priorityList, action)
+	}
+	cb.sim.PrePull()
+	cb.sim.Step()
+	cb.fw.AutoAttacks.CancelAutoSwing(cb.sim)
+	cb.sim.AddPendingAction(NewDelayedAction(DelayedActionOptions{
+		DoAt:     500 * time.Millisecond,
+		OnAction: func(sim *Simulation) { cb.fw.ReactToEvent(sim, false, true) },
+	}))
+
+	cb.runUntil(950 * time.Millisecond)
+	if cb.fw.GCD.IsReady(cb.sim) {
+		t.Fatalf("the instant's GCD should still run at 0.95 s, the instant went off at %v", cb.nukeAt)
+	}
+	if !cb.fw.Moving {
+		t.Fatalf("at 0.95 s the walk whose condition turned true at 0.9 s should have started, under the GCD, at %.1f yd", cb.fw.DistanceFromTarget)
+	}
 }

@@ -57,14 +57,15 @@ func (rot *APLRotation) postFinalize(action *APLAction) {
 		}
 	}
 	for _, inner := range all {
-		if spell := castSpellOf(inner); spell != nil && !inGroup[inner] {
+		if spell := castSpellOf(inner.impl); spell != nil && !inGroup[inner] {
 			rot.warnIfNeverInRange(spell)
 		}
 	}
 }
 
-func castSpellOf(action *APLAction) *Spell {
-	switch impl := action.impl.(type) {
+// The spell a cast action casts or queues, nil for any other action.
+func castSpellOf(impl APLActionImpl) *Spell {
+	switch impl := impl.(type) {
 	case *APLActionCastSpell:
 		return impl.spell
 	case *APLActionCastFriendlySpell:
@@ -386,6 +387,9 @@ func (action *APLActionStrictMultidot) IsReady(sim *Simulation) bool {
 
 	return len(action.readyActions) > 0
 }
+
+// The gate re-checks the entry's If and the If of every Group Reference above it, at any depth; the
+// Ifs of Sequence and Schedule wrappers only decide the start.
 func (action *APLActionStrictMultidot) Execute(sim *Simulation) {
 	groupConditions := action.unit.Rotation.groupConditions
 	var gate APLValue

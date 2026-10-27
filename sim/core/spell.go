@@ -37,6 +37,7 @@ type SpellConfig struct {
 	Cast               CastConfig
 	ExtraCastCondition CanCastCondition
 	CastRequirement    CastRequirement
+	MenuGroup          string // A manual APL menu group, a rotation_tab.apl.submenus key.
 
 	// Optional range constraints. If supplied, these are used to modify the ExtraCastCondition above to additionally check for DistanceFromTarget.
 	MinRange     float64
@@ -129,6 +130,7 @@ type Spell struct {
 	ExtraCastCondition CanCastCondition
 
 	CastRequirement    CastRequirement
+	MenuGroup          string // A manual APL menu group, a rotation_tab.apl.submenus key.
 	hasCastRequirement bool
 	casterAuras        []*Aura
 	excludeCasterAuras []*Aura
@@ -284,6 +286,7 @@ func (unit *Unit) RegisterSpell(config SpellConfig) *Spell {
 		IgnoreHaste:        config.Cast.IgnoreHaste,
 		ExtraCastCondition: config.ExtraCastCondition,
 		CastRequirement:    config.CastRequirement,
+		MenuGroup:          config.MenuGroup,
 		hasCastRequirement: config.CastRequirement != CastRequirement{},
 
 		castTimeFn: config.Cast.CastTime,
@@ -591,8 +594,7 @@ func (spell *Spell) reset(sim *Simulation) {
 }
 
 func (spell *Spell) SetMetricsSplit(splitIdx int32) {
-	spell.SpellMetrics = spell.splitSpellMetrics[splitIdx]
-	spell.hitRanges = spell.splitHitRanges[splitIdx]
+	spell.recordInSplit(splitIdx)
 	spell.ActionID.Tag = splitIdx
 
 	// Also set the tag on any dots to have them line up in the timeline
@@ -606,6 +608,12 @@ func (spell *Spell) SetMetricsSplit(splitIdx int32) {
 	if spell.aoeDot != nil && spell.aoeDot.ActionID.SameActionIgnoreTag(spell.ActionID) {
 		spell.aoeDot.ActionID.Tag = splitIdx
 	}
+}
+
+// Points the spell's metrics at one split and leaves the action id the log records untagged.
+func (spell *Spell) recordInSplit(splitIdx int32) {
+	spell.SpellMetrics = spell.splitSpellMetrics[splitIdx]
+	spell.hitRanges = spell.splitHitRanges[splitIdx]
 }
 
 func (spell *Spell) GetMetricSplitCount() int {
@@ -638,6 +646,8 @@ func (spell *Spell) rangesToRecord(target *Unit, value float64) *hitRanges {
 	return hr
 }
 
+// Called with the total each hit feeds, so a range follows its total: damage records in combat only,
+// heals and shields always.
 func (spell *Spell) recordHit(target *Unit, kind proto.HitKind, value float64) {
 	if hr := spell.rangesToRecord(target, value); hr != nil {
 		hr.kinds[kind].add(value)
@@ -922,6 +932,8 @@ func (spell *Spell) ExpectedInitialDamage(sim *Simulation, target *Unit) float64
 func (spell *Spell) ExpectedTickDamage(sim *Simulation, target *Unit) float64 {
 	return spell.expectedDamage(sim, target, spell.expectedTickDamageInternal, false)
 }
+
+// Kept for the DoT increase values, which are disabled for now in apl_values_dot.go.
 func (spell *Spell) ExpectedTickDamageFromCurrentSnapshot(sim *Simulation, target *Unit) float64 {
 	return spell.expectedDamage(sim, target, spell.expectedTickDamageInternal, true)
 }
@@ -930,6 +942,8 @@ func (spell *Spell) ExpectedTickDamageFromCurrentSnapshot(sim *Simulation, targe
 // for 150%, melee and ranged attacks for 200%. Multiplicative modifiers (the slaying
 // talents on the attack table, SpellMod_CritMultiplier_Pct) scale that base; additive
 // ones (Ruin, Impale, SpellMod_CritMultiplier_Flat) scale only the bonus part above 100%.
+// Aura 163 (aura 50 for healing) multiplies PseudoStats.CritDamageMultiplier, so 2% gives 204% melee
+// and 153% spell crits, and Vengeance 5/5 on top gives (1.53 - 1) × 2 + 1 = 206%.
 // https://web.archive.org/web/20081014064638/http://elitistjerks.com/f31/t12595-relentless_earthstorm_diamond_-_melee_only/p4/
 func (spell *Spell) CritDamageMultiplier(at *AttackTable) float64 {
 	var base float64

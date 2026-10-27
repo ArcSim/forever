@@ -49,6 +49,8 @@ type Aura struct {
 	ActionIDForProc ActionID     // If set, indicates that this aura is a trigger aura for the specified proc.
 	Source          ActionSource // Left unset, registration fills in the phase it runs in.
 
+	MenuGroup string // A manual APL menu group, a rotation_tab.apl.submenus key.
+
 	Icd *Cooldown           // The internal cooldown if any
 	Dpm *DynamicProcManager // Dynamic Proc manager for proc trigger auras if any
 
@@ -1195,6 +1197,9 @@ func (auras AuraArray) ApplyOnExpire(onExpire OnExpire) {
 	}
 }
 
+// An aura on every unit allied to the caster, for raid-targeted buffs such as Battle Shout and the
+// prayers. An in-sim cast of a party or raid area aura (paladin auras, shaman totems) reaches only the
+// caster; the party and raid buff settings stand in for the others.
 func (caster *Unit) NewAllyAuraArray(makeAura func(*Unit) *Aura) AuraArray {
 	auras := make([]*Aura, len(caster.Env.AllUnits))
 	for _, target := range caster.Env.AllUnits {

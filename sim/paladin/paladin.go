@@ -48,6 +48,8 @@ type Paladin struct {
 	flashOfLightBonusHealing          float64
 	holyShieldBlockValueMultiplier    float64
 	forbearanceReduction              time.Duration
+
+	sealOfFuryTaunt *core.Spell
 }
 
 // Implemented by each Paladin spec.

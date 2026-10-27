@@ -18,6 +18,7 @@ func (warlock *Warlock) NewAPLValue(rot *core.APLRotation, config *proto.APLValu
 	case *proto.APLValue_WarlockBaneIsActiveOnAllTargets:
 		return &APLValueWarlockActiveOnAllTargets{spells: warlock.Banes, label: "Bane Is Active On All Targets"}
 	case *proto.APLValue_WarlockAssignedCurseIsActiveOnAllTargets:
+		// With no curse assigned it holds no spell and reads false, with no validation warning.
 		value := &APLValueWarlockActiveOnAllTargets{label: "Assigned Curse Is Active On All Targets (none)"}
 		if curse := warlock.GetAssignedCurse(); curse != nil {
 			value.spells = []*core.Spell{curse}

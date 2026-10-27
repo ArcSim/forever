@@ -46,6 +46,9 @@ jobs:
                     exit 1
                   fi
 
+            - name: Skill paths
+              run: make skills-check
+
             - name: Install Go
               uses: actions/setup-go@v6
               with:

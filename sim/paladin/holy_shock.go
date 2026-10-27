@@ -34,7 +34,7 @@ func (paladin *Paladin) registerHolyShockRank(_ int32, rank *spelldata.Spell) {
 	damageRow, healRow := refs[0], refs[1]
 	damage, heal := damageRow.DamageEffect(), healRow.HealEffect()
 
-	damageConfig := paladin.holyShockConfig(rank, rank.ID, damageRow, damage, core.ProcMaskSpellDamage)
+	damageConfig := paladin.holyShockConfig(rank, damageRow.ID, damageRow, damage, core.ProcMaskSpellDamage)
 	damageConfig.ClassSpellMask = SpellMaskHolyShock
 	damageConfig.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 		if vigil := paladin.activeLightsVigil(target); vigil != nil {

@@ -19,6 +19,9 @@ type APLRotation struct {
 	canMoveCloserKnown bool // canMoveCloser's answer is set once, as it depends only on the rotation.
 	canMoveCloserValue bool
 
+	hasMoveKnown bool // hasMove's answer is set once, as it depends only on the rotation.
+	hasMoveValue bool
+
 	majorCooldownActionsKnown bool         // majorCooldownActions is set once, as it depends only on the rotation.
 	majorCooldownActions      []*APLAction // The priority list's actions that can be a major cooldown going ahead of the spell queued after a hardcast.
 
@@ -403,6 +406,18 @@ func (rot *APLRotation) allAPLActions() []*APLAction {
 	return actions
 }
 
+// Whether a Move sits anywhere in the rotation.
+func (rot *APLRotation) hasMove() bool {
+	if !rot.hasMoveKnown {
+		rot.hasMoveKnown = true
+		rot.hasMoveValue = slices.ContainsFunc(rot.allAPLActions(), func(action *APLAction) bool {
+			_, isMove := action.impl.(*APLActionMove)
+			return isMove
+		})
+	}
+	return rot.hasMoveValue
+}
+
 // Returns all action objects from the prepull as an unstructured list. Used for easily finding specific actions.
 func (rot *APLRotation) allPrepullActions() []*APLAction {
 	return Flatten(MapSlice(rot.prepullActions, func(action *APLAction) []*APLAction { return action.GetAllActions() }))
@@ -522,7 +537,9 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 	if apl.unit.RotationTimer.IsReady(sim) {
 		nextEvaluation := sim.CurrentTime + apl.unit.ReactionTime
 
-		if !apl.unit.Moving {
+		// A rotation that moves keeps looking through the GCD, so a walk timed to a swing timer starts
+		// when its condition turns true, as a player watching the timer starts it.
+		if !apl.unit.Moving && !apl.hasMove() {
 			nextEvaluation = max(nextEvaluation, apl.unit.NextGCDAt())
 		}
 
@@ -574,12 +591,12 @@ func (apl *APLRotation) majorCooldownMayGo(sim *Simulation) bool {
 		apl.majorCooldownActionsKnown = true
 		apl.majorCooldownActions = FilterSlice(apl.priorityList, canBeMajorCooldown)
 	}
-	for _, action := range apl.majorCooldownActions {
-		if action.IsReady(sim) {
-			return true
-		}
-	}
-	return false
+	// A Strict Sequence asked whether it is ready marks the rotation as in a sequence. Nothing asked here
+	// runs, so the mark is put back.
+	inSequence := apl.inSequence
+	mayGo := slices.ContainsFunc(apl.majorCooldownActions, func(action *APLAction) bool { return action.IsReady(sim) })
+	apl.inSequence = inSequence
+	return mayGo
 }
 
 // Whether isMajorCooldown can accept the action: an autocast, a cast of a major cooldown, or a group holding
@@ -592,6 +609,8 @@ func canBeMajorCooldown(action *APLAction) bool {
 	case *APLActionCastSpell:
 		return impl.spell.Flags.Matches(SpellFlagMCD)
 	case *APLActionCastFriendlySpell:
+		return impl.spell.Flags.Matches(SpellFlagMCD)
+	case *APLActionChannelSpell:
 		return impl.spell.Flags.Matches(SpellFlagMCD)
 	case *APLActionGroupReference:
 		return impl.group != nil && slices.ContainsFunc(impl.group.actions, canBeMajorCooldown)
@@ -608,6 +627,8 @@ func (apl *APLRotation) isMajorCooldown(sim *Simulation, action *APLAction) bool
 	case *APLActionCastSpell:
 		return impl.spell.Flags.Matches(SpellFlagMCD)
 	case *APLActionCastFriendlySpell:
+		return impl.spell.Flags.Matches(SpellFlagMCD)
+	case *APLActionChannelSpell:
 		return impl.spell.Flags.Matches(SpellFlagMCD)
 	case *APLActionGroupReference:
 		if impl.group == nil {

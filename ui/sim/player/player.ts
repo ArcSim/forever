@@ -461,6 +461,11 @@ export class Player<SpecType extends Spec> {
 			return true;
 		}
 
+		// Balance keeps one ally so Innervate and other helpful spells can land on another unit.
+		if (this.getSpec() === Spec.SpecBalanceDruid) {
+			return true;
+		}
+
 		if (!this.itemSwapSettings.getEnableItemSwap()) {
 			return false;
 		}
@@ -729,6 +734,7 @@ export class Player<SpecType extends Spec> {
 		return ConsumesSpec.clone(this.slice().consumables);
 	}
 
+	/** Matches each hand's imbue to the weapon already in that hand, so the gear and the swap gear go in before the consumes. */
 	setConsumes(newConsumes: ConsumesSpec) {
 		const adjustedConsumes = this.itemSwapSettings.getGear().adjustSwapImbues(this.getGear().adjustImbues(newConsumes));
 		if (ConsumesSpec.equals(this.slice().consumables, adjustedConsumes)) return;
@@ -1115,7 +1121,7 @@ export class Player<SpecType extends Spec> {
 	setWeaponSkills(newWeaponSkills: Array<WeaponSkillValue>) {
 		const current = this.slice().weaponSkills;
 		const sorted = newWeaponSkills.map(entry => WeaponSkillValue.clone(entry)).sort((a, b) => a.skill - b.skill);
-		if (arrayEquals(sorted, current, WeaponSkillValue.equals)) return;
+		if (arrayEquals(sorted, current, (a, b) => WeaponSkillValue.equals(a, b))) return;
 
 		this.patch('weaponSkills', sorted);
 	}

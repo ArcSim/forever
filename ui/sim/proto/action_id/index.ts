@@ -150,6 +150,8 @@ export class ActionId {
 			case OtherAction.OtherActionMove:
 				baseName = i18n.t('common.action_names.moving');
 				iconUrl = 'https://wow.zamimg.com/images/wow/icons/medium/inv_boots_cloth_03.jpg';
+				// Tag 1 holds the walks a spell or a pet's own logic causes, e.g. Charge's.
+				if (this.tag == 1) name = i18n.t('common.action_names.moving_from_spell');
 				break;
 			case OtherAction.OtherActionPrepull:
 				baseName = i18n.t('common.action_names.prepull');
@@ -568,6 +570,16 @@ export class ActionId {
 					name += ' (Heal)';
 				}
 				break;
+			case 'Read Leyline':
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.attuned')})`;
+				}
+				break;
+			case 'Skysight':
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.charged')})`;
+				}
+				break;
 			case 'Hack and Slash':
 				if (tag == 1) {
 					name += ' (Axe/Sword)';
@@ -575,6 +587,16 @@ export class ActionId {
 					name += ' (Fist/Dagger)';
 				} else if (tag == 3) {
 					name += ' (Mace)';
+				}
+				break;
+			case 'Demonic Rune':
+				if (tag) {
+					name += ' (Damage)';
+				}
+				break;
+			case 'Judgement of Fury':
+				if (this.spellId === 20232) {
+					name += ' (Taunt)';
 				}
 				break;
 			default:
