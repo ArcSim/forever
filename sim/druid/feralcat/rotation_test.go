@@ -860,12 +860,13 @@ func TestAdaptiveCatAvailabilityWarnings(t *testing.T) {
 			req.Raid.Parties[0].Players[0].Consumables = &proto.ConsumesSpec{}
 		}
 		expected := map[string]bool{
-			"Cat (#1) does not know spell {SpellID: 1259705}": true,
-			"Cat (#1) does not know spell {SpellID: 1259686}": true,
-			"Cat (#1) does not know spell {ItemID: 9449}":     true,
-			"Cat (#1) does not know spell {ItemID: 12662}":    true,
-			"Cat (#1) picks no potion for {OtherID: 26}":      true,
-			"No swap set configured in Settings.":             true,
+			"Cat (#1) does not know spell {SpellID: 1259705}":   true,
+			"No aura found on Cat (#1) for: {SpellID: 1270842}": true,
+			"Cat (#1) does not know spell {SpellID: 1259686}":   true,
+			"Cat (#1) does not know spell {ItemID: 9449}":       true,
+			"Cat (#1) does not know spell {ItemID: 12662}":      true,
+			"Cat (#1) picks no potion for {OtherID: 26}":        true,
+			"No swap set configured in Settings.":               true,
 		}
 		if !consumes {
 			expected["Cat (#1) does not know spell {ItemID: 7676}"] = true
@@ -897,4 +898,49 @@ func spellID(id int32) *proto.ActionID {
 
 func comboPoints() *proto.APLValue {
 	return &proto.APLValue{Value: &proto.APLValue_CurrentComboPoints{CurrentComboPoints: &proto.APLValueCurrentComboPoints{}}}
+}
+
+func TestAdaptiveInnervateWaitsForEnergized(t *testing.T) {
+	for _, race := range []proto.Race{proto.Race_RaceTauren, proto.Race_RaceHighOrderSkyborne} {
+		for _, active := range []bool{false, true} {
+			if race == proto.Race_RaceTauren && active {
+				continue
+			}
+			rotation := defaultCatRotation()
+			rotation.PrepullActions = nil
+			for _, item := range rotation.PriorityList {
+				if item.Action.GetCastSpell().GetSpellId().GetSpellId() == spellInnervate {
+					rotation.PriorityList = []*proto.APLListItem{item}
+					break
+				}
+			}
+			req := sweepRequest(powershiftTalents, rotation, false, 1)
+			req.Raid.Parties[0].Players[0].Race = race
+			sim := core.NewSim(req, simsignals.CreateSignals())
+			sim.Reset()
+			cat := sim.Raid.Parties[0].Players[0].(*FeralDruid)
+			cat.AutoAttacks.CancelAutoSwing(sim)
+			sim.CurrentTime = time.Second
+			cat.SetGCDTimer(sim, 0)
+			cat.SpendEnergy(sim, cat.CurrentEnergy(), cat.NewEnergyMetrics(core.ActionID{SpellID: 1}))
+			cat.SpendMana(sim, cat.CurrentMana()-1000, cat.NewManaMetrics(core.ActionID{SpellID: 1}))
+			aura := cat.GetAuraByID(core.ActionID{SpellID: 1270842})
+			if active {
+				aura.Activate(sim)
+			}
+			cat.Rotation.DoNextAction(sim)
+			spell := cat.GetSpell(core.ActionID{SpellID: spellInnervate})
+			casts := int32(0)
+			for _, metrics := range spell.SpellMetrics {
+				casts += metrics.Casts
+			}
+			want := int32(1)
+			if active {
+				want = 0
+			}
+			if casts != want {
+				t.Errorf("race=%s Energized=%v: Innervate casts=%d, want %d", race, active, casts, want)
+			}
+		}
+	}
 }

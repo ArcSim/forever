@@ -1901,6 +1901,34 @@
               }
             },
             {
+              "or": {
+                "vals": [
+                  {
+                    "not": {
+                      "val": {
+                        "auraIsKnown": {
+                          "auraId": {
+                            "spellId": 1270842
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "not": {
+                      "val": {
+                        "auraIsActive": {
+                          "auraId": {
+                            "spellId": 1270842
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
               "cmp": {
                 "op": "OpLt",
                 "lhs": {
