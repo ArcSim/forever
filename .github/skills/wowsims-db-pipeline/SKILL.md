@@ -115,6 +115,9 @@ Reading another table once, what the tables hold and how a script reads them: `r
 - `InferPhase` in `tools/database/item_source_utils.go` has no callers and stays: `gen_db` stamps every item phase 1.
 - A test that assumes one build across every spell data group breaks once a partial update mixes the builds.
 - `make buffs-proto` needs the compiled protos; on a fresh checkout run `make sim/core/proto/api.pb.go` first.
+- A hotfix that turns an effect into an `A_DUMMY` with its value kept usually moves it into a server script, and
+  `ParseEffects` then drops it without a word. When `.results` move after a regeneration, check the changed rows
+  for one before taking the change as live; Missile Barrage's tick length is applied by hand for this reason.
 
 ## Keeping this skill true
 
