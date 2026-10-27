@@ -10,6 +10,7 @@ import (
 
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/dbcenums"
+	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/tools/database/overrides"
 )
 
@@ -300,6 +301,34 @@ func TestShippedOverridesAreWellFormed(t *testing.T) {
 	}
 }
 
+// A hand trigger goes into the store while its spell's effects leave the link unstated, and is
+// refused once one of them triggers the linked spell itself. Each case runs over every shipped
+// entry, with only the first entry's spell stating the link in the stale case.
+func TestAHandTriggerTheGameFilesStateIsStale(t *testing.T) {
+	link := overrides.HandTriggers[0]
+	tablesWith := func(trigger int32) (*spellTables, map[int32]bool) {
+		tables := newSpellTables()
+		tables.Effects[link.Spell] = []storeEffect{{SpellID: link.Spell, Type: dbcenums.E_DUMMY, TriggerID: trigger}}
+		inStore := map[int32]bool{}
+		for _, l := range overrides.HandTriggers {
+			inStore[l.Spell], inStore[l.Triggers] = true, true
+		}
+		return tables, inStore
+	}
+
+	hand, err := storeHandTriggers(tablesWith(0))
+	if err != nil {
+		t.Fatalf("an unstated link is refused: %v", err)
+	}
+	if got := hand[link.Spell]; len(got) == 0 || got[0].Triggers != link.Triggers {
+		t.Errorf("the store links %d to %v, want %d", link.Spell, got, link.Triggers)
+	}
+
+	if _, err := storeHandTriggers(tablesWith(link.Triggers)); err == nil || !strings.Contains(err.Error(), "stale") {
+		t.Errorf("a link %d's effect states is not refused as stale: %v", link.Spell, err)
+	}
+}
+
 func TestAreaBonusesBakeOntoTheRow(t *testing.T) {
 	rows := []storeSpell{{ID: 10}, {ID: 11}}
 	list := []overrides.AreaBonus{
@@ -380,6 +409,44 @@ func TestShippedAreaBonusesAreWellFormed(t *testing.T) {
 		}
 		if len(b.Groups) == 0 || b.Multiplier <= 0 || b.DurationMultiplier <= 0 {
 			t.Errorf("spell %d's area bonus reads %v x%v (duration x%v)", b.SpellID, b.Groups, b.Multiplier, b.DurationMultiplier)
+		}
+	}
+}
+
+// Of two sets sharing a name, the lower set id's items go and the higher's stay; a set alone under its
+// name, an item with no set and an ItemAllowList item of the lower set stay.
+func TestLowerSameNameSetIsDropped(t *testing.T) {
+	var allowed int32
+	for id := range ItemAllowList {
+		allowed = id
+		break
+	}
+	if allowed == 0 {
+		t.Fatal("ItemAllowList is empty")
+	}
+
+	db := NewWowDatabase()
+	for _, item := range []*proto.UIItem{
+		{Id: 1, SetId: 10, SetName: "Shared"},
+		{Id: 2, SetId: 10, SetName: "Shared"},
+		{Id: 3, SetId: 20, SetName: "Shared"},
+		{Id: 4, SetId: 5, SetName: "Alone"},
+		{Id: 5},
+		{Id: allowed, SetId: 10, SetName: "Shared"},
+	} {
+		db.Items[item.Id] = item
+	}
+
+	DropLowerSameNameSets(db)
+
+	for _, id := range []int32{1, 2} {
+		if _, ok := db.Items[id]; ok {
+			t.Errorf("item %d of the lower set ships", id)
+		}
+	}
+	for _, id := range []int32{3, 4, 5, allowed} {
+		if _, ok := db.Items[id]; !ok {
+			t.Errorf("item %d is dropped", id)
 		}
 	}
 }

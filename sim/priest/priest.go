@@ -158,7 +158,7 @@ func (priest *Priest) directDamageSpellConfig(rank *spelldata.Spell, classSpellM
 	}
 
 	config.ExpectedInitialDamage = func(sim *core.Simulation, target *core.Unit, spell *core.Spell, _ bool) *core.SpellResult {
-		return spell.CalcDamage(sim, target, baseDamage.Average(), spell.OutcomeExpectedMagicHitAndCrit)
+		return spell.CalcDamage(sim, target, baseDamage.Average(), spell.OutcomeExpectedMagicCrit)
 	}
 
 	return config
@@ -200,7 +200,7 @@ func New(char *core.Character, selfBuffs SelfBuffs, talents string) *Priest {
 		Talents:   &proto.PriestTalents{},
 	}
 
-	core.FillTalentsProto(priest.Talents.ProtoReflect(), talents, TalentTreeSizes)
+	priest.FillTalentsProto(priest.Talents.ProtoReflect(), talents, TalentTreeSizes)
 	priest.EnableManaBar()
 	priest.AddStatDependency(stats.Strength, stats.AttackPower, 1)
 	priest.AddStatDependency(stats.Agility, stats.PhysicalCritPercent, core.CritPerAgiMaxLevel[char.Class])

@@ -18,7 +18,6 @@ func (mage *Mage) registerFrostTalents() {
 	mage.registerFrostbite()
 
 	// Tier 3
-	mage.registerPiercingIce()
 	mage.registerFrostChanneling()
 	mage.registerIceLance()
 	mage.registerImprovedBlizzard()
@@ -48,11 +47,12 @@ func (mage *Mage) registerColdSnapTalent() {
 	mage.registerColdSnapSpell()
 }
 
-// "Increases the Armor and resistance given by your Frost Armor and Ice Armor spells by 30%. In
-// addition, gives your Frost Ward a 20% chance to reflect Frost spells and effects while active."
+// "Increases the Armor and resistances granted by your Frost Armor and Ice Armor spells by $s1%, gives
+// your Frost Ward a $s2% chance to negate the warded damage spell, and increases the amount absorbed
+// by your Ice Barrier and Frost Ward by $s3%."
 //
-// The armor half is applied in armors.go. The reflect needs an enemy casting Frost at the mage, so
-// it is not modelled.
+// The armor is applied in armors.go and the absorb in ice_barrier.go and defensives.go. The negate
+// needs an enemy casting Frost at the mage, so it is not modelled.
 func (mage *Mage) registerFrostWarding() {
 	if mage.Talents.FrostWarding == 0 {
 		return
@@ -68,7 +68,7 @@ func (mage *Mage) registerImprovedFrostbolt() {
 	spelldata.ParseStatic(&mage.Character, spellData.ImprovedFrostbolt.Rank(mage.Talents.ImprovedFrostbolt))
 }
 
-// "Improves your chance to hit with Frost and Fire spells by 5%." The row's mask names the Fire and
+// "Improves your chance to hit with Frost and Fire spells by $s1%." The row's mask names the Fire and
 // Frost spells, Frostfire Bolt included.
 func (mage *Mage) registerElementalPrecision() {
 	if mage.Talents.ElementalPrecision == 0 {
@@ -115,14 +115,6 @@ func (mage *Mage) registerFrostbite() {
 	if mage.Talents.Frostbite == 0 {
 		return
 	}
-}
-
-func (mage *Mage) registerPiercingIce() {
-	if mage.Talents.PiercingIce == 0 {
-		return
-	}
-
-	spelldata.ParseStatic(&mage.Character, spellData.PiercingIce.Rank(mage.Talents.PiercingIce))
 }
 
 // Reduces the mana cost of your Frost spells by 5/10/15% and their threat by 10/20/30%.

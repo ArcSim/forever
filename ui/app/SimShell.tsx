@@ -12,8 +12,10 @@ import { ForeverNotice } from './ForeverNotice';
 import { SimTitleDropdown } from './header/SimTitleDropdown';
 import { SimToolbar } from './header/SimToolbar';
 import type { SimHostObject } from './individual_sim_ui';
+import { SpecReleaseInfo } from './ReleaseInfo';
 import { simUiAttributes, simUiClasses } from './shell_classes';
 import { SimImportExport } from './SimImportExport';
+import { SimOnboarding } from './SimOnboarding';
 import { SimRunCard } from './SimRunCard';
 import { SimTabsPanels, SimTabsStrip } from './SimTabs';
 import { SimTabsSection } from './SimTabsSection';
@@ -84,6 +86,7 @@ export const SimShell = ({ domRef, host, sim, className, spec, noticeText, known
 									{host && <SimWarnings warnings={host.warnings} ready={simReady} className="my-auto" />}
 									{host && <CharacterStats className="mt-auto" />}
 								</div>
+								{host && <SpecReleaseInfo spec={spec} className="border-t border-border px-sidebar py-2 text-xs text-muted" />}
 							</aside>
 							<div
 								className="z-1 mx-auto flex w-full min-w-[calc(275px+1vw)] flex-4 flex-col pt-0 pr-page pb-page pl-page max-lg:min-h-auto"
@@ -106,6 +109,8 @@ export const SimShell = ({ domRef, host, sim, className, spec, noticeText, known
 								</main>
 							</div>
 						</div>
+						{/* Inside the tab root, which the tour opens tabs through. */}
+						<SimOnboarding host={host} simReady={simReady} />
 					</SimTabsSection>
 				</div>
 				<ToastArea manager={toastManager} />

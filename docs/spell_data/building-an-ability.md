@@ -12,9 +12,13 @@ warrior.RegisterSpell(config)
 ```
 
 The row fills the `ActionID`, `Rank` (from "Rank 4", which is what flips `HasRanks` in the APL UI),
-`SpellSchool`, `DefenseType`, `ClassFlags`, `MissileSpeed` and `MinRange`/`MaxRange`. It fills the
-cast: the cast time, the GCD where the row sits in the global cooldown category, its own cooldown and
-the category one it shares. It fills the cost out of the first bar it states, with rage divided off the
+`SpellSchool`, `DefenseType`, `ClassFlags`, `MissileSpeed`, `MissileMinDuration` and
+`MinRange`/`MaxRange`. After the options, an area centred on the caster or a cone from it gives a
+cast its radius as `MaxRange` and a proc (`Proc()`) none; see `SpellConfig`. A row with Fixed Travel Time states its flight time in seconds as its Speed, so it gets no
+`MissileSpeed` and that time as its `MissileMinDuration`, or its own MinDuration where that is
+longer: Dragonfire Potion's 1252554 lands 1 s after use at any distance. It fills the cast:
+the cast time, the GCD where the row sits in the global cooldown category, its own cooldown and the
+category one it shares. It fills the cost out of the first bar it states, with rage divided off the
 0-1000 bar, and the refund the Discount Power On Miss attribute states. `CastRequirement` gets the
 forms, caster auras, weapon, shield and out-of-combat state the game files require (see below). That is
 why Pummel needs no Berserker Stance condition and Shield Bash needs no shield check. `Flags` gets
@@ -33,13 +37,13 @@ caller gates on `sim.Encounter.InArea(row.AreaType())`. A group that is a single
 is needed for the cooldown timers, so a config is built where the sim has a character rather than at
 package init.
 
-|               |                                                                                                                                                                       |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Melee(mask)` | the proc mask, `SpellFlagMeleeMetrics` and `SpellFlagAPL`, damage and threat multipliers of 1, and `IgnoreHaste`                                                      |
-| `Magic(mask)` | the proc mask, `SpellFlagAPL`, the multipliers, and `BonusCoefficient` from the damage effect's spell power share, or the heal's where the spell damages nothing      |
-| `Proc()`      | `SpellFlagPassiveSpell` and `SpellFlagNoOnCastComplete`, clears `SpellFlagAPL`, and empties the cast (cast time, GCD, cooldowns), every cost and the cast requirement |
-| `Flags(f)`    | ors in flags the game files do not state                                                                                                                              |
-| `Tag(n)`      | splits one spell id into several actions                                                                                                                              |
+|               |                                                                                                                                                                        |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Melee(mask)` | the proc mask, `SpellFlagMeleeMetrics` and `SpellFlagAPL`, a damage multiplier of 1, a threat multiplier of 1 (0 on a row that generates no threat), and `IgnoreHaste` |
+| `Magic(mask)` | the proc mask, `SpellFlagAPL`, the multipliers, and `BonusCoefficient` from the damage effect's spell power share, or the heal's where the spell damages nothing       |
+| `Proc()`      | `SpellFlagPassiveSpell` and `SpellFlagNoOnCastComplete`, clears `SpellFlagAPL`, and empties the cast (cast time, GCD, cooldowns), every cost and the cast requirement  |
+| `Flags(f)`    | ors in flags the game files do not state                                                                                                                               |
+| `Tag(n)`      | splits one spell id into several actions                                                                                                                               |
 
 The row is filled first and the options run on top in the order given, so an option sees what the row
 put there.
@@ -105,6 +109,16 @@ leave the form.
   whose row allows Defensive Stance.
 - A form spell (subtext "Shapeshift") is a single-rank ladder like a warrior stance, so
   `spellData.CatForm` exists.
+
+## Filing it in the APL picker
+
+The APL cast-spell and aura pickers file an entry under its category (`Cooldowns`, `Consumables`,
+`Talents`, ...), else under `Spell` or the top level. To file it in a submenu of its own, set `MenuGroup`
+on the `core.SpellConfig` or `core.Aura` to a lowercase_underscore key and add the label under
+`rotation_tab.apl.submenus.<key>` in the locale and its schema. The group wins over the category and is
+listed first. Nothing sets a group by default, and a spell and its aura are filed apart, so set it on
+each, and on every rank of a ranked spell. The warrior's stances (`sim/warrior/stances.go`) are filed
+under `Stances` this way.
 
 ## The three shapes a registration takes
 

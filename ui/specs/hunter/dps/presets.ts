@@ -13,6 +13,7 @@ import {
 } from '@generated/proto/hunter';
 import { SavedTalents } from '@generated/proto/ui';
 
+import CleanWeaveAPL from './apls/clean_weave.apl.json';
 import WeaveAPL from './apls/default.apl.json';
 import MeleeAPL from './apls/melee.apl.json';
 import TurretAPL from './apls/turret.apl.json';
@@ -50,6 +51,10 @@ export const TurretMultiAPLRotation = PresetUtils.makePresetAPLRotation(
 export const TurretHawkAPLRotation = PresetUtils.makePresetAPLRotation('Turret (Hawks)', TurretHawkAPL);
 export const WeaveAPLRotation = PresetUtils.makePresetAPLRotation('Melee Weave', WeaveAPL);
 export const WeaveHawkAPLRotation = PresetUtils.makePresetAPLRotation('Melee Weave (Hawks)', withVariables(WeaveAPL, { 'Use Summon Hawk': true }));
+// The weave with no toggles: every shot goes ahead of the weave, and a weave is a walk in for the next
+// swing that is back before the Auto Shot it delays is more than Max Auto Shot delay late (Max long weave
+// delay when one walk in and out outlasts an Auto Shot cycle). Walk times come from the run speed.
+export const CleanWeaveAPLRotation = PresetUtils.makePresetAPLRotation('Clean Weave', CleanWeaveAPL);
 export const MeleeAPLRotation = PresetUtils.makePresetAPLRotation('Melee', MeleeAPL);
 
 export const DefaultRotation = WeaveAPLRotation;
@@ -57,6 +62,7 @@ export const DefaultRotation = WeaveAPLRotation;
 export const DefaultSimpleRotation = Hunter_Rotation.create({
 	playstyle: Playstyle.Weave,
 	timeToWeave: 200,
+	pullRange: 25,
 	useMulti: true,
 	useArcane: true,
 });
@@ -131,6 +137,7 @@ export const OtherDefaults = {
 	profession1: Profession.Engineering,
 	profession2: Profession.Blacksmithing,
 	race: Race.RaceOrc,
+	reactionTime: 100,
 };
 
 const build = (
@@ -145,7 +152,7 @@ const build = (
 		gear,
 		talents: talentPreset,
 		rotation,
-		settings: { name, specOptions: options, playerOptions: { distanceFromTarget } },
+		settings: { name, specOptions: options, playerOptions: { distanceFromTarget, reactionTimeMs: OtherDefaults.reactionTime } },
 	});
 
 // Gear, talents, rotation, pet and distance together, one per tree and playstyle.

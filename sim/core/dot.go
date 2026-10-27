@@ -166,6 +166,11 @@ func (dot *Dot) recomputeAuraDuration(_ *Simulation) {
 	dot.Duration = dot.tickPeriod * time.Duration(dot.remainingTicks)
 }
 
+// The duration an application now would give the dot.
+func (dot *Dot) freshDuration() time.Duration {
+	return dot.CalcTickPeriod() * time.Duration(dot.ExpectedTickCount())
+}
+
 // TickPeriod is how fast the snapshotted dot ticks.
 func (dot *Dot) TickPeriod() time.Duration {
 	return dot.tickPeriod
@@ -192,10 +197,9 @@ func (dot *Dot) HastedTickCount() int32 {
 }
 
 func (dot *Dot) ExpectedTickCount() int32 {
-	tickCount := dot.BaseTickCount
+	tickCount := dot.calculateTickCount(dot.BaseDuration(), dot.BaseTickLength)
 	if (dot.affectedByCastSpeed || dot.affectedByRealHaste) && !dot.hasteReducesDuration {
-		tickPeriod := dot.CalcTickPeriod()
-		tickCount = dot.calculateTickCount(dot.BaseDuration(), tickPeriod)
+		tickCount = dot.calculateTickCount(dot.BaseDuration(), dot.CalcTickPeriod())
 	}
 	return tickCount
 }
@@ -393,6 +397,12 @@ func newDot(config Dot) *Dot {
 		}
 		sim.AddPendingAction(dot.tickAction)
 		if dot.isChanneled {
+			// Starting a channel ends the unit's running one with no further tick. That end clears the
+			// channel state and the rotation's interrupt condition, so it runs before this channel takes them.
+			if running := dot.Spell.Unit.ChanneledDot; running != nil {
+				running.stopTicking(sim)
+				running.Deactivate(sim)
+			}
 			dot.Spell.Unit.ChanneledDot = dot
 			if rotation := dot.Spell.Unit.Rotation; rotation != nil {
 				rotation.adoptChannelAction(dot)
@@ -416,8 +426,10 @@ func newDot(config Dot) *Dot {
 				dot.Spell.Unit.creditManaRegen(sim)
 			}
 			dot.Spell.Unit.ChanneledDot = nil
-			dot.Spell.Unit.Rotation.interruptChannelIf = nil
-			dot.Spell.Unit.Rotation.allowChannelRecastOnInterrupt = false
+			if rotation := dot.Spell.Unit.Rotation; rotation != nil {
+				rotation.interruptChannelIf = nil
+				rotation.allowChannelRecastOnInterrupt = false
+			}
 			// Note: even if clip delay is 0ms, always schedule rotation here so APL fires
 			// after ChanneledDot is cleared.
 			if dot.Spell.Unit.GCD.IsReady(sim) {

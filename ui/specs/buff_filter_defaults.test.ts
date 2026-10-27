@@ -5,7 +5,8 @@ import { fileURLToPath } from 'node:url';
 import { inputPicked } from '@features/inputs/components/ConnectedIconEnumPicker/utils';
 import { type ConsumeConfig, consumeConfigs, type ConsumeToggle } from '@features/settings/components/ConsumesPicker/utils';
 import { BUFFS_CONFIG, DEBUFFS_CONFIG, DEBUFFS_MISC_CONFIG, PARTY_BUFFS_CONFIG } from '@features/settings/model/buffs_debuffs';
-import { type PickerStatOptions, relevantStatOptions, statOptionScope } from '@features/settings/model/stat_options';
+import { DragonbreathChili } from '@features/settings/model/consumables_auto_gen';
+import { isMultiIconOption, type PickerStatOptions, relevantStatOptions, statOptionScope } from '@features/settings/model/stat_options';
 import { shownStats, type StatFilterSlot } from '@features/stat-filters/model/stat_filters';
 import { ConsumableType, type PseudoStat, Stat } from '@generated/proto/common';
 import type { Consumable } from '@generated/proto/db';
@@ -29,18 +30,30 @@ const sections: Array<[StatFilterSlot, PickerStatOptions[]]> = [
 
 const listed = (list: ReadonlyArray<unknown>, row: PickerStatOptions) => list.includes(row.config) || row.stats.some(stat => list.includes(stat));
 
-// The spec's own relevance rule, written out in full: the filter at its defaults must offer exactly these rows.
-const specRule = (rows: ReadonlyArray<PickerStatOptions>, spec: SpecDefinition<any>) => {
+const membersOf = (row: PickerStatOptions) => (isMultiIconOption(row) ? row.members : undefined);
+
+// The rows the spec's exclusions leave: a group keeps the members they leave, tagged with those members' stats, and is
+// gone with the last of them.
+const survivors = (rows: ReadonlyArray<PickerStatOptions>, spec: SpecDefinition<any>): PickerStatOptions[] =>
+	rows.flatMap(row => {
+		const members = membersOf(row);
+		if (!members) return listed(spec.excludeBuffDebuffInputs, row) ? [] : [row];
+		const left = members.filter(member => !listed(spec.excludeBuffDebuffInputs, member));
+		return left.length === 0 ? [] : [{ ...row, members: left, stats: [...new Set(left.flatMap(member => member.stats))] }];
+	});
+
+// The spec's own relevance rule, written out in full: the filter at its defaults must offer exactly the surviving rows
+// that pass it.
+const relevantTo = (spec: SpecDefinition<any>) => {
 	const displayed = new Set(spec.displayStats.filter(stat => stat.hasRootStat()).map(stat => stat.getRootStat()));
-	return rows
-		.filter(
-			row =>
-				row.stats.length === 0 ||
-				row.stats.some(stat => displayed.has(stat) || spec.epStats.includes(stat)) ||
-				listed(spec.includeBuffDebuffInputs, row),
-		)
-		.filter(row => !listed(spec.excludeBuffDebuffInputs, row));
+	return (row: PickerStatOptions) =>
+		row.stats.length === 0 ||
+		row.stats.some(stat => displayed.has(stat) || spec.epStats.includes(stat)) ||
+		listed(spec.includeBuffDebuffInputs, row) ||
+		!!membersOf(row)?.some(member => spec.includeBuffDebuffInputs.includes(member.config));
 };
+
+const specRule = (rows: ReadonlyArray<PickerStatOptions>, spec: SpecDefinition<any>) => survivors(rows, spec).filter(relevantTo(spec));
 
 const defaultShown = (slot: StatFilterSlot, rows: PickerStatOptions[], spec: SpecDefinition<any>) =>
 	new Set(shownStats(DatabaseFilters.create(), slot, statOptionScope(rows, spec)).map(stat => stat.getStat()));
@@ -51,7 +64,7 @@ describe('the buff and debuff stat filters at their defaults', () => {
 		(_file, slot, spec, rows) => {
 			const offered = relevantStatOptions(rows, spec, defaultShown(slot, rows, spec)).filter(row => !row.config.keptBy);
 
-			expect(offered).toEqual(specRule(rows, spec));
+			expect(offered.map(shapeOf)).toEqual(specRule(rows, spec).map(shapeOf));
 		},
 	);
 });
@@ -61,6 +74,13 @@ const marked = (config: PickerStatOptions['config'], player: Player<any>) =>
 	!!config.keptBy?.(player, ('inputs' in config ? inputPicked(config, player) : config.getValue(player)) as never);
 
 const labelOf = (row: PickerStatOptions) => row.config.label ?? ('actionId' in row.config ? String(row.config.actionId.spellId) : '?');
+
+// A row by its label, and a group by its members' labels too: a narrowed group is a new row with new closures.
+const shapeOf = (row: PickerStatOptions) => [labelOf(row), ...(membersOf(row)?.map(labelOf) ?? [])];
+
+// Whether the row holds a pick; for a group, one of the members still in it.
+const picked = (row: PickerStatOptions, player: Player<any>) =>
+	membersOf(row)?.some(member => inputPicked(member.config, player)) ?? inputPicked(row.config, player);
 
 const presetPlayer = async (spec: SpecDefinition<any>) => {
 	const { sim, player } = await makeIndividualSim({ spec: spec.spec, config: spec });
@@ -84,10 +104,14 @@ const STAT_ONLY_TYPES = [
 ];
 
 // The consumables' stat rule, written out in full against the stats and percents the spec weighs
-// consumables by: the filter at its defaults must keep exactly the picks that fail it.
+// consumables by and the stats it displays: the filter at its defaults must keep exactly the picks
+// that fail it. Dragonbreath Chili's worth is damage, so it always passes.
 const consumableRule = (consumable: Consumable, player: Player<any>) => {
-	const stats = consumableStatsOf(player.getSpecConfig());
-	const pseudoStats = consumablePseudoStatsOf(player.getSpecConfig());
+	if (consumable.id === DragonbreathChili.id) return true;
+	const specConfig = player.getSpecConfig();
+	const displayed = (specConfig.displayStats ?? []).filter(stat => stat.hasRootStat()).map(stat => stat.getRootStat());
+	const stats = consumableStatsOf({ epStats: [...specConfig.epStats, ...displayed], consumableStats: specConfig.consumableStats });
+	const pseudoStats = consumablePseudoStatsOf(specConfig);
 	const conditionalStats = [...consumable.mobTypeStats, ...consumable.zoneStats].flatMap(({ stats }) =>
 		Object.entries(stats).flatMap(([stat, value]) => (value > 0 ? [Number(stat) as Stat] : [])),
 	);
@@ -129,12 +153,12 @@ describe("a spec's default picks at the default stat filters", () => {
 
 	const keptAndExpected = (spec: SpecDefinition<any>, slot: StatFilterSlot, rows: PickerStatOptions[]) => {
 		const player = players.get(spec)!;
-		const survivors = rows.filter(row => !listed(spec.excludeBuffDebuffInputs, row));
+		const left = survivors(rows, spec);
 		const offered = relevantStatOptions(rows, spec, defaultShown(slot, rows, spec));
-		const relevant = specRule(rows, spec);
+		const relevant = relevantTo(spec);
 		return {
-			kept: survivors.filter((_, index) => marked(offered[index].config, player)).map(labelOf),
-			expected: survivors.filter(row => inputPicked(row.config, player) && !relevant.includes(row)).map(labelOf),
+			kept: left.filter((_, index) => marked(offered[index].config, player)).map(labelOf),
+			expected: left.filter(row => picked(row, player) && !relevant(row)).map(labelOf),
 		};
 	};
 

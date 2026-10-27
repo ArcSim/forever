@@ -137,9 +137,15 @@ func (hunter *Hunter) registerStriderKick() {
 
 	config := spelldata.SpellConfig(&hunter.Unit, striderKickRank, spelldata.Melee(core.ProcMaskMeleeMHSpecial))
 
+	// Effect 3 is the hunter's own movement speed for the row's duration.
+	// TODO: In-game testing required. The speed is taken to come with a kick that misses too.
+	speed := hunter.RegisterAura(spelldata.AuraConfig(striderKickRank))
+	speed.NewActiveMovementSpeedEffect(striderKickRank.EffectN(3).Percent())
+
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 		baseDamage := striderKickWeaponShare * hunter.MHNormalizedWeaponDamage(sim, spell.MeleeAttackPower(target))
 		spell.CalcAndDealDamage(sim, target, baseDamage, spell.OutcomeMeleeSpecialHitAndCrit)
+		speed.Activate(sim)
 	}
 
 	hunter.RegisterSpell(config)

@@ -136,8 +136,9 @@ describe('SettingsTabBody sections', () => {
 describe('SettingsTabBody offered flags', () => {
 	it('reads no option again for a write to an unrelated slice, and still follows the raid', async () => {
 		const spies = [...BUFFS_CONFIG, ...PARTY_BUFFS_CONFIG, ...DEBUFFS_CONFIG, ...DEBUFFS_MISC_CONFIG]
-			.filter(option => 'getValue' in option.config)
-			.map(option => vi.spyOn(option.config as { getValue: (player: unknown) => unknown }, 'getValue'));
+			.flatMap(option => ('inputs' in option.config ? option.config.inputs : [option.config]))
+			.filter(config => 'getValue' in config)
+			.map(config => vi.spyOn(config as { getValue: (player: unknown) => unknown }, 'getValue'));
 		const reads = () => spies.reduce((total, spy) => total + spy.mock.calls.length, 0);
 		const { sim, player } = await setup({ excludeBuffDebuffInputs: [GreaterBlessingOfSalvation] });
 		act(() => sim.setFilters(withSelection(sim.getFilters(), 'buffs', [])));

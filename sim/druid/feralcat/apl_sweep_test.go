@@ -38,8 +38,9 @@ const (
 	spellEnrage     int32 = 5229
 	spellMaul       int32 = 9881
 	spellInnervate  int32 = 29166
-	// Read Ley Line, the High Order Skyborne's racial: Energized, twice the mana regeneration for 15s.
+	// Read Leyline, the High Order Skyborne's racial: Energized, 50% more mana regeneration for 15s.
 	spellEnergized int32 = 1259705
+	auraEnergized  int32 = 1270842
 )
 
 // aplTune is one candidate. elune is "after" (once Berserk's crit has fallen), "now" (as soon as it
@@ -71,6 +72,9 @@ type aplTune struct {
 	// ccShred spends Clearcasting on Shred (Claw where Shred cannot land) ahead of the bleeds,
 	// Shifting Power and Ferocious Bite: Shred is the most energy Clearcasting can save.
 	ccShred bool
+	// excess pools on the Excess Energy value: a builder waits while it would leave a pending Rip or
+	// Rake refresh short, however far ahead the refresh is. rakePool is then unused.
+	excess bool
 }
 
 // aplVars holds the named conditions of a list, which the APL editor shows as variables so a reader
@@ -124,6 +128,9 @@ func catAPL(tune aplTune) *proto.APLRotation {
 			cmp(proto.APLValueCompare_OpGt, dotLeft(spellRake), konst("0s")),
 			cmp(proto.APLValueCompare_OpLe, dotLeft(spellRake), konst(tune.rakePool)),
 			cmp(proto.APLValueCompare_OpLt, afterBuilder, spellCost(spellRake))))
+	}
+	if tune.excess {
+		pooling = cmp(proto.APLValueCompare_OpLt, excessEnergy(), spellCost(spellShred))
 	}
 	pooling = vars.def("Pool for a refresh", pooling)
 	// Berserk is a major cooldown, so a plain cast waits for a GCD that is already idle while the
@@ -231,10 +238,15 @@ func catAPL(tune aplTune) *proto.APLRotation {
 	if tune.innervate {
 		// Casting Innervate leaves Cat Form, so it waits for a free GCD with nothing to spend energy on;
 		// Cat Form follows.
-		list = append(list, castWhen(spellInnervate, and(inCat, vars.def("Mana short", manaShort()),
+		when := []*proto.APLValue{inCat, vars.def("Mana short", manaShort()),
 			cmp(proto.APLValueCompare_OpLe, currentEnergy(), konst("30")),
 			not(clearcasting), not(auraUp(spellBerserk)),
-			cmp(proto.APLValueCompare_OpGe, remainingTime(), konst("15s")))))
+			cmp(proto.APLValueCompare_OpGe, remainingTime(), konst("15s"))}
+		if tune.energized {
+			// Innervate landing ends Energized, so it waits for Energized to run out.
+			when = append(when, not(auraUp(auraEnergized)))
+		}
+		list = append(list, castWhen(spellInnervate, and(when...)))
 	}
 	if tune.omen {
 		list = append(list, castWhen(spellFF, omenFish))
@@ -622,6 +634,7 @@ func TestAPLSweep(t *testing.T) {
 		{"apl, shift cap 55", withTune(func(t *aplTune) { t.ceiling = 55 })},
 		{"apl, omen only under 20", withTune(func(t *aplTune) { t.omenMax = "20" })},
 		{"apl, no omen fishing", withTune(func(t *aplTune) { t.omen = false })},
+		{"apl, excess energy pooling", withTune(func(t *aplTune) { t.excess = true })},
 	}
 	scenarios := []aplScenario{
 		{name: "180s, consumes", duration: 180, consumes: true},
@@ -742,6 +755,10 @@ func spellCanCast(id int32) *proto.APLValue {
 
 func spellLeft(id int32) *proto.APLValue {
 	return &proto.APLValue{Value: &proto.APLValue_SpellTimeToReady{SpellTimeToReady: &proto.APLValueSpellTimeToReady{SpellId: spellID(id)}}}
+}
+
+func excessEnergy() *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_DruidExcessEnergy{DruidExcessEnergy: &proto.APLValueDruidExcessEnergy{}}}
 }
 
 func spellCost(id int32) *proto.APLValue {
