@@ -1,12 +1,16 @@
-import { AuraStats as AuraStatsProto, SpellStats as SpellStatsProto, UnitMetadata as UnitMetadataProto } from '@generated/proto/api';
+import {
+	AuraStats as AuraStatsProto,
+	MeleeCritCapInfo,
+	PlayerStats,
+	SpellStats as SpellStatsProto,
+	UnitMetadata as UnitMetadataProto,
+} from '@generated/proto/api';
 import { Debuffs } from '@generated/proto/buffs';
 import {
 	ActionID as ActionIdProto,
-	Class,
 	ConsumesSpec,
 	ItemRandomSuffix,
 	PseudoStat,
-	Spec,
 	Stat,
 	WeaponSkill,
 	WeaponSkillValue,
@@ -107,58 +111,24 @@ describe('Player.getDebuffStats', () => {
 	});
 });
 
-// The main-hand table the sim sends against a level 63 target, in percent.
-interface SheetTable {
-	miss: number;
-	dodge: number;
-	parry: number;
-	glance: number;
-	suppression: number;
-}
-const LEVEL_63_AT_300: SheetTable = { miss: 8, dodge: 6.5, parry: 14, glance: 40, suppression: 3 };
-const LEVEL_63_AT_285: SheetTable = { miss: 11, dodge: 8, parry: 23, glance: 70, suppression: 6 };
-
-// A rogue with one weapon and no hit, expertise or crit, behind the target unless placed in front.
-const critCapInfo = (table: SheetTable, { inFront = false, dualWield = false, playerClass = Class.ClassRogue } = {}) => {
-	const pseudoStats: Array<number> = [];
-	pseudoStats[PseudoStat.PseudoStatMainHandMissPercent] = table.miss;
-	pseudoStats[PseudoStat.PseudoStatMainHandDodgePercent] = table.dodge;
-	pseudoStats[PseudoStat.PseudoStatMainHandParryPercent] = table.parry;
-	pseudoStats[PseudoStat.PseudoStatMainHandGlancePercent] = table.glance;
-	pseudoStats[PseudoStat.PseudoStatMeleeCritSuppressionPercent] = table.suppression;
-	return Player.prototype.getMeleeCritCapInfo.call({
-		slice: () => ({ currentStats: { finalStats: { pseudoStats } } }),
-		getDebuffStats: () => new Stats(),
-		isDualWielding: () => dualWield,
-		getClass: () => playerClass,
-		getInFrontOfTarget: () => inFront,
-		getSpec: () => Spec.SpecRogue,
-	} as unknown as Player<any>);
-};
+// The crit cap getters read nothing but the stats the sim sends, so they are called against those alone.
+const withStats = (currentStats: PlayerStats) =>
+	({ slice: () => ({ currentStats }), getMeleeCritCapInfo: Player.prototype.getMeleeCritCapInfo }) as unknown as Player<any>;
 
 describe('Player.getMeleeCritCapInfo', () => {
-	it.each<[number, SheetTable]>([
-		[300, LEVEL_63_AT_300],
-		[285, LEVEL_63_AT_285],
-	])('with %i main-hand weapon skill against a level 63 target, caps hit, dodge and crit on the table the sim sends', (_skill, table) => {
-		const info = critCapInfo(table);
+	it('shows the crit cap the sim sends, and its delta as how far over the cap the player is', () => {
+		const sent = MeleeCritCapInfo.create({ glancing: 40, suppression: 3, remainingHit: 8, block: 5, critCap: 50, delta: -12 });
+		const player = withStats(PlayerStats.create({ meleeCritCap: sent }));
 
-		expect(info.meleeHitCap).toBeCloseTo(table.miss);
-		expect(info.expertiseCap).toBeCloseTo(table.dodge);
-		expect(info.glancing).toBeCloseTo(table.glance);
-		expect(info.suppression).toBeCloseTo(table.suppression);
-		expect(info.baseCritCap).toBeCloseTo(100 - table.glance + table.suppression - table.miss - table.dodge);
+		expect(player.getMeleeCritCapInfo()).toEqual(sent);
+		expect(Player.prototype.getMeleeCritCap.call(player)).toBe(-12);
 	});
 
-	it.each<[number, SheetTable]>([
-		[300, LEVEL_63_AT_300],
-		[285, LEVEL_63_AT_285],
-	])('with %i main-hand weapon skill, adds the parry of a level 63 target to the expertise cap from in front', (_skill, table) => {
-		expect(critCapInfo(table, { inFront: true }).expertiseCap).toBeCloseTo(table.dodge + table.parry);
-	});
+	it('shows an empty crit cap before the sim sends one', () => {
+		const player = withStats(PlayerStats.create());
 
-	it('adds the dual-wield miss to the hit cap, except for a warrior', () => {
-		expect(critCapInfo(LEVEL_63_AT_300, { dualWield: true }).meleeHitCap).toBeCloseTo(8 + 19);
+		expect(player.getMeleeCritCapInfo()).toEqual(MeleeCritCapInfo.create());
+		expect(Player.prototype.getMeleeCritCap.call(player)).toBe(0);
 	});
 });
 

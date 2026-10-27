@@ -11373,6 +11373,9 @@
 								"to_exp_cap": {
 									"type": "string"
 								},
+								"block": {
+									"type": "string"
+								},
 								"spec_offsets": {
 									"type": "string"
 								},
@@ -11384,7 +11387,7 @@
 								}
 							},
 							"additionalProperties": false,
-							"required": ["glancing", "suppression", "to_hit_cap", "to_exp_cap", "spec_offsets", "final_crit_cap", "can_raise_by"]
+							"required": ["glancing", "suppression", "to_hit_cap", "to_exp_cap", "block", "spec_offsets", "final_crit_cap", "can_raise_by"]
 						},
 						"crit_cap": {
 							"type": "object",

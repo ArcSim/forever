@@ -30,12 +30,12 @@ const CRIT_CAP_DELTA = -13;
 const CRIT_CAP_INFO = {
 	glancing: 24,
 	suppression: 4.8,
-	remainingMeleeHitCap: 0,
-	remainingExpertiseCap: 0,
-	debuffCrit: 0,
-	specSpecificOffset: 0,
-	baseCritCap: 43,
-	playerCritCapDelta: CRIT_CAP_DELTA,
+	remainingHit: 0,
+	remainingExpertise: 0,
+	block: 0,
+	specOffset: 0,
+	critCap: 43,
+	delta: CRIT_CAP_DELTA,
 };
 
 interface SheetSetup {

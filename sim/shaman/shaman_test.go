@@ -8,6 +8,7 @@ import (
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/simsignals"
+	"github.com/wowsims/forever/sim/core/stats"
 	"github.com/wowsims/forever/sim/shaman"
 	"github.com/wowsims/forever/sim/shaman/enhancement"
 )
@@ -19,6 +20,61 @@ func init() {
 
 // The Enhancement suite's talents, which take Elemental Devastation.
 const enhancementTalents = "053503102-053030031005112251"
+
+// The melee crit cap counts the crit Elemental Devastation's buff grants as taken, and a shaman
+// without the talent counts none.
+func TestMeleeCritCapCountsElementalDevastation(t *testing.T) {
+	raidWith := func(talents string) *proto.Raid {
+		player := &proto.Player{
+			Name:          "Elemental Devastation",
+			Race:          proto.Race_RaceOrc,
+			Class:         proto.Class_ClassShaman,
+			Equipment:     &proto.EquipmentSpec{},
+			TalentsString: talents,
+			Spec:          &proto.Player_EnhancementShaman{EnhancementShaman: &proto.EnhancementShaman{Options: &proto.EnhancementShaman_Options{ClassOptions: &proto.ShamanOptions{}}}},
+			Rotation:      &proto.APLRotation{},
+		}
+		return core.SinglePlayerRaidProto(player, &proto.PartyBuffs{}, &proto.RaidBuffs{}, &proto.Debuffs{})
+	}
+	critCap := func(talents string) *proto.MeleeCritCapInfo {
+		t.Helper()
+		info := core.ComputeStats(&proto.ComputeStatsRequest{Raid: raidWith(talents), Encounter: core.MakeSingleTargetEncounter(0)}).RaidStats.Parties[0].Players[0].MeleeCritCap
+		if info == nil {
+			t.Fatalf("talents %q: the sheet has no melee crit cap", talents)
+		}
+		return info
+	}
+
+	sim := core.NewSim(&proto.RaidSimRequest{
+		Raid:       raidWith(enhancementTalents),
+		Encounter:  core.MakeSingleTargetEncounter(0),
+		SimOptions: &proto.SimOptions{RandomSeed: 1},
+	}, simsignals.CreateSignals())
+	sim.Reset()
+	sham := sim.Raid.Parties[0].Players[0].(shaman.ShamanAgent).GetShaman()
+	devastation := sham.GetAuraByID(core.ActionID{SpellID: 30165})
+	if devastation == nil {
+		t.Fatal("Elemental Devastation's buff is not registered")
+	}
+	before := sham.GetStat(stats.PhysicalCritPercent)
+	devastation.Activate(sim)
+	granted := sham.GetStat(stats.PhysicalCritPercent) - before
+	if granted <= 0 {
+		t.Fatalf("Elemental Devastation's buff grants %v crit, want above 0", granted)
+	}
+
+	with := critCap(enhancementTalents)
+	if !core.WithinToleranceFloat64(granted, with.SpecOffset, 1e-9) {
+		t.Errorf("spec offset %v, want the buff's %v crit", with.SpecOffset, granted)
+	}
+	want := 100 - with.Glancing - with.RemainingHit - with.RemainingExpertise - with.Block - with.SpecOffset + with.Suppression
+	if !core.WithinToleranceFloat64(want, with.CritCap, 1e-9) {
+		t.Errorf("crit cap %v, want %v with the spec offset taken off", with.CritCap, want)
+	}
+	if without := critCap("-053030031005112251"); without.SpecOffset != 0 {
+		t.Errorf("without the talent the spec offset is %v, want 0", without.SpecOffset)
+	}
+}
 
 // Fire Nova's hits are a spell the cast triggers, and the row lacks Not a Proc, so Elemental
 // Devastation, which cannot proc from procs, never hears their crits. It hears an Earth Shock's.

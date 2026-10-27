@@ -332,3 +332,66 @@ func TestSheetMainHandTableIsTheMainHandAutoAgainstTheTarget(t *testing.T) {
 		}
 	}
 }
+
+// The melee crit cap is what the main-hand auto's white-hit roll leaves for crit, plus the suppression
+// the sheet's crit keeps in: parry and block count only from the front, the dual-wield miss only with
+// two weapons.
+func TestSheetMeleeCritCapIsWhatTheWhiteHitTableLeaves(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		offHand int32
+		inFront bool
+	}{
+		{"one weapon behind", 0, false},
+		{"one weapon in front", 0, true},
+		{"dual wield behind", WeaponTestDaggerID, false},
+		{"dual wield in front", WeaponTestDaggerID, true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			raid := weaponTestRaid(proto.Race_RaceUndead, WeaponTestSlots(WeaponTestSwordID, tc.offHand, 0), nil)
+			raid.Parties[0].Players[0].InFrontOfTarget = tc.inFront
+			playerStats := ComputeStats(&proto.ComputeStatsRequest{Raid: raid, Encounter: weaponTestEncounter()}).RaidStats.Parties[0].Players[0]
+			info := playerStats.MeleeCritCap
+			if info == nil {
+				t.Fatal("the sheet has no melee crit cap")
+			}
+
+			sim := NewSim(&proto.RaidSimRequest{SimOptions: &proto.SimOptions{RandomSeed: 1}, Raid: raid, Encounter: weaponTestEncounter()}, simsignals.CreateSignals())
+			character := sim.Raid.Parties[0].Players[0].GetCharacter()
+			if character.AutoAttacks.IsDualWielding != (tc.offHand != 0) {
+				t.Fatalf("dual wielding %t, want %t", character.AutoAttacks.IsDualWielding, tc.offHand != 0)
+			}
+			auto := character.AutoAttacks.MHAuto()
+			table := character.AttackTables[character.CurrentTarget.UnitIndex]
+			miss := auto.GetPhysicalMissChance(table)
+			dodge := table.Defender.GetTotalDodgeChanceAsDefender(auto, table)
+			var parry, block float64
+			if tc.inFront {
+				parry = table.Defender.GetTotalParryChanceAsDefender(auto, table)
+				block = table.Defender.GetTotalBlockChanceAsDefender(auto, table)
+				if parry <= 0 || block <= 0 {
+					t.Fatalf("the target has %v parry and %v block from the front, want both above 0", parry, block)
+				}
+			}
+			pseudoStats := playerStats.FinalStats.PseudoStats
+			suppression := pseudoStats[proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent]
+			if suppression <= 0 {
+				t.Fatalf("the sheet shows %v suppression, want above 0", suppression)
+			}
+
+			want := 100*(1-miss-dodge-parry-table.MH.BaseGlanceChance-block) + suppression
+			if !WithinToleranceFloat64(want, info.CritCap, 1e-9) {
+				t.Errorf("crit cap %v, want %v", info.CritCap, want)
+			}
+			if !WithinToleranceFloat64(info.Suppression, suppression, 1e-9) {
+				t.Errorf("the cap counts %v suppression, the sheet shows %v", info.Suppression, suppression)
+			}
+			if got, want := info.Delta, pseudoStats[proto.PseudoStat_PseudoStatMeleeCritPercent]-info.CritCap; !WithinToleranceFloat64(want, got, 1e-9) {
+				t.Errorf("delta %v, want the sheet's melee crit less the cap, %v", got, want)
+			}
+			if info.SpecOffset != 0 {
+				t.Errorf("spec offset %v, want 0 for a class with no modifier", info.SpecOffset)
+			}
+		})
+	}
+}

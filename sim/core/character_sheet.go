@@ -51,6 +51,37 @@ func (character *Character) sheetAttackTable() *AttackTable {
 	return character.AttackTables[character.CurrentTarget.UnitIndex]
 }
 
+// An agent that moves the melee crit cap the character sheet shows. It edits the inputs, and the cap
+// and the delta are worked out after it.
+type MeleeCritCapModifier interface {
+	ModifyMeleeCritCap(info *proto.MeleeCritCapInfo)
+}
+
+// The melee crit cap of the main-hand auto attack against the current target, from the chances its
+// white-hit roll takes before crit; nil before the attack tables exist.
+func (character *Character) meleeCritCapProto() *proto.MeleeCritCapInfo {
+	table := character.sheetAttackTable()
+	if table == nil {
+		return nil
+	}
+	mainHand := character.sheetAttackStats(ProcMaskMeleeMHAuto)
+	probe := &Spell{Unit: &character.Unit, ProcMask: ProcMaskMeleeMHAuto, BonusHitPercent: character.ScopedPercents(ProcMaskMeleeMHAuto).Hit}
+	dodge, parry, block := probe.expectedDodgeParryBlock(table.Defender, table)
+	info := &proto.MeleeCritCapInfo{
+		Glancing:           table.Hand(probe).BaseGlanceChance * 100,
+		Suppression:        mainHand.CritSuppressionPercent,
+		RemainingHit:       probe.GetPhysicalMissChance(table) * 100,
+		RemainingExpertise: (dodge + parry) * 100,
+		Block:              block * 100,
+	}
+	if modifier, ok := character.Env.GetAgentFromUnit(&character.Unit).(MeleeCritCapModifier); ok {
+		modifier.ModifyMeleeCritCap(info)
+	}
+	info.CritCap = 100 - info.Glancing - info.RemainingHit - info.RemainingExpertise - info.Block - info.SpecOffset + info.Suppression
+	info.Delta = mainHand.CritPercent - info.CritCap
+	return info
+}
+
 // The hit the active hit mods with a ShowAsSchoolHit give each of those schools. A talent such as Arcane
 // Focus states its hit on its spells' class flags, which name no school the sheet could show it under.
 func (character *Character) schoolHitMods() [stats.SchoolLen]float64 {

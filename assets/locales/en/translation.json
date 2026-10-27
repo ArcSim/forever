@@ -3357,6 +3357,7 @@
 				"suppression": "Suppression:",
 				"to_hit_cap": "To Hit Cap:",
 				"to_exp_cap": "To Exp Cap:",
+				"block": "Block:",
 				"spec_offsets": "Spec Offsets:",
 				"final_crit_cap": "Final Crit Cap:",
 				"can_raise_by": "Can Raise By:"

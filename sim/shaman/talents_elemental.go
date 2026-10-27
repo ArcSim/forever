@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/wowsims/forever/sim/core"
+	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/spelldata"
 	"github.com/wowsims/forever/sim/core/stats"
 )
@@ -96,6 +97,14 @@ func (shaman *Shaman) applyElementalDevastation() {
 	trigger.Name = "Elemental Devastation - Trigger"
 
 	shaman.MakeProcTriggerAura(trigger)
+}
+
+// The melee crit cap counts Elemental Devastation's crit as taken. The buff is up for almost every
+// swing, and the sheet shows its crit only while it is up.
+func (shaman *Shaman) ModifyMeleeCritCap(info *proto.MeleeCritCapInfo) {
+	if shaman.Talents.ElementalDevastation > 0 {
+		info.SpecOffset += spellData.ElementalDevastation.ValueAt(shaman.Talents.ElementalDevastation)
+	}
 }
 
 var clearcastingBuff = spellData.ElementalFocusTriggered.Highest()
