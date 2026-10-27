@@ -51,34 +51,32 @@ func (character *Character) sheetAttackTable() *AttackTable {
 	return character.AttackTables[character.CurrentTarget.UnitIndex]
 }
 
-// An agent that moves the melee crit cap the character sheet shows. It edits the inputs, and the cap
-// and the delta are worked out after it.
+// An agent that moves the melee crit cap the character sheet shows. Suppression and the cap are worked out
+// after the hook, the cap from the info fields, so a change to any of them reaches it.
 type MeleeCritCapModifier interface {
 	ModifyMeleeCritCap(info *proto.MeleeCritCapInfo)
 }
 
-// The melee crit cap of the main-hand auto attack against the current target, from the chances its
-// white-hit roll takes before crit; nil before the attack tables exist.
-func (character *Character) meleeCritCapProto() *proto.MeleeCritCapInfo {
-	table := character.sheetAttackTable()
-	if table == nil {
+// The melee crit cap of the main-hand auto against the current target; nil before the attack tables exist and
+// without a main-hand auto. sheetCritPercent is the melee crit the sheet shows.
+func (character *Character) meleeCritCapProto(sheetCritPercent float64) *proto.MeleeCritCapInfo {
+	table, auto := character.sheetAttackTable(), character.AutoAttacks.MHAuto()
+	if table == nil || auto == nil {
 		return nil
 	}
-	mainHand := character.sheetAttackStats(ProcMaskMeleeMHAuto)
-	probe := &Spell{Unit: &character.Unit, ProcMask: ProcMaskMeleeMHAuto, BonusHitPercent: character.ScopedPercents(ProcMaskMeleeMHAuto).Hit}
-	dodge, parry, block := probe.expectedDodgeParryBlock(table.Defender, table)
+	white := auto.whiteHitTable(table.Defender, table)
 	info := &proto.MeleeCritCapInfo{
-		Glancing:           table.Hand(probe).BaseGlanceChance * 100,
-		Suppression:        mainHand.CritSuppressionPercent,
-		RemainingHit:       probe.GetPhysicalMissChance(table) * 100,
-		RemainingExpertise: (dodge + parry) * 100,
-		Block:              block * 100,
+		Glancing:           white.glance * 100,
+		RemainingHit:       white.miss * 100,
+		RemainingExpertise: (white.dodge + white.parry) * 100,
+		Block:              white.block * 100,
 	}
 	if modifier, ok := character.Env.GetAgentFromUnit(&character.Unit).(MeleeCritCapModifier); ok {
 		modifier.ModifyMeleeCritCap(info)
 	}
+	info.Suppression = sheetCritPercent + info.SpecOffset - auto.physicalCritChanceUnclamped(table, info.SpecOffset)*100
 	info.CritCap = 100 - info.Glancing - info.RemainingHit - info.RemainingExpertise - info.Block - info.SpecOffset + info.Suppression
-	info.Delta = mainHand.CritPercent - info.CritCap
+	info.Delta = sheetCritPercent - info.CritCap
 	return info
 }
 

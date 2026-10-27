@@ -1,10 +1,4 @@
-import {
-	AuraStats as AuraStatsProto,
-	MeleeCritCapInfo,
-	PlayerStats,
-	SpellStats as SpellStatsProto,
-	UnitMetadata as UnitMetadataProto,
-} from '@generated/proto/api';
+import { AuraStats as AuraStatsProto, SpellStats as SpellStatsProto, UnitMetadata as UnitMetadataProto } from '@generated/proto/api';
 import { Debuffs } from '@generated/proto/buffs';
 import {
 	ActionID as ActionIdProto,
@@ -108,27 +102,6 @@ describe('Player.getDebuffStats', () => {
 	it("credits Hunter's Mark with the ranged attack power spell 14325 states", () => {
 		expect(debuffStats({ huntersMark: true }).getStat(Stat.StatRangedAttackPower)).toBe(143);
 		expect(debuffStats({ huntersMark: false }).getStat(Stat.StatRangedAttackPower)).toBe(0);
-	});
-});
-
-// The crit cap getters read nothing but the stats the sim sends, so they are called against those alone.
-const withStats = (currentStats: PlayerStats) =>
-	({ slice: () => ({ currentStats }), getMeleeCritCapInfo: Player.prototype.getMeleeCritCapInfo }) as unknown as Player<any>;
-
-describe('Player.getMeleeCritCapInfo', () => {
-	it('shows the crit cap the sim sends, and its delta as how far over the cap the player is', () => {
-		const sent = MeleeCritCapInfo.create({ glancing: 40, suppression: 3, remainingHit: 8, block: 5, critCap: 50, delta: -12 });
-		const player = withStats(PlayerStats.create({ meleeCritCap: sent }));
-
-		expect(player.getMeleeCritCapInfo()).toEqual(sent);
-		expect(Player.prototype.getMeleeCritCap.call(player)).toBe(-12);
-	});
-
-	it('shows an empty crit cap before the sim sends one', () => {
-		const player = withStats(PlayerStats.create());
-
-		expect(player.getMeleeCritCapInfo()).toEqual(MeleeCritCapInfo.create());
-		expect(Player.prototype.getMeleeCritCap.call(player)).toBe(0);
 	});
 });
 

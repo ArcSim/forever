@@ -1,6 +1,6 @@
 import {
 	AuraStats as AuraStatsProto,
-	MeleeCritCapInfo,
+	type MeleeCritCapInfo,
 	Player as PlayerProto,
 	PlayerStats,
 	SpellStats as SpellStatsProto,
@@ -868,12 +868,8 @@ export class Player<SpecType extends Spec> {
 		return (this.getGear().getEquippedItem(ItemSlot.ItemSlotOffHand)?.item.weaponSpeed ?? 0) > 0;
 	}
 
-	getMeleeCritCapInfo(): MeleeCritCapInfo {
-		return this.slice().currentStats.meleeCritCap ?? MeleeCritCapInfo.create();
-	}
-
-	getMeleeCritCap() {
-		return this.getMeleeCritCapInfo().delta;
+	getMeleeCritCapInfo(): MeleeCritCapInfo | undefined {
+		return this.slice().currentStats.meleeCritCap;
 	}
 
 	// In-place rotation mutation with a single change event — the write path for

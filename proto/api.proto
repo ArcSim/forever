@@ -680,7 +680,7 @@ message PetStats {
 // white-hit table leaves after miss, dodge, parry, glancing and block.
 message MeleeCritCapInfo {
 	double glancing = 1;
-	double suppression = 2; // The crit the target's level takes off, which the sheet's crit keeps in.
+	double suppression = 2; // The crit the target takes off the sheet's crit, spec_offset counted; below 0 when a debuff adds crit.
 	double remaining_hit = 3; // The miss left after hit, the dual-wield penalty included.
 	double remaining_expertise = 4; // The dodge and parry left after expertise; parry only from the front.
 	double block = 5; // Only from the front.
@@ -708,7 +708,7 @@ message PlayerStats {
 	// The full skill per weapon skill, with every bonus the gear, talents and buffs add.
 	repeated WeaponSkillValue weapon_skills = 13;
 
-	MeleeCritCapInfo melee_crit_cap = 14; // Unset before the attack tables exist.
+	MeleeCritCapInfo melee_crit_cap = 14; // Unset before the attack tables exist and without a main-hand auto attack.
 }
 message PartyStats {
 	repeated PlayerStats players = 1;

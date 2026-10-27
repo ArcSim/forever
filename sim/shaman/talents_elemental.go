@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/wowsims/forever/sim/core"
-	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/spelldata"
 	"github.com/wowsims/forever/sim/core/stats"
 )
@@ -86,7 +85,7 @@ func (shaman *Shaman) applyElementalDevastation() {
 	// 30165 supplies the duration. The crit is the talent's own ladder, 3/6/9 by rank, which is
 	// what the tooltip of 30160 reads; the buff row states a flat 3.
 	critAura := shaman.RegisterAura(spelldata.AuraConfig(elementalDevastationBuff)).
-		AttachStatBuff(stats.PhysicalCritPercent, spellData.ElementalDevastation.ValueAt(shaman.Talents.ElementalDevastation))
+		AttachStatBuff(stats.PhysicalCritPercent, shaman.ElementalDevastationCritPercent())
 
 	// The row hears harmful spells with no roll, and the tooltip's "Critical Strikes with direct
 	// damage spells" makes the crit the outcome.
@@ -99,12 +98,9 @@ func (shaman *Shaman) applyElementalDevastation() {
 	shaman.MakeProcTriggerAura(trigger)
 }
 
-// The melee crit cap counts Elemental Devastation's crit as taken. The buff is up for almost every
-// swing, and the sheet shows its crit only while it is up.
-func (shaman *Shaman) ModifyMeleeCritCap(info *proto.MeleeCritCapInfo) {
-	if shaman.Talents.ElementalDevastation > 0 {
-		info.SpecOffset += spellData.ElementalDevastation.ValueAt(shaman.Talents.ElementalDevastation)
-	}
+// The physical crit Elemental Devastation's buff grants at the talent's rank, 0 without the talent.
+func (shaman *Shaman) ElementalDevastationCritPercent() float64 {
+	return spellData.ElementalDevastation.ValueAt(shaman.Talents.ElementalDevastation)
 }
 
 var clearcastingBuff = spellData.ElementalFocusTriggered.Highest()

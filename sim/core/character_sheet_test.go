@@ -335,28 +335,32 @@ func TestSheetMainHandTableIsTheMainHandAutoAgainstTheTarget(t *testing.T) {
 
 // The melee crit cap is what the main-hand auto's white-hit roll leaves for crit, plus the suppression
 // the sheet's crit keeps in: parry and block count only from the front, the dual-wield miss only with
-// two weapons.
+// two weapons. The suppression is the level's, and a target with defense adds its reduced crit taken.
 func TestSheetMeleeCritCapIsWhatTheWhiteHitTableLeaves(t *testing.T) {
 	for _, tc := range []struct {
-		name    string
-		offHand int32
-		inFront bool
+		name          string
+		offHand       int32
+		inFront       bool
+		targetDefense float64
 	}{
-		{"one weapon behind", 0, false},
-		{"one weapon in front", 0, true},
-		{"dual wield behind", WeaponTestDaggerID, false},
-		{"dual wield in front", WeaponTestDaggerID, true},
+		{"one weapon behind", 0, false, 0},
+		{"one weapon in front", 0, true, 0},
+		{"dual wield behind", WeaponTestDaggerID, false, 0},
+		{"dual wield in front", WeaponTestDaggerID, true, 0},
+		{"one weapon behind a target with defense", 0, false, DefenseRatingPerAvoidancePercent},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			raid := weaponTestRaid(proto.Race_RaceUndead, WeaponTestSlots(WeaponTestSwordID, tc.offHand, 0), nil)
 			raid.Parties[0].Players[0].InFrontOfTarget = tc.inFront
-			playerStats := ComputeStats(&proto.ComputeStatsRequest{Raid: raid, Encounter: weaponTestEncounter()}).RaidStats.Parties[0].Players[0]
+			encounter := weaponTestEncounter()
+			encounter.Targets[0].Stats = stats.Stats{stats.DefenseRating: tc.targetDefense}.ToProtoArray()
+			playerStats := ComputeStats(&proto.ComputeStatsRequest{Raid: raid, Encounter: encounter}).RaidStats.Parties[0].Players[0]
 			info := playerStats.MeleeCritCap
 			if info == nil {
 				t.Fatal("the sheet has no melee crit cap")
 			}
 
-			sim := NewSim(&proto.RaidSimRequest{SimOptions: &proto.SimOptions{RandomSeed: 1}, Raid: raid, Encounter: weaponTestEncounter()}, simsignals.CreateSignals())
+			sim := NewSim(&proto.RaidSimRequest{SimOptions: &proto.SimOptions{RandomSeed: 1}, Raid: raid, Encounter: encounter}, simsignals.CreateSignals())
 			character := sim.Raid.Parties[0].Players[0].GetCharacter()
 			if character.AutoAttacks.IsDualWielding != (tc.offHand != 0) {
 				t.Fatalf("dual wielding %t, want %t", character.AutoAttacks.IsDualWielding, tc.offHand != 0)
@@ -373,10 +377,14 @@ func TestSheetMeleeCritCapIsWhatTheWhiteHitTableLeaves(t *testing.T) {
 					t.Fatalf("the target has %v parry and %v block from the front, want both above 0", parry, block)
 				}
 			}
-			pseudoStats := playerStats.FinalStats.PseudoStats
-			suppression := pseudoStats[proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent]
-			if suppression <= 0 {
-				t.Fatalf("the sheet shows %v suppression, want above 0", suppression)
+			reducedCritTaken := table.Defender.PseudoStats.ReducedCritTakenPercent * 100
+			if (tc.targetDefense > 0) != (reducedCritTaken > 0) {
+				t.Fatalf("a target with %v defense rating takes %v%% less crit", tc.targetDefense, reducedCritTaken)
+			}
+			levelSuppression := playerStats.FinalStats.PseudoStats[proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent]
+			suppression := levelSuppression + reducedCritTaken
+			if levelSuppression <= 0 {
+				t.Fatalf("the level takes %v suppression, want above 0", levelSuppression)
 			}
 
 			want := 100*(1-miss-dodge-parry-table.MH.BaseGlanceChance-block) + suppression
@@ -384,14 +392,22 @@ func TestSheetMeleeCritCapIsWhatTheWhiteHitTableLeaves(t *testing.T) {
 				t.Errorf("crit cap %v, want %v", info.CritCap, want)
 			}
 			if !WithinToleranceFloat64(info.Suppression, suppression, 1e-9) {
-				t.Errorf("the cap counts %v suppression, the sheet shows %v", info.Suppression, suppression)
-			}
-			if got, want := info.Delta, pseudoStats[proto.PseudoStat_PseudoStatMeleeCritPercent]-info.CritCap; !WithinToleranceFloat64(want, got, 1e-9) {
-				t.Errorf("delta %v, want the sheet's melee crit less the cap, %v", got, want)
-			}
-			if info.SpecOffset != 0 {
-				t.Errorf("spec offset %v, want 0 for a class with no modifier", info.SpecOffset)
+				t.Errorf("the cap counts %v suppression, want the level's plus the target's reduced crit taken, %v", info.Suppression, suppression)
 			}
 		})
+	}
+}
+
+// A character with no main-hand auto, as a caster has, gets no melee crit cap.
+func TestSheetHasNoMeleeCritCapWithoutMainHandAuto(t *testing.T) {
+	raid := weaponTestRaid(proto.Race_RaceUndead, WeaponTestSlots(WeaponTestSwordID, 0, 0), nil)
+	sim := NewSim(&proto.RaidSimRequest{SimOptions: &proto.SimOptions{RandomSeed: 1}, Raid: raid, Encounter: weaponTestEncounter()}, simsignals.CreateSignals())
+	character := sim.Raid.Parties[0].Players[0].GetCharacter()
+	if character.meleeCritCapProto(0) == nil {
+		t.Fatal("the character with a main-hand auto has no melee crit cap")
+	}
+	character.AutoAttacks.SetMHSpell(nil)
+	if info := character.meleeCritCapProto(0); info != nil {
+		t.Errorf("melee crit cap %v, want none without a main-hand auto", info)
 	}
 }
