@@ -6,7 +6,7 @@ import { SavedTalents } from '@generated/proto/ui';
 import { Encounter } from '@sim/raid/encounter';
 
 import { CatEp, HybridEp } from '../feral_ep';
-import JvmesApl from './apls/jvmes.apl.json';
+import AdaptiveApl from './apls/adaptive.apl.json';
 import Level60GearJson from './gear_sets/default.gear.json';
 import PreRaidGearJson from './gear_sets/pre_raid.gear.json';
 
@@ -17,7 +17,7 @@ export const DefaultConsumables = ConsumesSpec.create({
 	flaskId: Consumables.FlaskOfNaturalAggression.id,
 	foodId: Consumables.SwiftstrikeSteak.id,
 	conjuredId: Consumables.DemonicRune.id,
-	explosiveId: Consumables.EZThroThoriumGrenade.id,
+	explosiveId: Consumables.EZThroDarkBomb.id,
 	mhImbueId: Consumables.DenseWeightstone.id,
 	swapMhImbueId: Consumables.DenseWeightstone.id,
 	extraIds: [Consumables.JujuMight.id, Consumables.GroundScorpokAssay.id, Consumables.GoblinSapperCharge.id],
@@ -63,7 +63,7 @@ export const HybridEpWeights = PresetUtils.makePresetEpWeights('Hybrid', HybridE
 // Uses Thistle Tea and optional Sapper, with racial actions gated by availability.
 // Uses Dash for the approach; Sapper can be used without leaving Cat Form.
 export const JVMES_APL = {
-	...PresetUtils.makePresetAPLRotation('Adaptive Cat', JvmesApl),
+	...PresetUtils.makePresetAPLRotation('Adaptive Cat', AdaptiveApl),
 	tooltip:
 		'Maintains Faerie Fire and bleeds, pools for later Berserks, and uses optional consumables and racials. Supports an MCP opener from the weapon swap slot.',
 };

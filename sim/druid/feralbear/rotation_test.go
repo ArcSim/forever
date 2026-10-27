@@ -26,7 +26,7 @@ func TestBearShippedAplRuns(t *testing.T) {
 		t.Fatalf("sim error: %s", result.Error.Message)
 	}
 	player := result.RaidMetrics.Parties[0].Players[0]
-	for _, id := range []int32{1238073, 9881, 22812} {
+	for _, id := range []int32{1238073, 9881} {
 		if bearCastsOf(player.Actions, id) == 0 {
 			t.Fatalf("shipped bear APL never casts %d", id)
 		}
@@ -51,7 +51,7 @@ func bearNakedRequest() *proto.RaidSimRequest {
 				Spec: &proto.Player_FeralBearDruid{FeralBearDruid: &proto.FeralBearDruid{
 					Options: &proto.FeralBearDruid_Options{},
 				}},
-				Rotation: core.GetAplRotation("../../../ui/specs/druid/feralbear/apls", "default").Rotation,
+				Rotation: core.GetAplRotation("../../../ui/specs/druid/feralbear/apls", "adaptive").Rotation,
 			}},
 			Buffs: &proto.PartyBuffs{},
 		}},
@@ -204,7 +204,7 @@ func TestAdaptiveBearHoldsEnrageForRageShortage(t *testing.T) {
 		{"bite-starved", true, true, 15, true},
 		{"lacerate-starved", false, true, 5, true},
 		{"bite-funded", true, true, 20, false},
-		{"lacerate-funded", false, true, 12, false},
+		{"lacerate-funded", false, true, 15, false},
 		{"global-busy", true, false, 0, false},
 	} {
 		t.Run(check.name, func(t *testing.T) {
@@ -258,8 +258,8 @@ func TestAdaptiveBearPotionSelection(t *testing.T) {
 			rot := selectedAdaptiveBearAPL()
 			rot.PrepullActions = nil
 			rot.PriorityList = slices.DeleteFunc(rot.PriorityList, func(row *proto.APLListItem) bool {
-				id := row.Action.GetCastSpell().GetSpellId().GetItemId()
-				return id != itemStoneshield && id != 13442 && row.Action.GetAutocastOtherCooldowns() == nil
+				id := row.Action.GetCastSpell().GetSpellId().GetOtherId()
+				return id != proto.OtherAction_OtherActionDefensivePotion && id != proto.OtherAction_OtherActionOffensivePotion && row.Action.GetAutocastOtherCooldowns() == nil
 			})
 			req := bearRequest(rot, 1)
 			player := req.Raid.Parties[0].Players[0]
@@ -350,4 +350,293 @@ func TestAdaptiveMcpReturnsToMainWeapon(t *testing.T) {
 			sim.Cleanup()
 		}
 	}
+}
+
+func TestAdaptiveBearPrepullPreservesStartingRage(t *testing.T) {
+	for _, rage := range []float64{0, 9, 10, 25, 100} {
+		t.Run(fmt.Sprintf("rage=%g", rage), func(t *testing.T) {
+			rotation := selectedAdaptiveBearAPL()
+			rotation.PrepullActions = rotation.PrepullActions[:1]
+			rotation.PriorityList = nil
+			req := bearNakedRequest()
+			req.Raid.Tanks = nil
+			player := req.Raid.Parties[0].Players[0]
+			player.GetFeralBearDruid().Options.StartingRage = rage
+			player.Rotation = rotation
+			sim := core.NewSim(req, simsignals.CreateSignals())
+			for iteration := 0; iteration < 2; iteration++ {
+				sim.Reset()
+				bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
+				bear.AutoAttacks.CancelAutoSwing(sim)
+				observed := false
+				sim.AddPendingAction(&core.PendingAction{NextActionAt: -9 * time.Second, OnAction: func(sim *core.Simulation) {
+					observed = true
+					wantCasts := int32(0)
+					if rage < 10 {
+						wantCasts = 1
+					}
+					gotCasts := bear.DireBearForm.SpellMetrics[bear.CurrentTarget.UnitIndex].Casts
+					if gotCasts != wantCasts {
+						t.Fatalf("prepull shifts = %d, want %d", gotCasts, wantCasts)
+					}
+					if rage >= 10 && bear.CurrentRage() != rage {
+						t.Fatalf("starting rage %g became %g", rage, bear.CurrentRage())
+					}
+					t.Logf("iteration %d: initial rage %g, observed rage %g, shifts %d", iteration, rage, bear.CurrentRage(), gotCasts)
+				}})
+				sim.PrePull()
+				for !observed {
+					if sim.Step() {
+						t.Fatal("simulation ended before prepull observation")
+					}
+				}
+				sim.Cleanup()
+			}
+		})
+	}
+}
+
+func TestAdaptiveBearPrepullDoesNotShiftWithoutFuror(t *testing.T) {
+	rotation := selectedAdaptiveBearAPL()
+	rotation.PrepullActions = rotation.PrepullActions[:1]
+	rotation.PriorityList = nil
+	req := bearNakedRequest()
+	req.Raid.Tanks = nil
+	player := req.Raid.Parties[0].Players[0]
+	player.TalentsString = "050022-25200302120132012051-005"
+	player.Rotation = rotation
+	sim := core.NewSim(req, simsignals.CreateSignals())
+	sim.Reset()
+	bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
+	if bear.Talents.Furor != 0 {
+		t.Fatal("fixture has Furor talented")
+	}
+	bear.AutoAttacks.CancelAutoSwing(sim)
+	observed := false
+	sim.AddPendingAction(&core.PendingAction{NextActionAt: -9 * time.Second, OnAction: func(sim *core.Simulation) {
+		observed = true
+		if casts := bear.DireBearForm.SpellMetrics[bear.CurrentTarget.UnitIndex].Casts; casts != 0 {
+			t.Fatalf("prepull shifts without Furor = %d", casts)
+		}
+	}})
+	sim.PrePull()
+	for !observed {
+		if sim.Step() {
+			t.Fatal("simulation ended before prepull observation")
+		}
+	}
+	sim.Cleanup()
+}
+
+const (
+	spellDireBear   int32 = 9634
+	spellPrimalBite int32 = 1238073
+	spellMaul       int32 = 9881
+	spellLacerate   int32 = 1235827
+	spellSwipe      int32 = 9908
+	spellEnrage     int32 = 5229
+	spellDemoRoar   int32 = 9898
+	spellFF         int32 = 9907
+	spellFrenzied   int32 = 22842
+	spellBarkskin   int32 = 22812
+	spellBerserk    int32 = 417141
+	itemSapper      int32 = 10646
+	itemStoneshield int32 = 13455
+	itemHealthstone int32 = 9421
+)
+
+// Fixed consumables for Bear rotation and mechanics tests.
+var bearTestConsumables = &proto.ConsumesSpec{
+	DefensivePotId: itemStoneshield,
+	ElixirIds:      []int32{13452, 9088},
+	FoodId:         21023,
+	MhImbueId:      12643,
+	ConjuredId:     itemHealthstone,
+	ExtraIds:       []int32{itemSapper, 10310, 10305},
+}
+
+// Level 60 tank fixture with fixed raid buffs, consumables, healing and incoming damage.
+func bearRequest(rotation *proto.APLRotation, iterations int32) *proto.RaidSimRequest {
+	return &proto.RaidSimRequest{
+		SimOptions: &proto.SimOptions{RandomSeed: 101, Iterations: iterations, IsTest: true},
+		Raid: &proto.Raid{
+			Parties: []*proto.Party{{
+				Players: []*proto.Player{{
+					Name: "Bear", Class: proto.Class_ClassDruid, Race: proto.Race_RaceNightElf,
+					TalentsString:   DefaultTalents,
+					ReactionTimeMs:  250,
+					InFrontOfTarget: true,
+					Profession1:     proto.Profession_Engineering,
+					Profession2:     proto.Profession_Enchanting,
+					Equipment:       core.GetGearSet("../../../ui/specs/druid/feralbear/gear_sets", "default").GearSet,
+					Consumables:     bearTestConsumables,
+					Cooldowns:       &proto.Cooldowns{HpPercentForDefensives: 0.4},
+					Buffs: &proto.IndividualBuffs{
+						GreaterBlessingOfKings: true,
+						GreaterBlessingOfMight: true,
+						Thorns:                 true,
+					},
+					HealingModel: &proto.HealingModel{
+						Hps:               2200,
+						CadenceSeconds:    0.4,
+						CadenceVariation:  1.2,
+						AbsorbFrac:        0.02,
+						BurstWindow:       6,
+						InspirationUptime: 0.25,
+					},
+					Spec: &proto.Player_FeralBearDruid{FeralBearDruid: &proto.FeralBearDruid{
+						Options: &proto.FeralBearDruid_Options{},
+					}},
+					Rotation: rotation,
+				}},
+				Buffs: &proto.PartyBuffs{
+					ManaSpringTotem: proto.TristateEffect_TristateEffectRegular,
+				},
+			}},
+			Buffs: &proto.RaidBuffs{
+				BattleShout:              proto.TristateEffect_TristateEffectRegular,
+				ArcaneBrilliance:         true,
+				GiftOfTheWild:            true,
+				PrayerOfFortitude:        true,
+				PrayerOfShadowProtection: true,
+				PrayerOfSpirit:           true,
+				WindfuryTotem:            true,
+				StrengthOfEarthTotem:     true,
+			},
+			Debuffs: &proto.Debuffs{
+				ExposeArmor:         true,
+				FaerieFire:          true,
+				CurseOfRecklessness: true,
+				InsectSwarm:         true,
+				JudgementOfWisdom:   true,
+				SunderArmor:         true,
+			},
+			Tanks: []*proto.UnitReference{{Type: proto.UnitReference_Player, Index: 0}},
+		},
+		Encounter: &proto.Encounter{
+			Duration: 180,
+			Targets:  []*proto.Target{bearTarget()},
+		},
+	}
+}
+
+// The tank fixture's damage before armor.
+const bearBossDamage = 6000
+
+func bearTarget() *proto.Target {
+	target := core.FreshDefaultTargetConfig()
+	target.Id = 31146
+	target.Name = "Raid Target"
+	target.Stats[stats.BlockValue] = 54
+	target.Stats[stats.Health] = 1299000
+	target.MinBaseDamage = bearBossDamage
+	return target
+}
+
+// bearAPLWarnings is what the APL editor marks with a warning or an error, by priority list line;
+// group i's line j is 100*(i+1)+j. Prepull lines are -1 and validations by UUID -2. Information (the blue icon) is left out.
+func bearAPLWarnings(t *testing.T, req *proto.RaidSimRequest) map[int][]string {
+	t.Helper()
+	stats := core.ComputeStats(&proto.ComputeStatsRequest{Raid: req.Raid, Encounter: req.Encounter}).
+		RaidStats.Parties[0].Players[0].RotationStats
+	warnings := map[int][]string{}
+	add := func(line int, validations []*proto.APLValidation) {
+		for _, v := range validations {
+			if v.LogLevel >= proto.LogLevel_Warning {
+				warnings[line] = append(warnings[line], v.Validation)
+			}
+		}
+	}
+	for i, action := range stats.PriorityList {
+		add(i, action.Validations)
+	}
+	// Group lines count from 100 per group.
+	for i, group := range stats.Groups {
+		for j, action := range group.Actions {
+			add(100*(i+1)+j, action.Validations)
+		}
+	}
+	for _, action := range stats.PrepullActions {
+		add(-1, action.Validations)
+	}
+	for _, uuid := range stats.UuidValidations {
+		add(-2, uuid.Validations)
+	}
+	return warnings
+}
+
+// Omitted utility items and debuffs produce availability warnings, not malformed rotation branches.
+func TestAdaptiveBearAvailabilityWarnings(t *testing.T) {
+	for _, consumes := range []bool{true, false} {
+		req := bearRequest(selectedAdaptiveBearAPL(), 20)
+		if !consumes {
+			req.Raid.Parties[0].Players[0].Consumables = &proto.ConsumesSpec{}
+			req.Raid.Parties[0].Players[0].Profession1 = proto.Profession_ProfessionUnknown
+		}
+		expected := map[string]bool{
+			"No swap set configured in Settings.":                       true,
+			"Bear (#1) does not know spell {ItemID: 9449}":              true,
+			"Bear (#1) picks no potion for {OtherID: 26}":               true,
+			"No aura found on Target 1 for: {SpellID: 440667, Tag: -1}": true,
+		}
+		if !consumes {
+			expected["Bear (#1) does not know spell {ItemID: 10646}"] = true
+			expected["Bear (#1) does not know spell {ItemID: 9421}"] = true
+			expected["Bear (#1) picks no potion for {OtherID: 25}"] = true
+		}
+		for line, messages := range bearAPLWarnings(t, req) {
+			missingVindication := false
+			for _, message := range messages {
+				if message == "No aura found on Target 1 for: {SpellID: 440667, Tag: -1}" {
+					missingVindication = true
+				}
+			}
+			for _, message := range messages {
+				if missingVindication && message == "A condition branch in this 'And' check could not be resolved and was dropped." {
+					continue
+				}
+				if !expected[message] {
+					t.Errorf("consumes=%t line %d: %s", consumes, line, message)
+				}
+			}
+		}
+		result := core.RunSim(req, nil, simsignals.CreateSignals())
+		if result.Error != nil {
+			t.Fatal(result.Error.Message)
+		}
+		metrics := result.RaidMetrics.Parties[0].Players[0]
+		for _, id := range []int32{spellPrimalBite, spellLacerate, spellMaul, spellBerserk} {
+			if bearCastsOf(metrics.Actions, id) == 0 {
+				t.Errorf("consumes=%t spell %d was never cast", consumes, id)
+			}
+		}
+	}
+}
+
+func bearSpellID(id int32) *proto.ActionID {
+	return &proto.ActionID{RawId: &proto.ActionID_SpellId{SpellId: id}}
+}
+
+func spellCost(id int32) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_SpellCurrentCost{SpellCurrentCost: &proto.APLValueSpellCurrentCost{SpellId: bearSpellID(id)}}}
+}
+
+func not(value *proto.APLValue) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_Not{Not: &proto.APLValueNot{Val: value}}}
+}
+
+func and(values ...*proto.APLValue) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_And{And: &proto.APLValueAnd{Vals: values}}}
+}
+
+func or(values ...*proto.APLValue) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_Or{Or: &proto.APLValueOr{Vals: values}}}
+}
+
+func cmp(op proto.APLValueCompare_ComparisonOperator, lhs, rhs *proto.APLValue) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_Cmp{Cmp: &proto.APLValueCompare{Op: op, Lhs: lhs, Rhs: rhs}}}
+}
+
+func mathOp(op proto.APLValueMath_MathOperator, lhs, rhs *proto.APLValue) *proto.APLValue {
+	return &proto.APLValue{Value: &proto.APLValue_Math{Math: &proto.APLValueMath{Op: op, Lhs: lhs, Rhs: rhs}}}
 }

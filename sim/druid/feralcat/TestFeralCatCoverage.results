@@ -30,16 +30,16 @@ casts_results: {
    value: 0
   }
   casts: {
-   key: "spell_id:1238122"
-   value: 0
-  }
-  casts: {
    key: "spell_id:1259799"
    value: 0
   }
   casts: {
    key: "spell_id:1322605"
-   value: 6
+   value: 7
+  }
+  casts: {
+   key: "spell_id:16979"
+   value: 0
   }
   casts: {
    key: "spell_id:20580"
@@ -59,6 +59,10 @@ casts_results: {
   }
   casts: {
    key: "spell_id:29166"
+   value: 0
+  }
+  casts: {
+   key: "spell_id:414924"
    value: 0
   }
   casts: {
@@ -107,11 +111,11 @@ casts_results: {
   }
   casts: {
    key: "spell_id:9830 rank:5"
-   value: 7
+   value: 9
   }
   casts: {
    key: "spell_id:9850 rank:5"
-   value: 18
+   value: 20
   }
   casts: {
    key: "spell_id:9867 rank:4"
@@ -123,7 +127,7 @@ casts_results: {
   }
   casts: {
    key: "spell_id:9892 rank:3"
-   value: 16
+   value: 17
   }
   casts: {
    key: "spell_id:9896 rank:6"
@@ -135,11 +139,11 @@ casts_results: {
   }
   casts: {
    key: "spell_id:9904 rank:4"
-   value: 13
+   value: 9
   }
   casts: {
    key: "spell_id:9907 rank:4"
-   value: 7
+   value: 5
   }
   casts: {
    key: "spell_id:9908 rank:5"
@@ -191,16 +195,16 @@ casts_results: {
    value: 0
   }
   casts: {
-   key: "spell_id:1238122"
-   value: 0
-  }
-  casts: {
    key: "spell_id:1259799"
    value: 0
   }
   casts: {
    key: "spell_id:1322605"
    value: 6
+  }
+  casts: {
+   key: "spell_id:16979"
+   value: 0
   }
   casts: {
    key: "spell_id:20580"
@@ -212,7 +216,7 @@ casts_results: {
   }
   casts: {
    key: "spell_id:22829 rank:4"
-   value: 5
+   value: 4
   }
   casts: {
    key: "spell_id:22842"
@@ -220,6 +224,10 @@ casts_results: {
   }
   casts: {
    key: "spell_id:29166"
+   value: 0
+  }
+  casts: {
+   key: "spell_id:414924"
    value: 0
   }
   casts: {
@@ -268,11 +276,11 @@ casts_results: {
   }
   casts: {
    key: "spell_id:9830 rank:5"
-   value: 9
+   value: 6
   }
   casts: {
    key: "spell_id:9850 rank:5"
-   value: 16
+   value: 21
   }
   casts: {
    key: "spell_id:9867 rank:4"
@@ -284,7 +292,7 @@ casts_results: {
   }
   casts: {
    key: "spell_id:9892 rank:3"
-   value: 16
+   value: 17
   }
   casts: {
    key: "spell_id:9896 rank:6"

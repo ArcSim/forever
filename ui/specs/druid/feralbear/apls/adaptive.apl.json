@@ -7,6 +7,32 @@
           "spellId": {
             "spellId": 9634
           }
+        },
+        "condition": {
+          "and": {
+            "vals": [
+              {
+                "talentIsKnown": {
+                  "talentId": {
+                    "spellId": 17056
+                  }
+                }
+              },
+              {
+                "cmp": {
+                  "op": "OpLt",
+                  "lhs": {
+                    "currentRage": {}
+                  },
+                  "rhs": {
+                    "const": {
+                      "val": "10"
+                    }
+                  }
+                }
+              }
+            ]
+          }
         }
       },
       "doAtValue": {
@@ -628,23 +654,23 @@
       }
     },
     {
-      "name": "Mighty Rage can help without replacing Stoneshield",
+      "name": "Offensive potion is useful without a defensive potion",
       "value": {
         "and": {
           "vals": [
             {
-              "selectedPotion": {
-                "potionId": {
-                  "itemId": 13442
+              "spellIsKnown": {
+                "spellId": {
+                  "otherId": "OtherActionOffensivePotion"
                 }
               }
             },
             {
               "not": {
                 "val": {
-                  "selectedPotion": {
-                    "potionId": {
-                      "itemId": 13455
+                  "spellIsKnown": {
+                    "spellId": {
+                      "otherId": "OtherActionDefensivePotion"
                     }
                   }
                 }
@@ -751,7 +777,7 @@
         },
         "castSpell": {
           "spellId": {
-            "spellId": 1238122
+            "spellId": 16979
           }
         }
       }
@@ -778,7 +804,7 @@
               {
                 "spellIsReady": {
                   "spellId": {
-                    "spellId": 1238122
+                    "spellId": 16979
                   }
                 }
               }
@@ -887,33 +913,33 @@
       }
     },
     {
-      "notes": "Maintain Stoneshield on cooldown when selected",
+      "notes": "Use the selected defensive potion on cooldown",
       "action": {
         "condition": {
-          "selectedPotion": {
-            "potionId": {
-              "itemId": 13455
+          "spellIsKnown": {
+            "spellId": {
+              "otherId": "OtherActionDefensivePotion"
             }
           }
         },
         "castSpell": {
           "spellId": {
-            "itemId": 13455
+            "otherId": "OtherActionDefensivePotion"
           }
         }
       }
     },
     {
-      "notes": "Otherwise use Mighty Rage when rage is low",
+      "notes": "Otherwise use the selected offensive potion when rage is low",
       "action": {
         "condition": {
           "variableRef": {
-            "name": "Mighty Rage can help without replacing Stoneshield"
+            "name": "Offensive potion is useful without a defensive potion"
           }
         },
         "castSpell": {
           "spellId": {
-            "itemId": 13442
+            "otherId": "OtherActionOffensivePotion"
           }
         }
       }

@@ -402,7 +402,7 @@ const naturalReactionTalents = "0500220000000000-55200322120132012551-0000000000
 
 // Natural Reaction 5/5 (417051): every dodge in a bear form grants 417053's 5 rage.
 func TestNaturalReactionGivesRageOnDodges(t *testing.T) {
-	req := bearRequest(bearAPL(bestBearAPL), 20)
+	req := bearRequest(selectedAdaptiveBearAPL(), 20)
 	req.Raid.Parties[0].Players[0].TalentsString = naturalReactionTalents
 	result := core.RunSim(req, nil, simsignals.CreateSignals())
 	if result.Error != nil {
@@ -448,7 +448,7 @@ func TestSwipeGainsThreePercentOfAttackPower(t *testing.T) {
 // defense, which the form scales too. The UI's bear has Thick Hide 3/3 and gear with bonus armor and
 // defense.
 func TestBearFormsScaleBonusArmorAndThickHideDefense(t *testing.T) {
-	sim := core.NewSim(bearRequest(bearAPL(bestBearAPL), 1), simsignals.CreateSignals())
+	sim := core.NewSim(bearRequest(selectedAdaptiveBearAPL(), 1), simsignals.CreateSignals())
 	sim.Reset()
 	bear := sim.Raid.Parties[0].Players[0].(*GuardianDruid)
 	inBear := bear.GetStat(stats.Armor)
