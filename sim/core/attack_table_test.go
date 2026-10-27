@@ -510,19 +510,20 @@ func TestNoActiveDefenseZeroesAPlayersAvoidance(t *testing.T) {
 	defender.PseudoStats.BaseBlockChance = 0.1
 	table := NewAttackTable(attacker, defender)
 
-	for _, flags := range []SpellFlag{SpellFlagNone, SpellFlagNoActiveDefense} {
-		spell := &Spell{Unit: attacker, ProcMask: ProcMaskMeleeMHAuto, DefenseType: DefenseTypeMelee, Flags: flags}
-		for _, avoidance := range []attackTableValue{
-			{name: "dodge", got: defender.GetTotalDodgeChanceAsDefender(spell, table)},
-			{name: "parry", got: defender.GetTotalParryChanceAsDefender(spell, table)},
-			{name: "block", got: defender.GetTotalBlockChanceAsDefender(spell, table)},
-		} {
-			if flags == SpellFlagNone && avoidance.got <= 0 {
-				t.Errorf("%s without the flag = %v, want the player's chance", avoidance.name, avoidance.got)
-			} else if flags != SpellFlagNone && avoidance.got != 0 {
-				t.Errorf("%s with the flag = %v, want 0", avoidance.name, avoidance.got)
-			}
-		}
+	// A level 63 enemy's hand adds -0.6% dodge, 4.4% parry and 4.4% block to the player's 10% each.
+	for _, tc := range []struct {
+		flags               SpellFlag
+		dodge, parry, block float64
+	}{
+		{SpellFlagNone, 0.094, 0.144, 0.144},
+		{SpellFlagNoActiveDefense, 0, 0, 0},
+	} {
+		spell := &Spell{Unit: attacker, ProcMask: ProcMaskMeleeMHAuto, DefenseType: DefenseTypeMelee, Flags: tc.flags}
+		checkAttackTableValues(t, tc.flags.String(), []attackTableValue{
+			{"dodge", defender.GetTotalDodgeChanceAsDefender(spell, table), tc.dodge},
+			{"parry", defender.GetTotalParryChanceAsDefender(spell, table), tc.parry},
+			{"block", defender.GetTotalBlockChanceAsDefender(spell, table), tc.block},
+		})
 	}
 }
 

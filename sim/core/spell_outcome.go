@@ -844,7 +844,7 @@ func (spell *Spell) OutcomeExpectedPhysicalCrit(_ *Simulation, result *SpellResu
 func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
 	hand := attackTable.Hand(spell)
 	missChance := spell.GetPhysicalMissChance(attackTable)
-	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(hand)
+	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(result.Target, attackTable)
 	glanceChance := hand.BaseGlanceChance
 	whiteCritCap := 1.0 - missChance - dodgeChance - parryChance - glanceChance - blockChance
 	critChance := min(spell.PhysicalCritChance(attackTable), whiteCritCap)
@@ -853,25 +853,21 @@ func (spell *Spell) OutcomeExpectedMeleeWhite(_ *Simulation, result *SpellResult
 }
 
 func (spell *Spell) OutcomeExpectedMeleeWeaponSpecialHitAndCrit(_ *Simulation, result *SpellResult, attackTable *AttackTable) {
-	hand := attackTable.Hand(spell)
 	missChance := spell.physicalMissChanceNoDWPenalty(attackTable)
-	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(hand)
+	dodgeChance, parryChance, blockChance := spell.expectedDodgeParryBlock(result.Target, attackTable)
 	critChance := spell.PhysicalCritChance(attackTable)
 	averageMultiplier := (1.0-missChance-dodgeChance-parryChance-blockChance)*(1.0+(spell.CritDamageMultiplier(attackTable)-1)*critChance) +
 		blockChance*(1.0-result.blockedFraction())
 	result.Damage *= averageMultiplier
 }
 
-// The dodge, parry and block chances an expected melee outcome subtracts: none for a spell flagged No Active
-// Defense, and parry and block only from the front.
-func (spell *Spell) expectedDodgeParryBlock(hand *AttackTableHand) (dodge, parry, block float64) {
-	if spell.Flags.Matches(SpellFlagNoActiveDefense) {
-		return 0, 0, 0
-	}
-	dodge = max(0, hand.BaseDodgeChance-spell.DodgeParrySuppression()-spell.Unit.PseudoStats.DodgeReduction)
+// The dodge, parry and block chances an expected melee outcome subtracts, as the rolls read them; parry and block
+// only from the front.
+func (spell *Spell) expectedDodgeParryBlock(target *Unit, attackTable *AttackTable) (dodge, parry, block float64) {
+	dodge = target.GetTotalDodgeChanceAsDefender(spell, attackTable)
 	if spell.Unit.PseudoStats.InFrontOfTarget {
-		parry = max(0, hand.BaseParryChance-spell.DodgeParrySuppression())
-		block = hand.BaseBlockChance
+		parry = target.GetTotalParryChanceAsDefender(spell, attackTable)
+		block = target.GetTotalBlockChanceAsDefender(spell, attackTable)
 	}
 	return dodge, parry, block
 }
