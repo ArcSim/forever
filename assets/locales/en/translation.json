@@ -2713,7 +2713,7 @@
 			"title": "Addon Import",
 			"description": "Import settings from the",
 			"addon_link": "WoWSims Exporter In-Game Addon",
-			"feature_description": "This feature imports gear, race, professions and rotation. The class is required, and anything missing from the pasted text keeps its current value. To include a rotation, add a \"rotation\" entry in the same format as the JSON export. It does NOT import buffs, debuffs, consumes, or custom stats.",
+			"feature_description": "This feature imports gear, race, professions and rotation. The class is required, and anything missing from the pasted text keeps its current value. It does NOT import buffs, debuffs, consumes, or custom stats.",
 			"instructions": "To import, paste the output from the addon below and click, 'Import'.",
 			"upload_button": "Upload File",
 			"import_button": "Import",
