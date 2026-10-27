@@ -502,6 +502,30 @@ func TestNoActiveDefenseSkipsDodgeParryAndBlock(t *testing.T) {
 	}
 }
 
+// An enemy's flagged attack meets no dodge, parry or block from a player, through the same chances its rolls read.
+func TestNoActiveDefenseZeroesAPlayersAvoidance(t *testing.T) {
+	attacker, defender := attackTableUnits(EnemyUnit, 63, PlayerUnit, 60)
+	defender.PseudoStats.BaseDodgeChance = 0.1
+	defender.PseudoStats.BaseParryChance = 0.1
+	defender.PseudoStats.BaseBlockChance = 0.1
+	table := NewAttackTable(attacker, defender)
+
+	for _, flags := range []SpellFlag{SpellFlagNone, SpellFlagNoActiveDefense} {
+		spell := &Spell{Unit: attacker, ProcMask: ProcMaskMeleeMHAuto, DefenseType: DefenseTypeMelee, Flags: flags}
+		for _, avoidance := range []attackTableValue{
+			{name: "dodge", got: defender.GetTotalDodgeChanceAsDefender(spell, table)},
+			{name: "parry", got: defender.GetTotalParryChanceAsDefender(spell, table)},
+			{name: "block", got: defender.GetTotalBlockChanceAsDefender(spell, table)},
+		} {
+			if flags == SpellFlagNone && avoidance.got <= 0 {
+				t.Errorf("%s without the flag = %v, want the player's chance", avoidance.name, avoidance.got)
+			} else if flags != SpellFlagNone && avoidance.got != 0 {
+				t.Errorf("%s with the flag = %v, want 0", avoidance.name, avoidance.got)
+			}
+		}
+	}
+}
+
 func TestExpectedWhiteDamageUsesTheGlanceMidpoint(t *testing.T) {
 	attacker := &Unit{PseudoStats: stats.NewPseudoStats()}
 	target := &Unit{PseudoStats: stats.NewPseudoStats()}

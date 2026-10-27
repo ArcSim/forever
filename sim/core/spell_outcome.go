@@ -583,10 +583,6 @@ func (result *SpellResult) applyAttackTableMissNoDWPenalty(spell *Spell, attackT
 }
 
 func (result *SpellResult) applyAttackTableBlock(spell *Spell, attackTable *AttackTable, roll float64, chance *float64) bool {
-	if spell.Flags.Matches(SpellFlagNoActiveDefense) {
-		return false
-	}
-
 	*chance += result.Target.GetTotalBlockChanceAsDefender(spell, attackTable)
 	if roll < *chance {
 		isPartialResist := result.DidResist()
@@ -614,10 +610,6 @@ func (result *SpellResult) applyAttackTableBlock(spell *Spell, attackTable *Atta
 }
 
 func (result *SpellResult) applyAttackTableDodge(spell *Spell, attackTable *AttackTable, roll float64, chance *float64) bool {
-	if spell.Flags.Matches(SpellFlagNoActiveDefense) {
-		return false
-	}
-
 	*chance += result.Target.GetTotalDodgeChanceAsDefender(spell, attackTable)
 
 	if roll < *chance {
@@ -630,10 +622,6 @@ func (result *SpellResult) applyAttackTableDodge(spell *Spell, attackTable *Atta
 }
 
 func (result *SpellResult) applyAttackTableParry(spell *Spell, attackTable *AttackTable, roll float64, chance *float64) bool {
-	if spell.Flags.Matches(SpellFlagNoActiveDefense) {
-		return false
-	}
-
 	*chance += result.Target.GetTotalParryChanceAsDefender(spell, attackTable)
 
 	if roll < *chance {

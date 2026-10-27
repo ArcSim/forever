@@ -565,7 +565,7 @@ func (value *APLValueSpellIsHitCapped) String() string {
 
 // Whether the current target can neither dodge the spell nor, while the unit stands in front of it, parry it.
 // Only the melee table has dodge and parry, so anything else is capped, as is a spell flagged No Active
-// Defense. It reads the table and that flag; the outcome function the spell passes is not read.
+// Defense, which the target's chances read as zero. The outcome function the spell passes is not read.
 type APLValueSpellIsExpertiseCapped struct {
 	DefaultAPLValueImpl
 	spell     *Spell
@@ -588,10 +588,10 @@ func (value *APLValueSpellIsExpertiseCapped) Type() proto.APLValueType {
 	return proto.APLValueType_ValueTypeBool
 }
 func (value *APLValueSpellIsExpertiseCapped) GetBool(_ *Simulation) bool {
-	spell := value.spell
-	if !value.melee || spell.Flags.Matches(SpellFlagNoActiveDefense) {
+	if !value.melee {
 		return true
 	}
+	spell := value.spell
 	target := value.targetRef.Get()
 	attackTable := spell.Unit.AttackTables[target.UnitIndex]
 	if target.GetTotalDodgeChanceAsDefender(spell, attackTable) > capTolerance {
