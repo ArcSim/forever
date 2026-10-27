@@ -860,6 +860,7 @@ func TestAdaptiveCatAvailabilityWarnings(t *testing.T) {
 			req.Raid.Parties[0].Players[0].Consumables = &proto.ConsumesSpec{}
 		}
 		expected := map[string]bool{
+			"Cat (#1) does not know talent {SpellID: 16958}":    true,
 			"Cat (#1) does not know spell {SpellID: 1259705}":   true,
 			"No aura found on Cat (#1) for: {SpellID: 1270842}": true,
 			"Cat (#1) does not know spell {SpellID: 1259686}":   true,

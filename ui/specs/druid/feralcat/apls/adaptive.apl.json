@@ -349,7 +349,7 @@
       }
     },
     {
-      "notes": "Use Thistle Tea at or below its energy ceiling",
+      "notes": "Use Thistle Tea at or below the energy ceiling for your Blood Frenzy rank",
       "action": {
         "condition": {
           "variableRef": {
@@ -441,7 +441,7 @@
       }
     },
     {
-      "notes": "Refresh Rip; with 2/2 Blood Frenzy, build once more when Shred funds next-global Rip",
+      "notes": "Refresh Rip: with zero or two Blood Frenzy points, build to five when the next-global Rip is funded",
       "action": {
         "condition": {
           "and": {
@@ -632,7 +632,7 @@
       }
     },
     {
-      "name": "Rip target CP with two Blood Frenzy points",
+      "name": "Preferred Rip CP with zero or two Blood Frenzy points",
       "value": {
         "const": {
           "val": "5"
@@ -760,6 +760,14 @@
       }
     },
     {
+      "name": "Tea energy ceiling without Blood Frenzy",
+      "value": {
+        "const": {
+          "val": "25"
+        }
+      }
+    },
+    {
       "name": "Shifting Power ready",
       "value": {
         "and": {
@@ -855,8 +863,19 @@
                         {
                           "not": {
                             "val": {
-                              "variableRef": {
-                                "name": "Two Blood Frenzy points with Shifting Power"
+                              "or": {
+                                "vals": [
+                                  {
+                                    "variableRef": {
+                                      "name": "No Blood Frenzy points"
+                                    }
+                                  },
+                                  {
+                                    "variableRef": {
+                                      "name": "Two Blood Frenzy points with Shifting Power"
+                                    }
+                                  }
+                                ]
                               }
                             }
                           }
@@ -869,7 +888,7 @@
                             },
                             "rhs": {
                               "variableRef": {
-                                "name": "Rip target CP with two Blood Frenzy points"
+                                "name": "Preferred Rip CP with zero or two Blood Frenzy points"
                               }
                             }
                           }
@@ -1692,16 +1711,61 @@
               }
             },
             {
-              "cmp": {
-                "op": "OpLe",
-                "lhs": {
-                  "currentEnergy": {}
-                },
-                "rhs": {
-                  "variableRef": {
-                    "name": "Tea energy ceiling"
+              "or": {
+                "vals": [
+                  {
+                    "and": {
+                      "vals": [
+                        {
+                          "variableRef": {
+                            "name": "No Blood Frenzy points"
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "op": "OpLe",
+                            "lhs": {
+                              "currentEnergy": {}
+                            },
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Tea energy ceiling without Blood Frenzy"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "and": {
+                      "vals": [
+                        {
+                          "not": {
+                            "val": {
+                              "variableRef": {
+                                "name": "No Blood Frenzy points"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "cmp": {
+                            "op": "OpLe",
+                            "lhs": {
+                              "currentEnergy": {}
+                            },
+                            "rhs": {
+                              "variableRef": {
+                                "name": "Tea energy ceiling"
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
                   }
-                }
+                ]
               }
             }
           ]
@@ -2462,6 +2526,26 @@
               }
             }
           ]
+        }
+      }
+    },
+    {
+      "name": "No Blood Frenzy points",
+      "value": {
+        "cmp": {
+          "op": "OpEq",
+          "lhs": {
+            "talentRank": {
+              "talentId": {
+                "spellId": 16958
+              }
+            }
+          },
+          "rhs": {
+            "const": {
+              "val": "0"
+            }
+          }
         }
       }
     }
