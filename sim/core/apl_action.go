@@ -9,6 +9,7 @@ import (
 type APLAction struct {
 	condition APLValue
 	impl      APLActionImpl
+	spell     *Spell // The spell a cast action casts or queues, whose queue check runs before the condition.
 }
 
 func (action *APLAction) Finalize(rot *APLRotation) {
@@ -25,6 +26,11 @@ func (action *APLAction) Finalize(rot *APLRotation) {
 
 func (action *APLAction) IsReady(sim *Simulation) bool {
 	return (action.condition == nil || action.condition.GetBool(sim)) && action.impl.IsReady(sim)
+}
+
+// Whether a queued spell holds back the action's cast, which is then not ready whatever its condition says.
+func (action *APLAction) heldByQueuedSpell(sim *Simulation) bool {
+	return action.spell != nil && action.spell.heldByQueuedSpell(sim)
 }
 
 func (action *APLAction) Execute(sim *Simulation) {
@@ -165,19 +171,30 @@ func (rot *APLRotation) newAPLAction(config *proto.APLAction) *APLAction {
 		}
 	}
 
+	return newAPLActionEntry(condition, impl)
+}
+
+// Builds a rotation entry and hands it to the actions that read their own entry's condition.
+func newAPLActionEntry(condition APLValue, impl APLActionImpl) *APLAction {
 	action := &APLAction{
 		condition: condition,
 		impl:      impl,
+		spell:     castSpellOf(impl),
 	}
-
+	switch impl := impl.(type) {
+	case *APLActionStrictMultidot:
+		impl.entry = action
+	case *APLActionGroupReference:
+		impl.entry = action
+	case *APLActionMove:
+		impl.entry = action
+	}
 	return action
 }
 
 func removeFromMajorCooldowns(action APLActionImpl, character *Character) {
-	if castSpellAction, ok := action.(*APLActionCastSpell); ok {
-		character.removeInitialMajorCooldown(castSpellAction.spell.ActionID)
-	} else if castFriendlySpellAction, ok := action.(*APLActionCastFriendlySpell); ok {
-		character.removeInitialMajorCooldown(castFriendlySpellAction.spell.ActionID)
+	if spell := castSpellOf(action); spell != nil {
+		character.removeInitialMajorCooldown(spell.ActionID)
 	}
 }
 
@@ -248,6 +265,8 @@ func (rot *APLRotation) newAPLActionImpl(config *proto.APLAction) APLActionImpl 
 		return rot.newActionMoveDuration(config.GetMoveDuration())
 	case *proto.APLAction_PetAttack:
 		return rot.newActionPetAttack(config.GetPetAttack())
+	case *proto.APLAction_StartAttack:
+		return rot.newActionStartAttack(config.GetStartAttack())
 	case *proto.APLAction_CustomRotation:
 		return rot.newActionCustomRotation(config.GetCustomRotation())
 	case *proto.APLAction_GroupReference:

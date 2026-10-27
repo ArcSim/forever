@@ -147,6 +147,7 @@ export default defineSpec<Spec.SpecHunter>({
 			Presets.SimpleRotation,
 			Presets.WeaveAPLRotation,
 			Presets.WeaveHawkAPLRotation,
+			Presets.CleanWeaveAPLRotation,
 			Presets.TurretAPLRotation,
 			Presets.TurretMultiAPLRotation,
 			Presets.TurretHawkAPLRotation,
@@ -171,6 +172,7 @@ export default defineSpec<Spec.SpecHunter>({
 
 		const values: Record<string, string> = {
 			'Time to weave': `${simple.timeToWeave || 100}ms`,
+			'Pull range': String(simple.pullRange || 25),
 			'Use Aimed Shot': String(simple.useAimed),
 			'Use Multi-Shot': String(simple.useMulti),
 			'Use Arcane Shot': String(simple.useArcane),

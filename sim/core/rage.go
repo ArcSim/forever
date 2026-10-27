@@ -6,6 +6,8 @@ import (
 	"github.com/wowsims/forever/sim/core/proto"
 )
 
+// Booked in AddRage at gain time. Rage from white hits, hits taken and refunds carries
+// ResourceMetrics.NoThreat and makes none; a new rage source that comes from damage sets NoThreat too.
 const ThreatPerRageGained = 5
 
 // Damage taken grants DamageTakenRageFactor * (1 - A) * damage / c rage, where damage is the hit before any of the
@@ -270,8 +272,7 @@ func (rb *rageBar) reset(_ *Simulation) {
 // Each rage gained is ThreatPerRageGained threat times the unit's threat multiplier at the time, split
 // between the targets in combat at the time.
 func (rb *rageBar) addRageGainThreat(sim *Simulation, gain float64) {
-	targets := float64(len(sim.Encounter.ActiveTargetUnits))
-	rb.rageGainSpell.ApplyAOEThreatIgnoreMultipliers(gain * ThreatPerRageGained * rb.rageGainSpell.unitThreatMultiplier() / targets)
+	rb.rageGainSpell.applySplitThreat(sim, gain*ThreatPerRageGained*rb.rageGainSpell.unitThreatMultiplier())
 	rb.rageGainSpell.SpellMetrics[0].Casts++
 }
 

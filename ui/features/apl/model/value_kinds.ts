@@ -46,6 +46,7 @@ import {
 	APLValueDotTickFrequency,
 	APLValueDotTimeToNextTick,
 	APLValueDruidBleedIsActive,
+	APLValueDruidExcessEnergy,
 	APLValueEncounterInArea,
 	APLValueEnergyTimeToTarget,
 	APLValueFrontOfTarget,
@@ -86,20 +87,29 @@ import {
 	APLValueSpellFullCooldown,
 	APLValueSpellGCDHastedDuration,
 	APLValueSpellInFlight,
+	APLValueSpellInRange,
+	APLValueSpellIsCasting,
 	APLValueSpellIsChanneling,
+	APLValueSpellIsExpertiseCapped,
+	APLValueSpellIsHitCapped,
 	APLValueSpellIsKnown,
 	APLValueSpellIsReady,
 	APLValueSpellNumCharges,
 	APLValueSpellTimeToCharge,
 	APLValueSpellTimeToReady,
 	APLValueSpellTravelTime,
+	APLValueTalentIsKnown,
+	APLValueTalentRank,
 	APLValueTargetIsMobType,
 	APLValueTimeToNextEnergyTick,
 	APLValueTotemRemainingTime,
 	APLValueUnitDistance,
 	APLValueUnitIsMoving,
+	APLValueUnitMovementSpeed,
 	APLValueWarlockActivePet,
 	APLValueWarlockAssignedCurseIsActive,
+	APLValueWarlockAssignedCurseIsActiveOnAllTargets,
+	APLValueWarlockBaneIsActiveOnAllTargets,
 	APLValueWarlockIsAssignedCurse,
 } from '@generated/proto/apl';
 import { Class, Spec } from '@generated/proto/common';
@@ -345,6 +355,13 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		newValue: APLValueUnitDistance.create,
 		fields: [unitFieldConfig('sourceUnit', 'aura_sources')],
 	}),
+	unitMovementSpeed: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.unit_movement_speed.label'),
+		submenu: ['unit'],
+		shortDescription: i18n.t('rotation_tab.apl.values.unit_movement_speed.tooltip'),
+		newValue: APLValueUnitMovementSpeed.create,
+		fields: [unitFieldConfig('sourceUnit', 'aura_sources')],
+	}),
 
 	// Resources
 	currentHealth: inputBuilder({
@@ -380,7 +397,7 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 			const clss = player.getClass();
 			return !isPrepull && clss !== Class.ClassRogue && clss !== Class.ClassWarrior;
 		},
-		fields: [],
+		fields: [unitFieldConfig('sourceUnit', 'self_and_pets')],
 	}),
 	currentManaPercent: inputBuilder({
 		label: i18n.t('rotation_tab.apl.values.current_mana_percent.label'),
@@ -391,7 +408,7 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 			const clss = player.getClass();
 			return !isPrepull && clss !== Class.ClassRogue && clss !== Class.ClassWarrior;
 		},
-		fields: [],
+		fields: [unitFieldConfig('sourceUnit', 'self_and_pets')],
 	}),
 	maxMana: inputBuilder({
 		label: i18n.t('rotation_tab.apl.values.max_mana.label'),
@@ -591,6 +608,33 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
 		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
 	}),
+	spellInRange: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.in_range.label'),
+		submenu: ['spell'],
+		shortDescription: i18n.t('rotation_tab.apl.values.in_range.tooltip'),
+		fullDescription: i18n.t('rotation_tab.apl.values.in_range.full_description'),
+		newValue: APLValueSpellInRange.create,
+		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
+	}),
+	spellIsHitCapped: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.is_hit_capped.label'),
+		submenu: ['spell'],
+		shortDescription: i18n.t('rotation_tab.apl.values.is_hit_capped.tooltip'),
+		fullDescription: i18n.t('rotation_tab.apl.values.is_hit_capped.full_description'),
+		newValue: APLValueSpellIsHitCapped.create,
+		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
+	}),
+	spellIsExpertiseCapped: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.is_expertise_capped.label'),
+		submenu: ['spell'],
+		shortDescription: i18n.t('rotation_tab.apl.values.is_expertise_capped.tooltip'),
+		fullDescription: i18n.t('rotation_tab.apl.values.is_expertise_capped.full_description'),
+		newValue: APLValueSpellIsExpertiseCapped.create,
+		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
+	}),
 	spellIsReady: inputBuilder({
 		label: i18n.t('rotation_tab.apl.values.is_ready.label'),
 		submenu: ['spell'],
@@ -626,6 +670,14 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		submenu: ['spell'],
 		shortDescription: i18n.t('rotation_tab.apl.values.cpm.tooltip'),
 		newValue: APLValueSpellCPM.create,
+		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
+	}),
+	spellIsCasting: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.is_casting.label'),
+		submenu: ['spell'],
+		shortDescription: i18n.t('rotation_tab.apl.values.is_casting.tooltip'),
+		newValue: APLValueSpellIsCasting.create,
 		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
 		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
 	}),
@@ -666,7 +718,6 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		submenu: ['spell'],
 		shortDescription: i18n.t('rotation_tab.apl.values.gcd_hasted_duration.tooltip'),
 		newValue: APLValueSpellGCDHastedDuration.create,
-		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
 		fields: [actionIdFieldConfig('spellId', 'castable_spells', '')],
 	}),
 	spellFullCooldown: inputBuilder({
@@ -708,6 +759,22 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		newValue: APLValueSpellExpectedDpet.create,
 		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
 		fields: [unitFieldConfig('targetUnit', 'targets'), actionIdFieldConfig('spellId', 'expected_damage_spells', '')],
+	}),
+
+	// Talents
+	talentIsKnown: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.talent_known.label'),
+		submenu: ['talents'],
+		shortDescription: i18n.t('rotation_tab.apl.values.talent_known.tooltip'),
+		newValue: APLValueTalentIsKnown.create,
+		fields: [actionIdFieldConfig('talentId', 'talents', '')],
+	}),
+	talentRank: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.talent_rank.label'),
+		submenu: ['talents'],
+		shortDescription: i18n.t('rotation_tab.apl.values.talent_rank.tooltip'),
+		newValue: APLValueTalentRank.create,
+		fields: [actionIdFieldConfig('talentId', 'talent_ranks', '')],
 	}),
 
 	// Auras
@@ -799,7 +866,6 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		shortDescription: i18n.t('rotation_tab.apl.values.aura_duration.tooltip'),
 		fullDescription: i18n.t('rotation_tab.apl.values.aura_duration.full_description'),
 		newValue: APLValueAuraDuration.create,
-		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
 		fields: [unitFieldConfig('sourceUnit', 'aura_sources'), actionIdFieldConfig('auraId', 'auras', 'sourceUnit')],
 	}),
 
@@ -989,7 +1055,7 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		submenu: ['dot'],
 		shortDescription: i18n.t('rotation_tab.apl.values.dot_percent_increase.tooltip'),
 		newValue: APLValueDotPercentIncrease.create,
-		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		includeIf: (_player: Player<any>, _isPrepull: boolean) => false, // Disabled for now, with the DoT increase values in sim/core/apl_values_dot.go.
 		fields: [unitFieldConfig('targetUnit', 'targets'), actionIdFieldConfig('spellId', 'expected_dot_spells', ''), makeUseDotBaseValueCheckbox()],
 	}),
 	dotTickRatePercentIncrease: inputBuilder({
@@ -997,7 +1063,7 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		submenu: ['dot'],
 		shortDescription: i18n.t('rotation_tab.apl.values.dot_tick_rate_percent_increase.tooltip'),
 		newValue: APLValueDotPercentIncrease.create,
-		includeIf: (_: Player<any>, isPrepull: boolean) => !isPrepull,
+		includeIf: (_player: Player<any>, _isPrepull: boolean) => false, // Disabled for now, with the DoT increase values in sim/core/apl_values_dot.go.
 		fields: [unitFieldConfig('targetUnit', 'targets'), actionIdFieldConfig('spellId', 'expected_dot_spells', ''), makeUseDotBaseValueCheckbox()],
 	}),
 	sequenceIsComplete: inputBuilder({
@@ -1042,6 +1108,22 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 		includeIf: (player: Player<any>, isPrepull: boolean) => !isPrepull && player.getSpec() == Spec.SpecWarlock,
 		fields: [unitFieldConfig('targetUnit', 'targets')],
 	}),
+	warlockAssignedCurseIsActiveOnAllTargets: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.warlock_assigned_curse_is_active_on_all_targets.label'),
+		submenu: ['warlock'],
+		shortDescription: i18n.t('rotation_tab.apl.values.warlock_assigned_curse_is_active_on_all_targets.tooltip'),
+		newValue: APLValueWarlockAssignedCurseIsActiveOnAllTargets.create,
+		includeIf: (player: Player<any>, isPrepull: boolean) => !isPrepull && player.getSpec() == Spec.SpecWarlock,
+		fields: [],
+	}),
+	warlockBaneIsActiveOnAllTargets: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.warlock_bane_is_active_on_all_targets.label'),
+		submenu: ['warlock'],
+		shortDescription: i18n.t('rotation_tab.apl.values.warlock_bane_is_active_on_all_targets.tooltip'),
+		newValue: APLValueWarlockBaneIsActiveOnAllTargets.create,
+		includeIf: (player: Player<any>, isPrepull: boolean) => !isPrepull && player.getSpec() == Spec.SpecWarlock,
+		fields: [],
+	}),
 	warlockIsAssignedCurse: inputBuilder({
 		label: i18n.t('rotation_tab.apl.values.warlock_is_assigned_curse.label'),
 		submenu: ['warlock'],
@@ -1076,6 +1158,14 @@ export const valueKinds: { [f in ValidAPLValueKind]: ValueKindModel<APLValueImpl
 			return !isPrepull && (spec === Spec.SpecFeralCatDruid || spec === Spec.SpecFeralBearDruid);
 		},
 		fields: [unitFieldConfig('targetUnit', 'targets')],
+	}),
+	druidExcessEnergy: inputBuilder({
+		label: i18n.t('rotation_tab.apl.values.druid_excess_energy.label'),
+		submenu: ['feral_druid'],
+		shortDescription: i18n.t('rotation_tab.apl.values.druid_excess_energy.tooltip'),
+		newValue: APLValueDruidExcessEnergy.create,
+		includeIf: (player: Player<any>, isPrepull: boolean) => !isPrepull && player.getSpec() === Spec.SpecFeralCatDruid,
+		fields: [],
 	}),
 	variableRef: inputBuilder({
 		label: i18n.t('rotation_tab.apl.values.variable_ref.label'),

@@ -108,8 +108,8 @@ func SpellConfig(unit *core.Unit, s *Spell, opts ...SpellOpt) core.SpellConfig {
 		config.MissileSpeed = 0
 		config.MissileMinDuration = max(config.MissileMinDuration, core.DurationFromSeconds(float64(s.Speed)))
 	}
-	// Forever moves the minimum range of a bow, gun or crossbow shot from the 8 yd the row states to
-	// core.MinRangedRange.
+	// A bow, gun or crossbow shot's minimum range is the row's 8 yd counted from both units' combat
+	// reach, which is core.MinRangedRange in the sim's distance.
 	if s.MinRange != 0 && s.EquipClass == dbcenums.ITEM_CLASS_WEAPON && s.EquipSubclass&(dbcenums.ITEM_SUBCLASS_BIT_WEAPON_BOW|dbcenums.ITEM_SUBCLASS_BIT_WEAPON_GUNS|dbcenums.ITEM_SUBCLASS_BIT_WEAPON_CROSSBOW) != 0 {
 		config.MinRange = core.MinRangedRange
 	}

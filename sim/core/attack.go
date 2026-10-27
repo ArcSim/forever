@@ -361,9 +361,10 @@ func (wa *WeaponAttack) swing(sim *Simulation) time.Duration {
 	isRanged := wa == &wa.unit.AutoAttacks.ranged
 
 	// A ranged auto can't fire while moving. The hidden retry timer then
-	// checks every 500ms, and the shot goes off at the first check after the
-	// move ends. Casts never hold it. A ranged auto whose cast requirement
-	// fails, such as a weapon the ranged slot does not hold, waits the same way.
+	// checks every 500ms, and the shot goes off a reaction time after the
+	// move ends (see resumeHeldRangedSwing). Casts never hold it. A ranged auto whose cast
+	// requirement fails, such as a weapon the ranged slot does not hold, waits
+	// on the retry timer alone.
 	if isRanged && (wa.unit.Moving || wa.requirementFails(sim)) {
 		wa.swingAt = sim.CurrentTime + RangedAutoRetryInterval
 		return wa.swingAt
@@ -372,6 +373,7 @@ func (wa *WeaponAttack) swing(sim *Simulation) time.Duration {
 	// A ready ranged auto first winds up, which runs through casts. Moving
 	// cancels it (see initMovement).
 	if isRanged && wa.windupEnd == 0 {
+		wa.unit.AutoAttacks.meleeAttackOn = false // starting a ranged auto turns the melee attack off
 		wa.windupEnd = sim.CurrentTime + RangedSwingWindup
 		wa.naturalReadyAt += RangedSwingWindup
 		wa.swingAt = wa.windupEnd
@@ -482,6 +484,8 @@ type AutoAttacks struct {
 
 	// Wakes a melee-weaver's rotation when an out-of-range MH swing comes ready.
 	meleeWeaveWakeup *PendingAction
+
+	meleeAttackOn bool // The melee attack is toggled on, which starting a ranged auto turns off.
 }
 
 // Options for initializing auto attacks.
@@ -536,6 +540,7 @@ func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
 		DefenseType: DefenseTypeMelee,
 		ProcMask:    Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeMHAuto, options.ProcMask),
 		Flags:       SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
+		MaxRange:    MaxMeleeRange,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
@@ -561,6 +566,7 @@ func (unit *Unit) EnableAutoAttacks(agent Agent, options AutoAttackOptions) {
 		DefenseType: DefenseTypeMelee,
 		ProcMask:    Ternary(options.ProcMask == ProcMaskUnknown, ProcMaskMeleeOHAuto, options.ProcMask),
 		Flags:       SpellFlagMeleeMetrics | SpellFlagIncludeTargetBonusDamage | SpellFlagNoOnCastComplete,
+		MaxRange:    MaxMeleeRange,
 
 		DamageMultiplier:         1,
 		DamageMultiplierAdditive: 1,
@@ -640,6 +646,7 @@ func (aa *AutoAttacks) reset(sim *Simulation) {
 	}
 
 	aa.meleeWeaveWakeup = nil
+	aa.meleeAttackOn = false
 
 	aa.mh.enabled = false
 	aa.oh.enabled = false
@@ -749,6 +756,21 @@ func (wa *WeaponAttack) IsInRange() bool {
 	return (wa.MinRange == 0. || wa.MinRange <= wa.unit.DistanceFromTarget) && (maxRange == 0. || maxRange >= wa.unit.DistanceFromTarget)
 }
 
+// Toggles the melee attack on. For a unit that also shoots, the off hand's next swing comes no sooner
+// than half a swing from now, out of range or not, so starting the attack on the way in brings it
+// closer to ready by the time the unit arrives.
+func (aa *AutoAttacks) StartMeleeAttack(sim *Simulation) {
+	if !aa.AutoSwingMelee || aa.meleeAttackOn {
+		return
+	}
+	aa.meleeAttackOn = true
+	if aa.IsDualWielding && aa.AutoSwingRanged {
+		aa.oh.updateSwingDuration(aa.oh.unit.TotalMeleeHasteMultiplier())
+		aa.oh.swingAt = max(aa.oh.swingAt, sim.CurrentTime+aa.oh.curSwingDuration/2)
+		aa.oh.naturalReadyAt = max(aa.oh.naturalReadyAt, aa.oh.swingAt) // the game's rule, no delay on the timeline
+	}
+}
+
 // Starts or stops the ranged auto attack when the target has come into or gone out of its range.
 func (aa *AutoAttacks) UpdateRangedRange(sim *Simulation) {
 	if !aa.AutoSwingRanged {
@@ -798,13 +820,8 @@ func (aa *AutoAttacks) EnableMeleeSwing(sim *Simulation) {
 	}
 
 	if aa.IsDualWielding && !aa.oh.enabled {
-		var offset time.Duration
-		// When entering melee range from ranged, the offhand will start at half the swing duration
-		if aa.AutoSwingRanged {
-			aa.oh.updateSwingDuration(aa.oh.unit.TotalMeleeHasteMultiplier())
-			offset = aa.oh.curSwingDuration / 2
-		}
-		aa.oh.swingAt = max(aa.oh.swingAt, sim.CurrentTime+offset, 0)
+		aa.StartMeleeAttack(sim) // on arrival, when it was not started on the way in
+		aa.oh.swingAt = max(aa.oh.swingAt, sim.CurrentTime, 0)
 		if aa.oh.IsInRange() {
 			aa.oh.enabled = true
 			aa.oh.addWeaponAttack(sim, aa.oh.unit.TotalMeleeHasteMultiplier())
@@ -875,6 +892,20 @@ func (aa *AutoAttacks) cancelRangedWindup(sim *Simulation) {
 	aa.ranged.windupEnd = 0
 	aa.ranged.naturalReadyAt -= RangedSwingWindup // the next windup adds it again
 	aa.ranged.swingAt = sim.CurrentTime + RangedAutoRetryInterval
+	sim.rescheduleWeaponAttack(aa.ranged.swingAt)
+}
+
+// Fires a ranged auto that came due while moving a reaction time after the move ends, instead of at
+// the retry timer's next check: the player starts Auto Shot again by hand.
+func (aa *AutoAttacks) resumeHeldRangedSwing(sim *Simulation) {
+	if !aa.AutoSwingRanged || !aa.ranged.enabled || aa.ranged.windupEnd != 0 {
+		return
+	}
+	if aa.ranged.naturalReadyAt > sim.CurrentTime {
+		return // not due yet
+	}
+	// A shot back in range only as the move ends was set to fire now; it waits the reaction too.
+	aa.ranged.swingAt = sim.CurrentTime + aa.ranged.unit.ReactionTime
 	sim.rescheduleWeaponAttack(aa.ranged.swingAt)
 }
 

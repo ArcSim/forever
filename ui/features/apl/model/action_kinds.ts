@@ -24,6 +24,7 @@ import {
 	APLActionResetSequence,
 	APLActionSchedule,
 	APLActionSequence,
+	APLActionStartAttack,
 	APLActionStrictMultidot,
 	APLActionStrictSequence,
 	APLActionTriggerICD,
@@ -375,6 +376,9 @@ export const actionKinds: { [f in NonNullable<APLActionKind>]: ActionKindModel<A
 				label: i18n.t('rotation_tab.apl.actions.move.to_range'),
 				labelTooltip: i18n.t('rotation_tab.apl.actions.move.to_range_tooltip'),
 			}),
+			booleanFieldConfig('recheckWhileMoving', i18n.t('rotation_tab.apl.actions.move.recheck'), {
+				labelTooltip: i18n.t('rotation_tab.apl.actions.move.recheck_tooltip'),
+			}),
 		],
 	}),
 	['moveDuration']: inputBuilder({
@@ -395,6 +399,14 @@ export const actionKinds: { [f in NonNullable<APLActionKind>]: ActionKindModel<A
 		shortDescription: i18n.t('rotation_tab.apl.actions.pet_attack.tooltip'),
 		includeIf: (player: Player<any>, isPrepull: boolean) => isPrepull && [Class.ClassHunter, Class.ClassWarlock].includes(player.getClass()),
 		newValue: () => APLActionPetAttack.create(),
+		fields: [],
+	}),
+	['startAttack']: inputBuilder({
+		label: i18n.t('rotation_tab.apl.actions.start_attack.label'),
+		submenu: ['misc'],
+		shortDescription: i18n.t('rotation_tab.apl.actions.start_attack.tooltip'),
+		includeIf: (player: Player<any>) => player.getClass() === Class.ClassHunter,
+		newValue: () => APLActionStartAttack.create(),
 		fields: [],
 	}),
 	['customRotation']: inputBuilder({

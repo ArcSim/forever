@@ -7,6 +7,9 @@ import (
 	"github.com/wowsims/forever/sim/core/proto"
 )
 
+// An empty base spell means none. With no base spell, aligning to the encounter end casts early only
+// when a later use still gets at least half its buff (remaining > CD + buff/2) or the buff runs to the
+// end. The cooldown is FullCooldown, which for a potion includes its shared potion cooldown.
 type APLValueMultipleCdUsages struct {
 	DefaultAPLValueImpl
 	unit *Unit
@@ -18,18 +21,26 @@ type APLValueMultipleCdUsages struct {
 }
 
 func (rot *APLRotation) newValueMultipleCdUsages(config *proto.APLValueMultipleCdUsages, _ *proto.UUID) APLValue {
-	baseSpell := rot.GetAPLSpell(config.BaseSpellId)
+	var baseID ActionID
+	if config.BaseSpellId != nil {
+		baseID = ProtoToActionID(config.BaseSpellId)
+	}
+	hasBaseSpell := !baseID.IsEmptyAction()
+	var baseSpell *Spell
+	if hasBaseSpell {
+		baseSpell = rot.GetAPLSpell(config.BaseSpellId)
+	}
 
 	targetSpell := rot.GetAPLSpell(config.TargetSpellId)
 	if targetSpell == nil {
 		return nil
 	}
 
-	if config.BaseSpellId != nil && (baseSpell == nil || baseSpell.RelatedSelfBuff == nil) {
+	if hasBaseSpell && (baseSpell == nil || baseSpell.RelatedSelfBuff == nil) {
 		if baseSpell == nil {
-			rot.ValidationMessage(proto.LogLevel_Warning, "%s is not known. Only using offset to delay CD usage.", ProtoToActionID(config.BaseSpellId))
+			rot.ValidationMessage(proto.LogLevel_Warning, "%s is not known. Ignoring the base spell and offset.", baseID)
 		} else {
-			rot.ValidationMessage(proto.LogLevel_Warning, "%s does not have a related self buff. Only using offset to delay CD usage.", ProtoToActionID(config.BaseSpellId))
+			rot.ValidationMessage(proto.LogLevel_Warning, "%s does not have a related self buff. Ignoring the base spell and offset.", baseID)
 		}
 
 	}
@@ -56,26 +67,28 @@ func (value *APLValueMultipleCdUsages) Type() proto.APLValueType {
 	return proto.APLValueType_ValueTypeBool
 }
 func (value *APLValueMultipleCdUsages) GetBool(sim *Simulation) bool {
-	totalTime := sim.Duration
-	remainingTime := sim.GetRemainingDuration()
-	castOffset := value.offset.GetDuration(sim)
-
-	targetSpell := value.targetSpell
-	targetSpellCD := targetSpell.CD.Duration
-	targetSpellDuration := value.targetSpell.RelatedSelfBuff.Duration
-	targetSpellEffectiveTime := targetSpellCD + targetSpellDuration
-
-	maxUses := 1 + int(float64(totalTime)/float64(targetSpellCD))
-	canGetFullDurationAtEncounterEnd := remainingTime <= targetSpellDuration
-	canGetSecondUptimeWithinRemainingTime := remainingTime >= targetSpellEffectiveTime
-
 	baseSpell := value.baseSpell
-	if baseSpell == nil || baseSpell.RelatedSelfBuff == nil {
-		if value.alignCdEnd {
-			return canGetFullDurationAtEncounterEnd || canGetSecondUptimeWithinRemainingTime
-		}
+	hasBaseSpell := baseSpell != nil && baseSpell.RelatedSelfBuff != nil
+	if !hasBaseSpell && !value.alignCdEnd {
 		return true
 	}
+
+	totalTime := sim.Duration
+	remainingTime := sim.GetRemainingDuration()
+
+	targetSpell := value.targetSpell
+	targetSpellCD := targetSpell.FullCooldown()
+	targetSpellDuration := value.targetSpell.RelatedSelfBuff.Duration
+	canGetFullDurationAtEncounterEnd := remainingTime <= targetSpellDuration
+
+	if !hasBaseSpell {
+		return canGetFullDurationAtEncounterEnd || remainingTime > targetSpellCD+targetSpellDuration/2
+	}
+
+	castOffset := value.offset.GetDuration(sim)
+	targetSpellEffectiveTime := targetSpellCD + targetSpellDuration
+	maxUses := 1 + int(float64(totalTime)/float64(targetSpellCD))
+	canGetSecondUptimeWithinRemainingTime := remainingTime >= targetSpellEffectiveTime
 
 	baseSpellAura := baseSpell.RelatedSelfBuff
 	baseSpellIsReady := baseSpell.CD.IsReady(sim)

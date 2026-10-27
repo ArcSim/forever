@@ -1,8 +1,9 @@
 # Running the sim locally
 
-**Source of truth:** `vite.config.mts`, `vite.build-workers.mts`, `tools/vite/spec_pages.mts`, the `devserver` /
-`rundevserver` / `devmode` / `host` targets in the makefile, `ui/worker/local_worker.ts`, and for Storybook
-`.storybook/main.ts` and the `storybook:*` scripts in `package.json`. Read a target before copying a command from here:
+**Source of truth:** `vite.config.mts`, `vite.build-workers.mts`, `tools/vite/spec_pages.mts`, `tools/vite/build_info.mts`,
+the `devserver` / `rundevserver` / `devmode` / `host` targets in the makefile, `ui/worker/local_worker.ts`, and for
+Storybook `.storybook/main.ts` and the `storybook:*` scripts in `package.json`. Read a target before copying a command
+from here:
 
 ```
 /usr/bin/grep -n "^devserver:\|^rundevserver:\|^devmode:\|^host:" -A8 makefile
@@ -33,6 +34,19 @@ A fresh worktree also needs the generated files (`verification.md`, last section
 `/forever/<class>/<spec>` to the trailing-slash form as the production host does. Only an unknown spec URL falls through
 to the landing page, so getting the landing page means there is no `ui/specs/<class>/<spec>/spec.ts(x)` for that URL.
 
+## The release a page shows
+
+`tools/vite/build_info.mts` reads the release when vite loads its config: the commit (`BUILD_COMMIT`, else
+`git rev-parse HEAD`, else `GITHUB_SHA`), the UTC build date, the game build stamped on each part of
+`assets/db_inputs/spell_store_inputs.json`, and each spec page's last presets and engine changes, over the paths listed
+above `specReleases`. A shallow clone has no changes to read, so the build workflows check out the full history.
+
+`vite.config.mts` defines the lot as `import.meta.env.VITE_BUILD_INFO`. The landing page shows the game build, the build
+date and the commit beside its title; a spec page shows the game build and the date under the sidebar's stats, and its
+info button opens the sim build with the commit and the spec's presets and engine changes. The makefile's bundle target depends on the checkout's `HEAD` and
+`index`, so a commit or checkout rebuilds it. vitest and Storybook define no `VITE_BUILD_INFO`; the stories and tests
+fill `BUILD_INFO` from `ui/testing/build_info.ts`.
+
 ## Running real sims
 
 The Go host serves `dist/forever` from disk and answers the worker's sim requests natively, so stats, Simulate,
@@ -62,6 +76,8 @@ with headless `playwright-core`. It is not a dependency of this repo, so use a l
 
 - Block `**/*wowhead.com/**` with `page.route` so tooltips and icons do not hang the page or redirect it.
 - Load with `waitUntil: 'load'` and then wait about 8 seconds; the page never reaches `networkidle`.
+- A fresh profile opens the onboarding tour, whose shield takes every click. Set the localStorage key `__forever_onboarding` to `skipped`
+  in `page.addInitScript` before the page loads.
 - Icon pickers open on hover, and their trigger is a Wowhead link, so a click navigates away. Hover, never click.
 - Screenshot the element (`locator.screenshot()`) rather than the page, and find it by its `data-testid`
   (`ui/STYLING.md` §5).
@@ -69,6 +85,10 @@ with headless `playwright-core`. It is not a dependency of this repo, so use a l
   browser.
 - To load a realistic build, edit the page's `…__currentSettings__` localStorage key, or paste an
   `IndividualSimSettings` JSON into Import → JSON, and reload.
+- A spec's preset builds are chips under `[data-testid=saved-data-presets]`. Every tab renders its own copy and only
+  the open tab's is visible, so pick with `filter({ visible: true })`.
+- Healer specs are gear planning only and run no sim, so show a healing metric on Shadow Priest with Discipline
+  talents; the mage registers only its highest ranks, so show rank grouping with Shadow Priest Smite.
 
 Compare against a build of the parent commit on a second port rather than a remembered element count.
 

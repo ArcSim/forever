@@ -153,7 +153,8 @@ oil's equip spell is already the enchant's spell damage, and is not named. Eleme
 18262's enchant 2506 names 22755, 2% crit (`A_MOD_WEAPON_CRIT_PERCENT`) on the melee weapons its mask
 42483 names; the generated entry parses it once per stoned hand with `spelldata.OnHand`, so the crit
 reaches only the attacks of the hand carrying the stone.
-`consumables_gift_of_arthas.go` registers Gift of Arthas 9088.
+`consumables_gift_of_arthas.go` registers Gift of Arthas 9088, and `consumables_dragonbreath_chili.go`
+Dragonbreath Chili 12217, whose 15852 rolls on melee hits and casts 15851's fire damage.
 
 A pet takes no consumables of its own; the scrolls the game files mark `ONLY_TARGET_PLAYERS` cannot be
 used on one.
@@ -213,6 +214,14 @@ var ConsumableExclusiveGroups = []ConsumableGroup{
 		8424,  // Gizzard Gum
 		20079, // Spirit of Zanza
 	}},
+	{Group: ConsumableGroupKey{Key: "Rum", Name: "Rum"}, Items: []int32{
+		17048, // Rumsey Rum
+		18269, // Gordok Green Grog
+		18284, // Kreeg's Stout Beatdown
+		20709, // Rumsey Rum Light
+		21114, // Rumsey Rum Dark
+		21151, // Rumsey Rum Black Label
+	}},
 	{Group: ConsumableGroupKey{Key: "Hit food", Name: "Hit food"}, Items: []int32{
 		22237, // Dark Desire
 		23327, // Fire-toasted Bun
@@ -222,7 +231,9 @@ var ConsumableExclusiveGroups = []ConsumableGroup{
 
 The Jujus are Quest-class items the catalogue filter leaves out; naming them here brings them into
 the catalogue as well. The Blasted Lands buffs leave their category group for Zanza. The permanent
-Zanza items (23794, 23795, 23796) are not obtainable and `ConsumableDenyList` keeps them out. The two
+Zanza items (23794, 23795, 23796) are not obtainable and `ConsumableDenyList` keeps them out. The rums
+stack with the food and not with each other; the three the game files type as food leave the food pick
+for the Rum group. The two
 hit foods' 2% hit is listed outside the stat parse, as [below](#stats-dbjson-lists-outside-the-parse).
 
 **Adding a group.** Add an entry to `ConsumableExclusiveGroups`: `ElixirGroup` to put items into a row
@@ -408,8 +419,9 @@ should not take is a hand-written effect for the consumable.
 
 ## What the settings offer
 
-The settings render every consumable db.json ships from its own fields; nothing in the UI names a
-consumable. `buildConsumeConfigs` (`ui/features/settings/components/ConsumesPicker/utils.ts`) puts
+The settings render every consumable db.json ships from its own fields; the UI names one consumable,
+Dragonbreath Chili 12217, a food that stacks with the food pick. It is a toggle beside the food picker,
+picked into `extra_ids`, offered to melee DPS and tank specs whatever the stat filter shows. `buildConsumeConfigs` (`ui/features/settings/components/ConsumesPicker/utils.ts`) puts
 each in a picker by its type (`consumableSlot` in `ui/sim/settings/consumables.ts`): `ConsumableTypeConjured`
 the conjured item, `ConsumableTypePotion` the potion pickers, then the flask, `ConsumableTypeFood` the
 food, the explosive, the imbues and, beside each hand's imbue, `ConsumableTypeWeaponImbue` the weapon
@@ -418,7 +430,9 @@ its group's picker instead (`makeConsumableGroupInput`), which writes at most on
 into `elixir_ids` for an elixir, into `extra_ids` for anything else (Juju Power beside the Strength
 elixirs). The pickers are labelled with `group_name` and ordered by `group_key`: a group holding an
 elixir in the Elixirs row after the flask (a scroll of that group among them), one holding a scroll and
-no elixir as a column of the Scrolls row, and the rest (Hit food, Zanza) after the food. A group, a column or a row that offers the player nothing hides.
+no elixir as a column of the Scrolls row, one holding a holiday consumable in the Holiday row (Hit
+food), one holding a food after the food and the chili (Rum), and the rest at the head of the
+Miscellaneous row (Zanza). A group, a column or a row that offers the player nothing hides.
 
 A potion has three pickers, Offensive, Defensive and Resource, and each offers the
 potions whose `potion_classes` hold its class. `AddPotionClasses` (`tools/database/consumable_potion_classes.go`) fills
@@ -433,6 +447,14 @@ potion already picked, so a pick outside its class can be seen and cleared.
 Everything else is picked any number at a time into the spec's `extra_ids`: in the miscellaneous row,
 and an explosive with a cooldown of its own beside the shared one (Goblin Sapper Charge 10646) beside
 the explosive picker.
+
+The miscellaneous row holds two icons, Offensive and Defensive, each opening below on a menu of its
+consumables. `AddPotionClasses` classes the miscellaneous types (`ConsumableTypeOther`, `Device`,
+`Herb`, `Bandage` and `Unknown`) as it classes a potion, with three differences: Stamina counts as
+the health it brings, an aura of dodge, parry or block chance or of Defense skill counts as
+defensive (Bloodkelp Elixir of Dodging 22192, Elderberry Pie 23435), and one the rest leave with no
+class is offensive (Swiftfeather Token 1400's melee haste). A consumable whose classes are Defensive
+alone sits under Defensive, any other under Offensive.
 
 The generator writes the type (`Consumable.ToProto` in `tools/database/dbc/consumable.go`) from the
 category the first on-use row shares, which is also the consumable's `category_id`: the item row's, or
@@ -459,10 +481,13 @@ A picker offers a consumable when all of these hold (`offeredTo` in
 - for an imbue, the hand's item fits the enchant's weapon subclass and inventory type masks
   (`handTakesImbue`), so a shield coating shows on a shield.
 
-The stat filter starts from the stats the spec weighs consumables by (`consumableStatsOf`: its
-`epStats` and `consumableStats`; Stamina brings health and the resistances, Attack Power flat
-physical damage) and the percents `consumablePseudoStatsOf` names, and the player can show or hide
-any stat some consumable grants. A consumable already picked stays offered below the minimum level or
+The stat filter starts from the stats the spec weighs consumables by and the stats it displays, as
+the buffs' filter does (`consumableFilterScope`: `consumableStatsOf` over its `epStats`, its
+displayed stats and `consumableStats`; Stamina brings health and the resistances, Attack Power flat
+physical damage), and the percents `consumablePseudoStatsOf` names, and the player can show or hide
+any stat some consumable grants. A warrior weighs no Stamina but displays it, so the Stamina scrolls
+and the rums start shown. The potions and conjured items a sim request lists
+(`relevantConsumableIds`) still follow the weighed stats alone. A consumable already picked stays offered below the minimum level or
 with its stats hidden, so it can be seen and cleared; with its stats hidden, it is marked as kept.
 
 Each picker and each row of toggles lists its consumables by the EP their stats and percents add at

@@ -195,6 +195,7 @@ export const CarrionSurprise = { id: 12213 };
 export const MysteryStew = { id: 12214 };
 export const HeavyKodoStew = { id: 12215 };
 export const SpicedChiliCrab = { id: 12216 };
+export const DragonbreathChili = { id: 12217 };
 export const MonsterOmelet = { id: 12218 };
 export const CrispyBatWing = { id: 12224 };
 export const DenseSharpeningStone = { id: 12404 };

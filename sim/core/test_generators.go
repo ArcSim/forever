@@ -122,6 +122,8 @@ type SettingsCombos struct {
 	IsTank            bool
 	StartingDistances []float64
 	Cooldowns         *proto.Cooldowns
+	Profession1       proto.Profession
+	Profession2       proto.Profession
 }
 
 func (combos *SettingsCombos) NumTests() int {
@@ -197,7 +199,8 @@ func (combos *SettingsCombos) GetTest(testIdx int) (string, *proto.ComputeStatsR
 				TalentsString:      talentSetCombo.Talents,
 				Consumables:        buffsCombo.Consumables,
 				Buffs:              buffsCombo.Player,
-				Profession1:        proto.Profession_Engineering,
+				Profession1:        combos.Profession1,
+				Profession2:        combos.Profession2,
 				Cooldowns:          combos.Cooldowns,
 				Rotation:           rotationsCombo.Rotation,
 				ItemSwap:           itemSwapSetCombo.ItemSwap,
@@ -391,6 +394,9 @@ func (generator *ItemsTestGenerator) GetTest(testIdx int) (string, *proto.Comput
 			equipment.EquipItem(setItem)
 		}
 		label = strings.ReplaceAll(testSet.Name, " ", "")
+		if slices.ContainsFunc(generator.sets, func(other *ItemSet) bool { return other != testSet && other.Name == testSet.Name }) {
+			label = fmt.Sprintf("%s-%d", label, testSet.ID)
+		}
 	} else {
 		testEnchant := generator.enchants[testIdx-len(generator.items)-len(generator.sets)]
 		equipment.EquipEnchant(testEnchant)
@@ -611,6 +617,8 @@ func FullCharacterTestSuiteGenerator(configs []CharacterSuiteConfig) []TestGener
 				SimOptions:        DefaultSimTestOptions,
 				Cooldowns:         config.Cooldowns,
 				StartingDistances: allStartingDistances,
+				Profession1:       Ternary(config.Profession1 != proto.Profession_ProfessionUnknown, config.Profession1, proto.Profession_Engineering),
+				Profession2:       config.Profession2,
 			},
 		})
 		// We only run these tests for the first test
