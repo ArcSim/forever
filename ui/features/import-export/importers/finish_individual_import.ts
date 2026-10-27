@@ -25,7 +25,17 @@ export interface IndividualImport {
 
 export const finishIndividualImport = async (
 	host: IndividualSimHost<any>,
-	{ charClass, race, equipmentSpec, talentsStr = '', talentsMatchTrees = false, professions = [], rotation, missingEnchants = [], missingItems = [] }: IndividualImport,
+	{
+		charClass,
+		race,
+		equipmentSpec,
+		talentsStr = '',
+		talentsMatchTrees = false,
+		professions = [],
+		rotation,
+		missingEnchants = [],
+		missingItems = [],
+	}: IndividualImport,
 ): Promise<void> => {
 	if (charClass != host.player.getClass()) {
 		throw new Error(i18n.t('import.errors.wrong_class', { expected: host.player.getPlayerClass().friendlyName, found: classNames.get(charClass) }));
