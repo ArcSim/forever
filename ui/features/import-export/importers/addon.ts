@@ -69,6 +69,8 @@ export const ADDON_IMPORTER: ImporterDefinition = {
 		});
 
 		const talentsStr = (importJson['talents'] as string) || '';
+		// Set by the exporter's Forever flavor; Era/SoD exports carry strings for other trees.
+		const talentsMatchTrees = importJson['talentTrees'] === 'forever';
 
 		await Database.get();
 
@@ -83,6 +85,7 @@ export const ADDON_IMPORTER: ImporterDefinition = {
 			race,
 			equipmentSpec,
 			talentsStr,
+			talentsMatchTrees,
 			professions,
 		});
 	},
