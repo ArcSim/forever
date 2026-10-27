@@ -912,22 +912,7 @@
 						"ranged_crit_rating": {
 							"type": "string"
 						},
-						"melee_crit_suppression": {
-							"type": "string"
-						},
 						"ranged_crit_suppression": {
-							"type": "string"
-						},
-						"main_hand_miss": {
-							"type": "string"
-						},
-						"main_hand_dodge": {
-							"type": "string"
-						},
-						"main_hand_parry": {
-							"type": "string"
-						},
-						"main_hand_glance": {
 							"type": "string"
 						},
 						"healing_power": {
@@ -1056,12 +1041,7 @@
 						"off_hand_crit_rating",
 						"ranged_hit_rating",
 						"ranged_crit_rating",
-						"melee_crit_suppression",
 						"ranged_crit_suppression",
-						"main_hand_miss",
-						"main_hand_dodge",
-						"main_hand_parry",
-						"main_hand_glance",
 						"healing_power",
 						"spell_damage",
 						"arcane_damage",

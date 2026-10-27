@@ -120,10 +120,6 @@ func (character *Character) GetPseudoStatsProto() []float64 {
 	if character.AutoAttacks.IsDualWielding {
 		offHand = character.sheetAttackStats(ProcMaskMeleeOHAuto)
 	}
-	var mainHandTable AttackTableHand
-	if table := character.sheetAttackTable(); table != nil {
-		mainHandTable = table.MH
-	}
 	pseudoStats := []float64{
 		proto.PseudoStat_PseudoStatMainHandDps: character.AutoAttacks.MH().DPS(),
 		proto.PseudoStat_PseudoStatOffHandDps:  character.AutoAttacks.OH().DPS(),
@@ -166,13 +162,7 @@ func (character *Character) GetPseudoStatsProto() []float64 {
 		proto.PseudoStat_PseudoStatRangedHitRating:    ranged.HitRating,
 		proto.PseudoStat_PseudoStatRangedCritRating:   ranged.CritRating,
 
-		proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent:  mainHand.CritSuppressionPercent,
 		proto.PseudoStat_PseudoStatRangedCritSuppressionPercent: ranged.CritSuppressionPercent,
-
-		proto.PseudoStat_PseudoStatMainHandMissPercent:   mainHandTable.BaseMissChance * 100,
-		proto.PseudoStat_PseudoStatMainHandDodgePercent:  mainHandTable.BaseDodgeChance * 100,
-		proto.PseudoStat_PseudoStatMainHandParryPercent:  mainHandTable.BaseParryChance * 100,
-		proto.PseudoStat_PseudoStatMainHandGlancePercent: mainHandTable.BaseGlanceChance * 100,
 	}
 	modHit := character.schoolHitMods()
 	for school := stats.SchoolIndexArcane; school < stats.SchoolLen; school++ {

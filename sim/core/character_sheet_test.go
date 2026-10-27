@@ -259,17 +259,18 @@ func TestSheetCritSuppressionIsTheAutosAgainstTheTarget(t *testing.T) {
 		character.AddStatDynamic(sim, stats.PhysicalCritPercent, tc.buffCrit)
 		pseudoStats := character.GetPseudoStatsProto()
 		for _, row := range []struct {
-			name              string
-			suppression, crit proto.PseudoStat
-			auto              *Spell
+			name        string
+			suppression float64
+			crit        proto.PseudoStat
+			auto        *Spell
 		}{
-			{"melee", proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent, proto.PseudoStat_PseudoStatMeleeCritPercent, character.AutoAttacks.MHAuto()},
-			{"ranged", proto.PseudoStat_PseudoStatRangedCritSuppressionPercent, proto.PseudoStat_PseudoStatRangedCritPercent, character.AutoAttacks.RangedAuto()},
+			{"melee", character.meleeCritCapProto(pseudoStats[proto.PseudoStat_PseudoStatMeleeCritPercent]).Suppression, proto.PseudoStat_PseudoStatMeleeCritPercent, character.AutoAttacks.MHAuto()},
+			{"ranged", pseudoStats[proto.PseudoStat_PseudoStatRangedCritSuppressionPercent], proto.PseudoStat_PseudoStatRangedCritPercent, character.AutoAttacks.RangedAuto()},
 		} {
-			if got := pseudoStats[row.suppression]; !WithinToleranceFloat64(tc.want, got, 1e-9) {
-				t.Errorf("%v%% crit buff: the %s row shows %v%% suppression, want %v%%", tc.buffCrit, row.name, got, tc.want)
+			if !WithinToleranceFloat64(tc.want, row.suppression, 1e-9) {
+				t.Errorf("%v%% crit buff: the %s row shows %v%% suppression, want %v%%", tc.buffCrit, row.name, row.suppression, tc.want)
 			}
-			shown := max(pseudoStats[row.crit]-pseudoStats[row.suppression]-table.Defender.PseudoStats.ReducedCritTakenPercent*100, 0)
+			shown := max(pseudoStats[row.crit]-row.suppression-table.Defender.PseudoStats.ReducedCritTakenPercent*100, 0)
 			if rolled := row.auto.PhysicalCritChance(table) * 100; !WithinToleranceFloat64(rolled, shown, 1e-9) {
 				t.Errorf("%v%% crit buff: the %s row shows %v%% crit after suppression, the auto rolls %v%%", tc.buffCrit, row.name, shown, rolled)
 			}
@@ -300,34 +301,6 @@ func TestSheetShowsSchoolHitFromTheTalentsStage(t *testing.T) {
 		} {
 			if got := stage.PseudoStats[pseudoStat] - playerStats.GearStats.PseudoStats[pseudoStat]; !WithinToleranceFloat64(want, got, 1e-9) {
 				t.Errorf("the %s stage shows %v more %s than the gear stage, want %v", name, got, pseudoStat, want)
-			}
-		}
-	}
-}
-
-func TestSheetMainHandTableIsTheMainHandAutoAgainstTheTarget(t *testing.T) {
-	for _, tc := range []struct {
-		swordSkill                 int32
-		miss, dodge, parry, glance float64
-	}{
-		{300, 8, 6.5, 14, 40},
-		{285, 11, 8, 23, 70},
-	} {
-		raid := weaponTestRaid(proto.Race_RaceUndead, WeaponTestSlots(WeaponTestSwordID, 0, 0), nil)
-		raid.Parties[0].Players[0].WeaponSkills = []*proto.WeaponSkillValue{{Skill: proto.WeaponSkill_WeaponSkillSwords, Value: tc.swordSkill}}
-		sim := NewSim(&proto.RaidSimRequest{SimOptions: &proto.SimOptions{RandomSeed: 1}, Raid: raid, Encounter: weaponTestEncounter()}, simsignals.CreateSignals())
-		pseudoStats := sim.Raid.Parties[0].Players[0].GetCharacter().GetPseudoStatsProto()
-		for _, row := range []struct {
-			pseudoStat proto.PseudoStat
-			want       float64
-		}{
-			{proto.PseudoStat_PseudoStatMainHandMissPercent, tc.miss},
-			{proto.PseudoStat_PseudoStatMainHandDodgePercent, tc.dodge},
-			{proto.PseudoStat_PseudoStatMainHandParryPercent, tc.parry},
-			{proto.PseudoStat_PseudoStatMainHandGlancePercent, tc.glance},
-		} {
-			if got := pseudoStats[row.pseudoStat]; !WithinToleranceFloat64(row.want, got, 1e-9) {
-				t.Errorf("%d sword skill against a level 63 target: the sheet shows %v for %s, want %v", tc.swordSkill, got, row.pseudoStat, row.want)
 			}
 		}
 	}
@@ -381,7 +354,7 @@ func TestSheetMeleeCritCapIsWhatTheWhiteHitTableLeaves(t *testing.T) {
 			if (tc.targetDefense > 0) != (reducedCritTaken > 0) {
 				t.Fatalf("a target with %v defense rating takes %v%% less crit", tc.targetDefense, reducedCritTaken)
 			}
-			levelSuppression := playerStats.FinalStats.PseudoStats[proto.PseudoStat_PseudoStatMeleeCritSuppressionPercent]
+			levelSuppression := auto.physicalCritSuppression(table, playerStats.FinalStats.PseudoStats[proto.PseudoStat_PseudoStatMeleeCritPercent]) * 100
 			suppression := levelSuppression + reducedCritTaken
 			if levelSuppression <= 0 {
 				t.Fatalf("the level takes %v suppression, want above 0", levelSuppression)
