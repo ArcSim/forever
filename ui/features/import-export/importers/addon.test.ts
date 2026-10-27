@@ -1,5 +1,5 @@
-// The version probe the importer fires at module load, and which sections an import applies: the
-// class is required, and every other section is applied only when the pasted text carries it.
+// The version request sent at module load, and what an import changes: the class is required, and
+// anything missing from the pasted text stays as it was.
 import { APLRotation, APLRotation_Type as APLRotationType } from '@generated/proto/apl';
 import { Profession, Race } from '@generated/proto/common';
 import { makeIndividualSim, serveDatabase } from '@testing/sim/individual_sim';
@@ -31,7 +31,7 @@ describe('ADDON_IMPORTER', () => {
 
 const rotation = { type: 'TypeAPL', priorityList: [{ action: { autocastOtherCooldowns: {} } }] };
 
-// A warrior sim whose player already has a race and professions of its own.
+// A warrior sim with a race and professions already set.
 const startingSim = async () => {
 	const built = await makeIndividualSim();
 	built.player.setRace(Race.RaceHuman);
@@ -55,7 +55,7 @@ describe('ADDON_IMPORTER sections', () => {
 		expect(player.getGear()).toBe(gear);
 	});
 
-	it('keeps the rotation when the export carries none', async () => {
+	it('keeps the current rotation when the export has none', async () => {
 		const { player, host } = await startingSim();
 		player.setAplRotation(APLRotation.fromJson(rotation));
 
@@ -66,7 +66,7 @@ describe('ADDON_IMPORTER sections', () => {
 		expect(player.aplRotation.priorityList).toHaveLength(1);
 	});
 
-	it('applies every section a full export carries', async () => {
+	it('applies everything in a full export', async () => {
 		const { player, host } = await startingSim();
 
 		await ADDON_IMPORTER.onImport(

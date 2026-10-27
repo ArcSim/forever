@@ -9,7 +9,7 @@ import type { IndividualSimHost } from '@sim/sim_host';
 import { batch } from '@sim/state/batch';
 import { toastManager } from '@ui-kit/Toast';
 
-// Only the class is required. A section left out keeps the sim's current setting.
+// Only the class is required. Anything left out stays as it is in the sim.
 export interface IndividualImport {
 	charClass: Class;
 	race?: Race;

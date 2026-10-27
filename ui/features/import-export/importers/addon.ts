@@ -38,7 +38,7 @@ export const ADDON_IMPORTER: ImporterDefinition = {
 			throw new Error(i18n.t('import.addon.error_invalid_export'));
 		}
 
-		// Each section is applied only when the export carries it; the class is always required.
+		// The class is required. Gear, race, professions and rotation are optional, and anything left out stays as it is.
 		const has = (key: string) => importJson[key] != null;
 		if (!['gear', 'race', 'professions', 'rotation'].some(has)) {
 			throw new Error(i18n.t('import.addon.error_nothing_to_import'));
@@ -98,7 +98,7 @@ export const ADDON_IMPORTER: ImporterDefinition = {
 			equipmentSpec = EquipmentSpec.fromJson(gearJson, { ignoreUnknownFields: true });
 		}
 
-		// The same APLRotation JSON a settings export holds under `player.rotation`.
+		// Same format as `player.rotation` in a JSON export.
 		let rotation: APLRotation | undefined;
 		if (has('rotation')) {
 			try {
