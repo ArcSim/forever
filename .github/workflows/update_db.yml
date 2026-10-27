@@ -15,7 +15,7 @@ on:
 
 env:
     PRODUCT: wowf
-    # Raidbots collects no wowf cache; classic_beta is its label for the Forever files, not Blizzard's product.
+    # Raidbots' Forever cache (docs/spell_data/partial-updates.md).
     DBCACHE_URL: https://storage.googleapis.com/raidbots-static/wow/classic_beta/enUS/DBCache.bin
 
 jobs:
@@ -86,22 +86,20 @@ jobs:
             - name: Bootstrap the Go protos and the dist stub 🧬
               run: make sim/core/proto/api.pb.go binary_dist/dist.go
 
-            # The hotfix cache is normally for another build than the CDN
-            # serves, and --carry-hotfixes applies it onto the CDN build; the
-            # pull request says which build it was. The spell data change
-            # report goes into the pull request body.
+            # --carry-hotfixes carries an older build's cache onto the CDN
+            # build (docs/spell_data/partial-updates.md). db2tool's Hotfixes
+            # line, which names any carried build, and the spell data change
+            # report go into the pull request body.
             - name: Extract game files data and regenerate the database 🔧
               id: db
               run: |
                   set -o pipefail
                   make db DB2TOOL_FLAGS="--cdn --dbcache tools/db2tool/caches/DBCache.bin --carry-hotfixes" 2>&1 | tee "$RUNNER_TEMP/db.log"
-                  if grep -q 'none of the given --dbcache files hold hotfixes' "$RUNNER_TEMP/db.log"; then
-                      echo "hotfixes=NOT applied: the downloaded DBCache.bin is for a different build" >> "$GITHUB_OUTPUT"
-                  elif grep -q 'Carrying hotfixes from build' "$RUNNER_TEMP/db.log"; then
-                      echo "hotfixes=$(grep -m1 'Carrying hotfixes from build' "$RUNNER_TEMP/db.log" | sed 's/.*from build \([^ ]*\) onto build \(.*\)/applied, DBCache.bin for build \1 carried onto \2/')" >> "$GITHUB_OUTPUT"
-                  else
-                      echo "hotfixes=$(grep -m1 'Loaded hotfixes' "$RUNNER_TEMP/db.log" | sed 's/.*for build/applied, DBCache.bin for build/')" >> "$GITHUB_OUTPUT"
-                  fi
+                  line=$(grep -m1 '^Hotfixes: ' "$RUNNER_TEMP/db.log")
+                  case "$line" in
+                      "Hotfixes: none applied"*) echo "hotfixes=${line#Hotfixes: }" >> "$GITHUB_OUTPUT" ;;
+                      *) echo "hotfixes=applied (${line#Hotfixes: })" >> "$GITHUB_OUTPUT" ;;
+                  esac
                   {
                       echo "report<<REPORT_EOF"
                       python3 tools/spelldata_report_markdown.py < "$RUNNER_TEMP/db.log" || echo "The spell data change report could not be formatted; the build log has it."

@@ -90,14 +90,11 @@ Proto field numbers on a merge are `wowsims-core-mechanics` `## Protos`.
 
 ## Hotfixes
 
-The header comments of `check_hotfixes.yml` and `update_items.yml` and the end of
-`docs/spell_data/partial-updates.md` §Commands describe the hotfix flow. A single-item hotfix is the items-only run
-Update Items performs, `make db CLASSES=none SHARED=0 DB2TOOL_FLAGS="--cdn --dbcache <DBCache.bin> --carry-hotfixes"`.
-The extraction product is `wowf`, and no `wowf` cache exists: raidbots' newest Forever cache is labelled
-`classic_beta` (raidbots' name, not Blizzard's product) and is for an older build than the CDN serves.
-`--carry-hotfixes` applies a cache from another build on top of the extracted one (tables whose layout differs
-between the builds are skipped with a warning), so a cache for a different build is the normal case, not a
-reason to wait. A checkout gets
+The end of `docs/spell_data/partial-updates.md` §Commands describes the hotfix flow, and `tools/db2tool/README.md`
+§Usage the carry rules. A single-item hotfix is the items-only run Update Items performs,
+`make db CLASSES=none SHARED=0 DB2TOOL_FLAGS="--cdn --dbcache <DBCache.bin> --carry-hotfixes"`. The cache is
+usually for an older build than the CDN serves and `--carry-hotfixes` carries it onto the extracted build, so that
+is the normal case, not a reason to wait. A checkout gets
 its `tools/database/wowsims.db` from `make db`, reading a WoW install (`WOW_DIR` or the settings' `BaseDir`), or from
 the same run with `DB2TOOL_FLAGS="--cdn"` and no install; the modes are `tools/db2tool/README.md` §Usage. Before
 dispatching Build and Deploy by hand, read its state: `gh api repos/wowsims/forever/actions/workflows/deploy.yml --jq .state`.

@@ -11,10 +11,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/fs"
+	"maps"
 	"math"
 	"os"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"sort"
 	"strings"
@@ -167,42 +167,26 @@ func (h *HotfixReader) HighestPush() int32 {
 	return highest
 }
 
-// The readers that overlay build, in the order they apply. Without carry that is build's own reader
-// alone, or none. With carry it is every reader: those of other builds in ascending build order,
-// then build's own last, so a same-build record wins over a carried one.
-func OrderHotfixReaders(readers map[uint32]*HotfixReader, build uint32, carry bool) []*HotfixReader {
-	var ordered []*HotfixReader
-	if carry {
-		others := make([]uint32, 0, len(readers))
-		for b := range readers {
-			if b != build {
-				others = append(others, b)
-			}
-		}
-		slices.Sort(others)
-		for _, b := range others {
-			ordered = append(ordered, readers[b])
+// The readers that overlay build: own is build's own reader, or nil. With carry, carried holds the
+// readers of older builds in ascending build order, applied before own so a same-build record wins,
+// and newer lists the builds after build, whose caches are never carried.
+func OrderHotfixReaders(readers map[uint32]*HotfixReader, build uint32, carry bool) (carried []*HotfixReader, own *HotfixReader, newer []uint32) {
+	for _, b := range slices.Sorted(maps.Keys(readers)) {
+		switch {
+		case b == build:
+			own = readers[b]
+		case carry && b < build:
+			carried = append(carried, readers[b])
+		case carry:
+			newer = append(newer, b)
 		}
 	}
-	if own := readers[build]; own != nil {
-		ordered = append(ordered, own)
-	}
-	return ordered
+	return carried, own, newer
 }
 
-// Whether hotfix rows of hotfixBuild can decode with version, the block def selects for the
-// extracted build. They can when def selects that same block for hotfixBuild. Layout hashes are
-// unique across a definition's blocks, so equal hash lists identify the block. A block with no
-// hashes is compared whole, and its build list makes it unique.
-func HotfixLayoutMatches(def dbd.DBDefinition, version dbd.VersionDefinitions, hotfixBuild uint32) bool {
-	carried, err := dbd.SelectVersion(def, hotfixBuild)
-	if err != nil {
-		return false
-	}
-	if len(version.LayoutHashes) > 0 && len(carried.LayoutHashes) > 0 {
-		return slices.Equal(version.LayoutHashes, carried.LayoutHashes)
-	}
-	return reflect.DeepEqual(version, carried)
+// Whether version, the .dbd block of the extracted build, also lists hotfixBuild; the .dbd lists each build in one block only.
+func hotfixLayoutMatches(version dbd.VersionDefinitions, hotfixBuild uint32) bool {
+	return slices.ContainsFunc(version.Builds, func(b dbd.Build) bool { return b.Build == hotfixBuild })
 }
 
 // CombineHotfixFiles parses each file in order into readers keyed by BuildId:
@@ -306,8 +290,11 @@ func SStrHash(s string) uint32 {
 // insertion order preserved within a PushId). An Add
 // (IsValid && DataSize > 0) replaces or inserts the whole row decoded from
 // the blob; otherwise the row is deleted when shouldDelete. Rows come back
-// out in ascending-ID order, the order the sqlite inserts expect.
-func (h *HotfixReader) ApplyHotfixes(t *Table, def dbd.DBDefinition, version dbd.VersionDefinitions, buildNumber uint32, decoded *Decoded) error {
+// out in ascending-ID order, the order the sqlite inserts expect. A reader
+// of another build applies nothing when version does not list its build,
+// and reports layoutSkipped when it holds records for t; applied reports
+// whether any record applied.
+func (h *HotfixReader) ApplyHotfixes(t *Table, def dbd.DBDefinition, version dbd.VersionDefinitions, buildNumber uint32, decoded *Decoded) (applied, layoutSkipped bool, err error) {
 	var recs []*HotfixEntry
 	for i := range h.records {
 		if h.records[i].TableHash == t.TableHash {
@@ -315,12 +302,15 @@ func (h *HotfixReader) ApplyHotfixes(t *Table, def dbd.DBDefinition, version dbd
 		}
 	}
 	if len(recs) == 0 {
-		return nil
+		return false, false, nil
+	}
+	if hotfixBuild := uint32(h.BuildID); hotfixBuild != buildNumber && !hotfixLayoutMatches(version, hotfixBuild) {
+		return false, true, nil
 	}
 
 	plans, err := buildFieldPlans(def, version, buildNumber)
 	if err != nil {
-		return err
+		return false, false, err
 	}
 
 	sort.SliceStable(recs, func(i, j int) bool { return recs[i].PushID < recs[j].PushID })
@@ -346,7 +336,7 @@ func (h *HotfixReader) ApplyHotfixes(t *Table, def dbd.DBDefinition, version dbd
 		case rec.IsValid && rec.DataSize > 0: // RowOp.Add
 			values, err := decodeHotfixRow(t, plans, rec)
 			if err != nil {
-				return fmt.Errorf("hotfix record %d (push %d): %w", rec.RecordID, rec.PushID, err)
+				return false, false, fmt.Errorf("hotfix record %d (push %d): %w", rec.RecordID, rec.PushID, err)
 			}
 			byID[rec.RecordID] = values
 		case shouldDelete: // RowOp.Delete
@@ -366,7 +356,7 @@ func (h *HotfixReader) ApplyHotfixes(t *Table, def dbd.DBDefinition, version dbd
 		rows[i] = Row{ID: id, Values: byID[id]}
 	}
 	decoded.Rows = rows
-	return nil
+	return true, false, nil
 }
 
 // decodeHotfixRow decodes one hotfix data blob. Hotfix blobs are NOT

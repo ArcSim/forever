@@ -215,19 +215,31 @@ func TestOrderHotfixReaders(t *testing.T) {
 		return out
 	}
 
-	if got, want := builds(OrderHotfixReaders(readers, own, true)), []int32{70450, 70532, 70700, own}; !slices.Equal(got, want) {
-		t.Errorf("carried order = %v, want %v (other builds ascending, own build last)", got, want)
+	carried, ownReader, newer := OrderHotfixReaders(readers, own, true)
+	if got, want := builds(carried), []int32{70450, 70532}; !slices.Equal(got, want) {
+		t.Errorf("carried builds = %v, want %v (older builds ascending)", got, want)
 	}
-	if got, want := builds(OrderHotfixReaders(readers, own, false)), []int32{own}; !slices.Equal(got, want) {
-		t.Errorf("order without carry = %v, want %v", got, want)
+	if ownReader != readers[own] {
+		t.Errorf("own reader = %v, want build %d's", ownReader, own)
+	}
+	if want := []uint32{70700}; !slices.Equal(newer, want) {
+		t.Errorf("newer builds = %v, want %v", newer, want)
+	}
+	carried, ownReader, newer = OrderHotfixReaders(readers, own, false)
+	if len(carried) != 0 || len(newer) != 0 {
+		t.Errorf("without carry, carried %v and newer %v, want none", builds(carried), newer)
+	}
+	if ownReader != readers[own] {
+		t.Errorf("own reader without carry = %v, want build %d's", ownReader, own)
 	}
 
 	delete(readers, own)
-	if got := OrderHotfixReaders(readers, own, false); len(got) != 0 {
-		t.Errorf("without carry and no cache for the build, got builds %v, want none", builds(got))
+	carried, ownReader, _ = OrderHotfixReaders(readers, own, true)
+	if ownReader != nil {
+		t.Errorf("with no cache for the build, own reader = build %d's, want nil", ownReader.BuildID)
 	}
-	if got, want := builds(OrderHotfixReaders(readers, own, true)), []int32{70450, 70532, 70700}; !slices.Equal(got, want) {
-		t.Errorf("carried order with no own cache = %v, want %v", got, want)
+	if got, want := builds(carried), []int32{70450, 70532}; !slices.Equal(got, want) {
+		t.Errorf("carried builds with no own cache = %v, want %v", got, want)
 	}
 }
 
@@ -239,46 +251,42 @@ func TestHotfixLayoutMatches(t *testing.T) {
 		}
 		return out
 	}
-	oldFields := []dbd.Definition{{Name: "ID", IsID: true, Size: 32}, {Name: "Field", Size: 16}}
-	newFields := []dbd.Definition{{Name: "ID", IsID: true, Size: 32}, {Name: "Field", Size: 32}}
-
-	hashed := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
-		{LayoutHashes: []string{"0A1B2C3D"}, Builds: builds(70100), Definitions: oldFields},
-		{LayoutHashes: []string{"11223344"}, Builds: builds(70532, 70630), Definitions: newFields},
+	def := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
+		{Builds: builds(70100)},
+		{Builds: builds(70532, 70630)},
 	}}
-	unhashed := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
-		{Builds: builds(70100), Definitions: oldFields},
-		{Builds: builds(70532, 70630), Definitions: newFields},
-	}}
-
-	for name, def := range map[string]dbd.DBDefinition{"layout hashes": hashed, "no layout hashes": unhashed} {
-		version, err := dbd.SelectVersion(def, 70630)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !HotfixLayoutMatches(def, version, 70532) {
-			t.Errorf("%s: a build in the same version block must carry", name)
-		}
-		if HotfixLayoutMatches(def, version, 70100) {
-			t.Errorf("%s: a build in another version block must not carry", name)
-		}
-		if HotfixLayoutMatches(def, version, 69000) {
-			t.Errorf("%s: a build the definition does not list must not carry", name)
-		}
-	}
-
-	// A .dbd may give two blocks the same columns and different layout hashes;
-	// the guard still takes them as different layouts.
-	sameColumns := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
-		{LayoutHashes: []string{"0A1B2C3D"}, Builds: builds(70532), Definitions: newFields},
-		{LayoutHashes: []string{"11223344"}, Builds: builds(70630), Definitions: newFields},
-	}}
-	version, err := dbd.SelectVersion(sameColumns, 70630)
+	version, err := dbd.SelectVersion(def, 70630)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if HotfixLayoutMatches(sameColumns, version, 70532) {
-		t.Error("a build in another block with the same columns must not carry")
+	if !hotfixLayoutMatches(version, 70532) {
+		t.Error("a build in the same version block must carry")
+	}
+	if hotfixLayoutMatches(version, 70100) {
+		t.Error("a build in another version block must not carry")
+	}
+	if hotfixLayoutMatches(version, 69000) {
+		t.Error("a build the definition does not list must not carry")
+	}
+}
+
+func TestApplyHotfixesCarryGuard(t *testing.T) {
+	r, err := parseHotfix(xfthFile(9, 70100, xfthEntry(1, 0x1, 1, 1, []byte{1})))
+	if err != nil {
+		t.Fatal(err)
+	}
+	version := dbd.VersionDefinitions{Builds: []dbd.Build{{Expansion: 1, Major: 60, Minor: 1, Build: 70630}}}
+	for _, c := range []struct {
+		hash        uint32
+		wantSkipped bool
+	}{{0x1, true}, {0x2, false}} {
+		applied, skipped, err := r.ApplyHotfixes(&Table{TableHash: c.hash}, dbd.DBDefinition{}, version, 70630, &Decoded{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if applied || skipped != c.wantSkipped {
+			t.Errorf("table %#x: applied %v, skipped %v, want false, %v", c.hash, applied, skipped, c.wantSkipped)
+		}
 	}
 }
 
