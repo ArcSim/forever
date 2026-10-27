@@ -37,15 +37,28 @@ Three modes:
   Hotfixes come from `--dbcache` or `tools/db2tool/caches/`; raidbots mirrors
   the live client's cache at
   https://storage.googleapis.com/raidbots-static/wow/classic_beta/enUS/DBCache.bin,
-  which is what the `Update DB` GitHub workflow feeds it.
+  which is what the `Update DB` GitHub workflow feeds it. When no cache for
+  the extracted build exists, `--carry-hotfixes` applies one from another
+  build (see below).
 - **Offline mode (`--build <number|version>`)** — decodes pre-extracted `.db2`
   files (from `dbfilesclient/` or `--db2dir`) instead. No install required, no
   hotfixes unless `--dbcache` is given.
 
 Flags: `--settings/-s`, `--output/-o`, `--cdn`, `--region <r>`, `--build`,
 `--db2dir`, `--dbddir`, `--dbcache <file>` (pin specific hotfix caches for
-deterministic runs), `--no-hotfixes`, `--keys <file>` (community TACT key
-list).
+deterministic runs), `--no-hotfixes`, `--carry-hotfixes` (also apply caches
+of other builds), `--keys <file>` (community TACT key list).
+
+By default only a cache whose build is the extracted build applies. With
+`--carry-hotfixes`, which needs `--dbcache`, every cache given applies: those of other builds in
+ascending build order, then the extracted build's own last, so its records
+win. Each carried build prints `Carrying hotfixes from build <cache> onto build
+<extracted>`. A carried cache's rows decode with the extracted build's
+layout, so it only applies to a table whose `.dbd` puts both builds in the
+same version block (same layout hashes, or the same block when it lists
+none); any other table skips it and the run prints a warning naming the table
+and both builds. `BuildInfo.HotfixPush` records the highest server push across
+every applied cache.
 
 ## Encrypted sections and TACT keys
 

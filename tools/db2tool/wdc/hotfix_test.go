@@ -4,7 +4,10 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
+
+	"github.com/wowsims/forever/tools/db2tool/dbd"
 )
 
 // The two table hashes ApplyHotfixes special-cases are known constants, so they
@@ -191,6 +194,91 @@ func TestHighestPushCountsOnlyServerPushes(t *testing.T) {
 	}
 	if got := onDemand.HighestPush(); got != 0 {
 		t.Errorf("HighestPush of on-demand rows alone = %d, want 0", got)
+	}
+}
+
+func TestOrderHotfixReaders(t *testing.T) {
+	const own = 70630
+	readers := map[uint32]*HotfixReader{}
+	for _, build := range []int32{70532, own, 70450, 70700} {
+		r, err := parseHotfix(xfthFile(9, build, xfthEntry(1, 0x1, 1, 1, []byte{1})))
+		if err != nil {
+			t.Fatal(err)
+		}
+		readers[uint32(build)] = r
+	}
+	builds := func(ordered []*HotfixReader) []int32 {
+		out := make([]int32, len(ordered))
+		for i, r := range ordered {
+			out[i] = r.BuildID
+		}
+		return out
+	}
+
+	if got, want := builds(OrderHotfixReaders(readers, own, true)), []int32{70450, 70532, 70700, own}; !slices.Equal(got, want) {
+		t.Errorf("carried order = %v, want %v (other builds ascending, own build last)", got, want)
+	}
+	if got, want := builds(OrderHotfixReaders(readers, own, false)), []int32{own}; !slices.Equal(got, want) {
+		t.Errorf("order without carry = %v, want %v", got, want)
+	}
+
+	delete(readers, own)
+	if got := OrderHotfixReaders(readers, own, false); len(got) != 0 {
+		t.Errorf("without carry and no cache for the build, got builds %v, want none", builds(got))
+	}
+	if got, want := builds(OrderHotfixReaders(readers, own, true)), []int32{70450, 70532, 70700}; !slices.Equal(got, want) {
+		t.Errorf("carried order with no own cache = %v, want %v", got, want)
+	}
+}
+
+func TestHotfixLayoutMatches(t *testing.T) {
+	builds := func(ns ...uint32) []dbd.Build {
+		out := make([]dbd.Build, len(ns))
+		for i, n := range ns {
+			out[i] = dbd.Build{Expansion: 1, Major: 60, Minor: 1, Build: n}
+		}
+		return out
+	}
+	oldFields := []dbd.Definition{{Name: "ID", IsID: true, Size: 32}, {Name: "Field", Size: 16}}
+	newFields := []dbd.Definition{{Name: "ID", IsID: true, Size: 32}, {Name: "Field", Size: 32}}
+
+	hashed := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
+		{LayoutHashes: []string{"0A1B2C3D"}, Builds: builds(70100), Definitions: oldFields},
+		{LayoutHashes: []string{"11223344"}, Builds: builds(70532, 70630), Definitions: newFields},
+	}}
+	unhashed := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
+		{Builds: builds(70100), Definitions: oldFields},
+		{Builds: builds(70532, 70630), Definitions: newFields},
+	}}
+
+	for name, def := range map[string]dbd.DBDefinition{"layout hashes": hashed, "no layout hashes": unhashed} {
+		version, err := dbd.SelectVersion(def, 70630)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !HotfixLayoutMatches(def, version, 70532) {
+			t.Errorf("%s: a build in the same version block must carry", name)
+		}
+		if HotfixLayoutMatches(def, version, 70100) {
+			t.Errorf("%s: a build in another version block must not carry", name)
+		}
+		if HotfixLayoutMatches(def, version, 69000) {
+			t.Errorf("%s: a build the definition does not list must not carry", name)
+		}
+	}
+
+	// A .dbd may give two blocks the same columns and different layout hashes;
+	// the guard still takes them as different layouts.
+	sameColumns := dbd.DBDefinition{VersionDefinitions: []dbd.VersionDefinitions{
+		{LayoutHashes: []string{"0A1B2C3D"}, Builds: builds(70532), Definitions: newFields},
+		{LayoutHashes: []string{"11223344"}, Builds: builds(70630), Definitions: newFields},
+	}}
+	version, err := dbd.SelectVersion(sameColumns, 70630)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if HotfixLayoutMatches(sameColumns, version, 70532) {
+		t.Error("a build in another block with the same columns must not carry")
 	}
 }
 

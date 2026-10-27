@@ -14,6 +14,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"sort"
 	"strings"
@@ -164,6 +165,44 @@ func (h *HotfixReader) HighestPush() int32 {
 		}
 	}
 	return highest
+}
+
+// The readers that overlay build, in the order they apply. Without carry that is build's own reader
+// alone, or none. With carry it is every reader: those of other builds in ascending build order,
+// then build's own last, so a same-build record wins over a carried one.
+func OrderHotfixReaders(readers map[uint32]*HotfixReader, build uint32, carry bool) []*HotfixReader {
+	var ordered []*HotfixReader
+	if carry {
+		others := make([]uint32, 0, len(readers))
+		for b := range readers {
+			if b != build {
+				others = append(others, b)
+			}
+		}
+		slices.Sort(others)
+		for _, b := range others {
+			ordered = append(ordered, readers[b])
+		}
+	}
+	if own := readers[build]; own != nil {
+		ordered = append(ordered, own)
+	}
+	return ordered
+}
+
+// Whether hotfix rows of hotfixBuild can decode with version, the block def selects for the
+// extracted build. They can when def selects that same block for hotfixBuild. Layout hashes are
+// unique across a definition's blocks, so equal hash lists identify the block. A block with no
+// hashes is compared whole, and its build list makes it unique.
+func HotfixLayoutMatches(def dbd.DBDefinition, version dbd.VersionDefinitions, hotfixBuild uint32) bool {
+	carried, err := dbd.SelectVersion(def, hotfixBuild)
+	if err != nil {
+		return false
+	}
+	if len(version.LayoutHashes) > 0 && len(carried.LayoutHashes) > 0 {
+		return slices.Equal(version.LayoutHashes, carried.LayoutHashes)
+	}
+	return reflect.DeepEqual(version, carried)
 }
 
 // CombineHotfixFiles parses each file in order into readers keyed by BuildId:

@@ -7,7 +7,9 @@
 // community listfile are fetched/cached over plain HTTPS. The game files'
 // DBCache.bin hotfixes for the extracted build are applied to the decoded
 // rows; --dbcache <file> pins specific cache files instead of the default
-// scan and --no-hotfixes disables the overlay. Encrypted sections are
+// scan and --no-hotfixes disables the overlay. --carry-hotfixes also applies
+// caches of other builds, table by table where the .dbd puts both builds in
+// the same version block. Encrypted sections are
 // decrypted with every TACT key the game files ship, the server pushed into
 // DBCache.bin, or the community list carries (--keys <file>, default
 // tools/db2tool/TACTKeys.txt, refreshed from wowdev/TACTKeys).
@@ -44,18 +46,19 @@ func main() {
 }
 
 type options struct {
-	settingsFile string
-	databaseFile string
-	baseDir      string   // overrides the settings' BaseDir when set
-	db2Dir       string   // offline mode only
-	dbdDir       string   // offline mode override
-	buildNumber  uint32   // nonzero → offline mode
-	buildArg     string   // the --build value as given, recorded as the game version in offline mode
-	dbCaches     []string // explicit DBCache files, overriding the default scan
-	noHotfixes   bool     // skip hotfix application entirely
-	keyFile      string   // community TACT key list; empty → tools/db2tool/TACTKeys.txt
-	cdn          bool     // read the current build from Blizzard's CDN instead of BaseDir
-	region       string   // version service region for --cdn
+	settingsFile  string
+	databaseFile  string
+	baseDir       string   // overrides the settings' BaseDir when set
+	db2Dir        string   // offline mode only
+	dbdDir        string   // offline mode override
+	buildNumber   uint32   // nonzero → offline mode
+	buildArg      string   // the --build value as given, recorded as the game version in offline mode
+	dbCaches      []string // explicit DBCache files, overriding the default scan
+	noHotfixes    bool     // skip hotfix application entirely
+	carryHotfixes bool     // also apply caches of other builds, under the layout guard
+	keyFile       string   // community TACT key list; empty → tools/db2tool/TACTKeys.txt
+	cdn           bool     // read the current build from Blizzard's CDN instead of BaseDir
+	region        string   // version service region for --cdn
 }
 
 // parseArgs scans the args pairwise. --settings/-s and --output/-output/-o
@@ -93,6 +96,8 @@ func parseArgs(args []string) (options, error) {
 			}
 		case "--no-hotfixes":
 			opts.noHotfixes = true
+		case "--carry-hotfixes":
+			opts.carryHotfixes = true
 		case "--keys":
 			opts.keyFile, err = next()
 		case "--cdn":
@@ -122,6 +127,11 @@ func parseArgs(args []string) (options, error) {
 		if err != nil {
 			return opts, err
 		}
+	}
+	// The default scan finds every game's DBCache.bin under the install (retail, Classic, Era), and
+	// carried, any of them would overlay Forever's tables; carrying takes only the caches named.
+	if opts.carryHotfixes && len(opts.dbCaches) == 0 {
+		return opts, fmt.Errorf("--carry-hotfixes needs --dbcache <file>: it carries only the caches named")
 	}
 	return opts, nil
 }
@@ -262,12 +272,18 @@ func run(args []string) error {
 	}
 
 	// Hotfixes: overlay the game files' DBCache.bin records on every decoded
-	// table. Only a cache for this exact build applies; having none is not an
-	// error. --dbcache pins specific cache files (deterministic runs); with no
-	// override, local-CASC mode scans tools/db2tool/caches plus
+	// table. By default only a cache for this exact build applies; having none
+	// is not an error. --dbcache pins specific cache files (deterministic
+	// runs); with no override, local-CASC mode scans tools/db2tool/caches plus
 	// <BaseDir>/**/DBCache.bin, CDN mode only tools/db2tool/caches, and the
 	// offline --build mode stays hotfix-free.
-	var hotfixReader *wdc.HotfixReader
+	//
+	// --carry-hotfixes applies every --dbcache file: other builds in ascending
+	// build order, then this build's own last, so its records win. A carried
+	// cache's rows decode with this build's field plans, so it only applies to
+	// a table whose .dbd selects the same version block for both builds; any
+	// other table skips it with a warning.
+	var hotfixReaders []*wdc.HotfixReader
 	if !opts.noHotfixes {
 		var readers map[uint32]*wdc.HotfixReader
 		if len(opts.dbCaches) > 0 {
@@ -283,21 +299,30 @@ func run(args []string) error {
 				return err
 			}
 		}
-		hotfixReader = readers[buildNumber]
+		hotfixReaders = wdc.OrderHotfixReaders(readers, buildNumber, opts.carryHotfixes)
+		for _, r := range hotfixReaders {
+			if uint32(r.BuildID) != buildNumber {
+				fmt.Printf("Carrying hotfixes from build %d onto build %d\n", r.BuildID, buildNumber)
+			}
+		}
 		// A hotfix-free run is easy to miss in the output, and it also means
 		// no server-pushed TACT keys were picked up, so say so.
 		switch {
-		case hotfixReader == nil && len(opts.dbCaches) > 0:
+		case len(hotfixReaders) == 0 && len(opts.dbCaches) > 0:
 			fmt.Fprintf(os.Stderr, "db2tool: warning: none of the given --dbcache files hold hotfixes for build %d; continuing without the overlay\n", buildNumber)
-		case hotfixReader == nil && opts.cdn:
+		case len(hotfixReaders) == 0 && opts.cdn:
 			fmt.Fprintf(os.Stderr, "db2tool: warning: no DBCache.bin for build %d found under %s; continuing without the overlay\n", buildNumber, filepath.Join(toolHome, "caches"))
-		case hotfixReader == nil && opts.buildNumber == 0:
+		case len(hotfixReaders) == 0 && opts.buildNumber == 0:
 			fmt.Fprintf(os.Stderr, "db2tool: warning: no DBCache.bin for build %d found under %s or %s; continuing without the overlay\n", buildNumber, settings.Settings.BaseDir, filepath.Join(toolHome, "caches"))
 		}
 	}
+	// The push counts every applied reader, before the layout guard drops a
+	// carried reader from any table.
 	var hotfixPush int32
-	if hotfixReader != nil {
-		hotfixPush = hotfixReader.HighestPush()
+	if len(hotfixReaders) > 0 {
+		for _, r := range hotfixReaders {
+			hotfixPush = max(hotfixPush, r.HighestPush())
+		}
 		fmt.Printf("Hotfixes: build %d up to push %d\n", buildNumber, hotfixPush)
 	} else {
 		fmt.Printf("Hotfixes: none applied for build %d\n", buildNumber)
@@ -327,8 +352,14 @@ func run(args []string) error {
 		if err != nil {
 			return nil, td, nil, fmt.Errorf("table %s: %w", tableName, err)
 		}
-		if hotfixReader != nil {
-			if err := hotfixReader.ApplyHotfixes(table, def, version, buildNumber, decoded); err != nil {
+		for _, r := range hotfixReaders {
+			hotfixBuild := uint32(r.BuildID)
+			if hotfixBuild != buildNumber && !wdc.HotfixLayoutMatches(def, version, hotfixBuild) {
+				fmt.Fprintf(os.Stderr, "db2tool: warning: table %s: build %d does not share build %d's layout; not carrying its hotfixes into this table\n",
+					tableName, hotfixBuild, buildNumber)
+				continue
+			}
+			if err := r.ApplyHotfixes(table, def, version, buildNumber, decoded); err != nil {
 				return nil, td, nil, fmt.Errorf("table %s: applying hotfixes: %w", tableName, err)
 			}
 		}
