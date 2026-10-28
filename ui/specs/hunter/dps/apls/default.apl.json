@@ -914,36 +914,15 @@
 									},
 									{
 										"cmp": {
-											"op": "OpLe",
+											"op": "OpGt",
 											"lhs": {
-												"autoTimeToNext": {
+												"autoTimeSinceLast": {
 													"autoType": "MainHandAuto"
 												}
 											},
 											"rhs": {
-												"min": {
-													"vals": [
-														{
-															"variableRef": {
-																"name": "Time to range"
-															}
-														},
-														{
-															"math": {
-																"op": "OpDiv",
-																"lhs": {
-																	"autoSwingTime": {
-																		"autoType": "MainHand"
-																	}
-																},
-																"rhs": {
-																	"const": {
-																		"val": "2"
-																	}
-																}
-															}
-														}
-													]
+												"variableRef": {
+													"name": "Time to range"
 												}
 											}
 										}
@@ -1305,7 +1284,7 @@
 			"name": "Time to weave",
 			"value": {
 				"const": {
-					"val": "100ms"
+					"val": "250ms"
 				}
 			}
 		},
@@ -1346,7 +1325,7 @@
 			"name": "Max Auto Shot delay",
 			"value": {
 				"const": {
-					"val": "1.2s"
+					"val": "1.5s"
 				}
 			}
 		},

@@ -61,7 +61,7 @@ export const DefaultRotation = WeaveAPLRotation;
 
 export const DefaultSimpleRotation = Hunter_Rotation.create({
 	playstyle: Playstyle.Weave,
-	timeToWeave: 200,
+	timeToWeave: 250,
 	pullRange: 25,
 	useMulti: true,
 	useArcane: true,
@@ -137,7 +137,7 @@ export const OtherDefaults = {
 	profession1: Profession.Engineering,
 	profession2: Profession.Blacksmithing,
 	race: Race.RaceOrc,
-	reactionTime: 100,
+	reactionTime: 250,
 };
 
 const build = (
