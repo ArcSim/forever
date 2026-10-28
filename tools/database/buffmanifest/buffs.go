@@ -145,8 +145,7 @@ var Raid = []BuffSpec{
 	},
 	// The improved state is a warrior wearing three pieces of Battlegear of Wrath, whose set spell
 	// 23563 adds 30 to every effect of the shout. No set spell is resolved, so driveBattleShout adds it.
-	// The row is Rank 6, the top rank the trainer teaches; battle_shout_book_rank makes the raid's
-	// shout Rank 7 from Manual of Battle Shout VII.
+	// The row is Rank 6, the top rank the trainer teaches.
 	{
 		Field:      "battle_shout",
 		SpellID:    11551,

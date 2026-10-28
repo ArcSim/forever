@@ -139,6 +139,12 @@ func shieldSpells(t *testing.T, war *core.Character) map[string]*core.Spell {
 	return spells
 }
 
+// The trainer's top rank and the rank Manual of Battle Shout VII teaches.
+const (
+	battleShoutTrainerRank = 11551
+	battleShoutBookRank    = 25289
+)
+
 // The warrior's own shout with three pieces of Battlegear of Wrath on, through
 // the class option: it raises what either rank bids for its category by the 30
 // spell 23563 states.
@@ -194,12 +200,6 @@ func TestWarriorShoutsForTheTierTwoBonus(t *testing.T) {
 		}
 	}
 }
-
-// The trainer's top rank and the rank Manual of Battle Shout VII teaches.
-const (
-	battleShoutTrainerRank = 11551
-	battleShoutBookRank    = 25289
-)
 
 // The shout the rotation casts by the rank's spell id.
 func battleShoutSpell(t *testing.T, war *dps.DpsWarrior, spellID int32) *core.Spell {

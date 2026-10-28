@@ -12,8 +12,7 @@ import (
 // How close to running out the warrior's own shout has to be before recasting it is worth a global.
 const ShoutExpirationThreshold = time.Second * 3
 
-// Rank 6 is the top rank the trainer teaches and Rank 7 comes from Manual of Battle Shout VII. Both
-// register, and the rotation picks the rank it casts by spell id.
+// Rank 6 is the top rank the trainer teaches; Rank 7 comes from Manual of Battle Shout VII.
 var battleShoutTrainerRank = spellData.BattleShout.ByID(11551)
 var battleShoutBookRank = spellData.BattleShout.ByID(25289)
 
@@ -39,7 +38,7 @@ func (warrior *Warrior) registerBattleShoutRank(rank *spelldata.Spell) {
 		battleShoutValue += buffs.BattleShoutT2Bonus
 	}
 
-	// The character sheet shows the trainer rank's copy, the one the rotation casts by default.
+	// The character sheet shows the trainer rank's copy: the rank the rotation picks is unknown when the sheet is built.
 	ownBuildPhase := core.Ternary(castsOwnShout && rank == battleShoutTrainerRank, core.CharacterBuildPhaseBuffs, core.CharacterBuildPhaseNone)
 
 	auras := warrior.NewAllyAuraArray(func(unit *core.Unit) *core.Aura {
@@ -48,7 +47,7 @@ func (warrior *Warrior) registerBattleShoutRank(rank *spelldata.Spell) {
 		raidShout := !castsOwnShout && unit.GetAuraByID(core.ActionID{SpellID: rank.ID}.WithTag(-1)) != nil
 
 		// Booming Voice widens the radius and lowers the cost only, so the aura takes no talent points.
-		aura := buffs.NewSpellDataBattleShoutAuraRank(unit, castsOwnShout, rank)
+		aura := buffs.NewSpellDataBattleShoutRankAura(unit, castsOwnShout, rank)
 		if shoutsWithTheSet {
 			buffs.AddGeneratedFlatBonus(aura, stats.AttackPower, battleShoutBase, buffs.BattleShoutT2Bonus)
 		}
@@ -61,7 +60,7 @@ func (warrior *Warrior) registerBattleShoutRank(rank *spelldata.Spell) {
 	// What holds the Battle Shout category decides whether shouting is worth a
 	// global. Nothing there and the cast puts the buff up. This rank's own copy
 	// there and the cast only refreshes it, which is worth a global once it is
-	// about to run out. Anything else has to be outbid first - a warrior without
+	// about to run out. Anything else has to be outbid first, as a warrior without
 	// the set would otherwise keep recasting a shout the category turns away
 	// while a stronger external one is up.
 	battleShoutCategory := warrior.GetExclusiveEffectCategory(buffs.BattleShoutCategory)

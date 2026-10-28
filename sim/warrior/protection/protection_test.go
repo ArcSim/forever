@@ -7,6 +7,7 @@ import (
 	"github.com/wowsims/forever/sim/core/proto"
 
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -42,7 +43,7 @@ func protectionWarriorSuite() core.CharacterSuiteConfig {
 
 		Rotation: core.GetAplRotation("../../../ui/specs/warrior/protection/apls", "default"),
 		OtherRotations: []core.RotationCombo{
-			bookRanksRotation("default", "Manual: Heroic Strike IX", "Manual: Battle Shout VII", "Manual: Revenge VI"),
+			bookRanksRotation("default"),
 		},
 
 		IndividualBuffs: core.FullTankIndividualBuffs,
@@ -69,19 +70,21 @@ func protectionWarriorSuite() core.CharacterSuiteConfig {
 }
 
 // The preset with its book rank variables on, so the ranks from the class books reach the results.
-func bookRanksRotation(preset string, variables ...string) core.RotationCombo {
+func bookRanksRotation(preset string) core.RotationCombo {
 	rotation := core.GetAplRotation("../../../ui/specs/warrior/protection/apls", preset).Rotation
-	for _, name := range variables {
-		found := false
-		for _, variable := range rotation.ValueVariables {
-			if variable.Name == name && variable.Value.GetConst() != nil {
-				variable.Value.GetConst().Val = "true"
-				found = true
-			}
+	found := false
+	for _, variable := range rotation.ValueVariables {
+		if !strings.HasPrefix(variable.Name, "Manual: ") {
+			continue
 		}
-		if !found {
-			panic(fmt.Sprintf("the %s preset has no const variable %q", preset, name))
+		if variable.Value.GetConst() == nil {
+			panic(fmt.Sprintf("the %s preset's variable %q is no const", preset, variable.Name))
 		}
+		variable.Value.GetConst().Val = "true"
+		found = true
+	}
+	if !found {
+		panic(fmt.Sprintf("the %s preset has no Manual variable", preset))
 	}
 	return core.RotationCombo{Label: preset + "_book_ranks", Rotation: rotation}
 }

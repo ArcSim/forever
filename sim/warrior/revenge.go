@@ -5,8 +5,7 @@ import (
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
-// Rank 5 is the top rank the trainer teaches and Rank 6 comes from Manual of Revenge VI. Both register
-// and share one window, and the rotation picks the rank it casts by spell id.
+// Rank 5 is the top rank the trainer teaches; Rank 6 comes from Manual of Revenge VI.
 var revengeTrainerRank = spellData.Revenge.ByID(11601)
 var revengeBookRank = spellData.Revenge.ByID(25288)
 

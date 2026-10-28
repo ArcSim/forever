@@ -58,7 +58,7 @@ type Warrior struct {
 	curQueuedAutoSpell *core.Spell
 	queuedRealismICD   *core.Cooldown
 
-	EnrageAura     *core.Aura
+	EnrageAura      *core.Aura
 	GoreDrinkerAura *core.Aura
 
 	SweepingStrikesAura *core.Aura

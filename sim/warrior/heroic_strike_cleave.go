@@ -5,8 +5,7 @@ import (
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
-// Rank 8 is the top rank the trainer teaches and Rank 9 comes from Manual of Heroic Strike IX. Both
-// register with their own queue, and the rotation picks the rank it queues by spell id.
+// Rank 8 is the top rank the trainer teaches; Rank 9 comes from Manual of Heroic Strike IX.
 var heroicStrikeTrainerRank = spellData.HeroicStrike.ByID(11567)
 var heroicStrikeBookRank = spellData.HeroicStrike.ByID(25286)
 

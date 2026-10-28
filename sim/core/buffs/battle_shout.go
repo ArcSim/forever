@@ -5,8 +5,8 @@ import (
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
-// Rank 7 comes from Manual of Battle Shout VII, not the trainer, whose top rank is the generated row's
-// Rank 6. The raid's shout is either rank, and a warrior registers both.
+// Rank 7 comes from Manual of Battle Shout VII; the trainer's top rank is the generated row's Rank 6.
+// The raid's shout is either rank, and a warrior registers both.
 var battleShoutBookRank = spelldata.MustFind(25289)
 
 // A rank of the shout is the generated row on the rank's own spell, labelled with the rank so that two
@@ -23,6 +23,6 @@ func BattleShoutRankValue(rank *spelldata.Spell) float64 {
 	return battleShoutRankMeta(rank).Value(0)
 }
 
-func NewSpellDataBattleShoutAuraRank(unit *core.Unit, isPlayer bool, rank *spelldata.Spell) *core.Aura {
+func NewSpellDataBattleShoutRankAura(unit *core.Unit, isPlayer bool, rank *spelldata.Spell) *core.Aura {
 	return newBuff(unit, battleShoutRankMeta(rank), isPlayer, 0)
 }

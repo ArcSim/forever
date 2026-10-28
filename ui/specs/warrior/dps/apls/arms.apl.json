@@ -40,8 +40,8 @@
 	{"action":{"castSpell":{"spellId":{"spellId":25286,"tag":1}},"condition":{"and":{"vals":[{"variableRef":{"name":"Manual: Heroic Strike IX"}},{"not":{"val":{"isExecutePhase":{"threshold":"E20"}}}},{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"90"}}}},{"not":{"val":{"talentIsKnown":{"talentId":{"spellId":12862,"rank":1}}}}}]}}}},
 	{"action":{"castSpell":{"spellId":{"spellId":11567,"tag":1}},"condition":{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Heroic Strike IX"}}}},{"not":{"val":{"isExecutePhase":{"threshold":"E20"}}}},{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"90"}}}},{"not":{"val":{"talentIsKnown":{"talentId":{"spellId":12862,"rank":1}}}}}]}}}},
 	{"action":{"condition":{"cmp":{"op":"OpLt","lhs":{"currentRage":{}},"rhs":{"const":{"val":"90"}}}},"castSpell":{"spellId":{"spellId":2687}}}},
-	{"action":{"condition":{"and":{"vals":[{"variableRef":{"name":"Manual: Battle Shout VII"}},{"variableRef":{"name":"Delay Check"}},{"variableRef":{"name":"Battle Shout: Refresh"}}]}},"castSpell":{"spellId":{"spellId":25289}}}},
-	{"action":{"condition":{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Battle Shout VII"}}}},{"variableRef":{"name":"Delay Check"}},{"variableRef":{"name":"Battle Shout: Refresh"}}]}},"castSpell":{"spellId":{"spellId":11551}}}},
+	{"action":{"condition":{"and":{"vals":[{"variableRef":{"name":"Manual: Battle Shout VII"}},{"variableRef":{"name":"Delay Check"}},{"variableRef":{"name":"Battle Shout: No Raid Copy"}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"auraId":{"spellId":25289}}},"rhs":{"const":{"val":"10s"}}}}]}},"castSpell":{"spellId":{"spellId":25289}}}},
+	{"action":{"condition":{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Battle Shout VII"}}}},{"variableRef":{"name":"Delay Check"}},{"variableRef":{"name":"Battle Shout: No Raid Copy"}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"auraId":{"spellId":11551}}},"rhs":{"const":{"val":"10s"}}}}]}},"castSpell":{"spellId":{"spellId":11551}}}},
 	{"hide":true,"action":{"condition":{"const":{"val":"false"}},"castSpell":{"spellId":{"spellId":1719}}}},
 	{"hide":true,"action":{"condition":{"const":{"val":"false"}},"castSpell":{"spellId":{"spellId":20230}}}},
 	{"hide":true,"action":{"condition":{"const":{"val":"false"}},"castSpell":{"spellId":{"spellId":871}}}}
@@ -61,7 +61,7 @@
 	"valueVariables": [
 	{"name":"Manual: Heroic Strike IX","value":{"const":{"val":"false"}}},
 	{"name":"Manual: Battle Shout VII","value":{"const":{"val":"false"}}},
-	{"name":"Battle Shout: Refresh","value":{"and":{"vals":[{"not":{"val":{"or":{"vals":[{"auraIsKnown":{"auraId":{"spellId":11551,"tag":-1}}},{"auraIsKnown":{"auraId":{"spellId":25289,"tag":-1}}}]}}}},{"or":{"vals":[{"and":{"vals":[{"variableRef":{"name":"Manual: Battle Shout VII"}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"auraId":{"spellId":25289}}},"rhs":{"const":{"val":"10s"}}}}]}},{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Battle Shout VII"}}}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"auraId":{"spellId":11551}}},"rhs":{"const":{"val":"10s"}}}}]}}]}}]}}},
+	{"name":"Battle Shout: No Raid Copy","value":{"not":{"val":{"or":{"vals":[{"auraIsKnown":{"auraId":{"spellId":11551,"tag":-1}}},{"auraIsKnown":{"auraId":{"spellId":25289,"tag":-1}}}]}}}}},
 	{"name":"Delay Check","value":{"and":{"vals":[{"cmp":{"op":"OpGe","lhs":{"spellTimeToReady":{"spellId":{"spellId":21553}}},"rhs":{"spellGcdHastedDuration":{"spellId":{"spellId":21553}}}}},{"or":{"vals":[{"not":{"val":{"actionGroupUsed":{"name":"Stance Dance ON/OFF"}}}},{"cmp":{"op":"OpGe","lhs":{"spellTimeToReady":{"spellId":{"spellId":1680,"tag":1}}},"rhs":{"spellGcdHastedDuration":{"spellId":{"spellId":1680,"tag":1}}}}}]}}]}}},
 	{"name":"Recklessness: Used","value":{"and":{"vals":[{"actionGroupUsed":{"name":"Recklessness ON/OFF"}},{"actionGroupUsed":{"name":"Stance Dance ON/OFF"}}]}}}
 	]

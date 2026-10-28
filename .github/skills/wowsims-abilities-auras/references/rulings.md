@@ -45,7 +45,7 @@ Each line is the rule the code follows, where it lives, and the pull request tha
   Shout 11551 and 25289, Revenge 11601 and 25288 (one window, read by 5302). The raid's Battle Shout is Rank 6 unless
   `battle_shout_book_rank` makes it Rank 7, and the warrior's own copies are labelled by rank.**
   `sim/warrior/heroic_strike_cleave.go`, `sim/warrior/battle_shout.go`, `sim/warrior/revenge.go`,
-  `sim/core/buffs/battle_shout.go`.
+  `sim/core/buffs/battle_shout.go`, PR #736.
 - **Devouring Plague is learnable by every race, and Inner Focus restarts its cooldown when the buff is spent
   (`OnExpire` calls `CD.Use`) though the row has no cooldown-on-event bit.** `sim/priest/devouring_plague.go`,
   `sim/priest/talents_discipline.go`, PR #246.

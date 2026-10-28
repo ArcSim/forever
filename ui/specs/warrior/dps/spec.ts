@@ -1,7 +1,7 @@
 import * as BuffDebuffInputs from '@features/settings/model/buffs_debuffs';
 import * as OtherInputs from '@features/settings/model/other_inputs';
 import { StatCapType } from '@generated/proto/api';
-import { APLRotation, APLRotation_Type, APLValue, SimpleRotation } from '@generated/proto/apl';
+import { APLRotation, APLRotation_Type, APLValueVariable, SimpleRotation } from '@generated/proto/apl';
 import { Cooldowns, HandType, ItemSlot, PseudoStat, Spec, Stat } from '@generated/proto/common';
 import { DpsWarriorSpec, WarriorSunder } from '@generated/proto/warrior';
 import * as Mechanics from '@sim/constants/mechanics';
@@ -202,12 +202,13 @@ export default defineSpec<Spec.SpecDpsWarrior>({
 		if (hamstringWeaveAction) hamstringWeaveAction.hide = !useHamstring;
 
 		// A Manual variable set to true casts the rank its Ruins of Ahn'Qiraj class book teaches; false casts the top trainer rank.
-		const setManualVariable = (name: string, useManual: boolean) => {
-			const variable = rotation.valueVariables.find(v => v.name === name);
-			if (variable) variable.value = APLValue.fromJson({ const: { val: String(useManual) } });
+		const values: Record<string, string> = {
+			'Manual: Heroic Strike IX': String(useHeroicStrikeManual),
+			'Manual: Battle Shout VII': String(useBattleShoutManual),
 		};
-		setManualVariable('Manual: Heroic Strike IX', useHeroicStrikeManual);
-		setManualVariable('Manual: Battle Shout VII', useBattleShoutManual);
+		rotation.valueVariables = rotation.valueVariables.map(variable =>
+			variable.name in values ? APLValueVariable.fromJson({ name: variable.name, value: { const: { val: values[variable.name] } } }) : variable,
+		);
 
 		return APLRotation.create({
 			simple: SimpleRotation.create({}),

@@ -95,7 +95,7 @@ func TestManifestAnchorsMatchTheGameFiles(t *testing.T) {
 			resolved = book
 		}
 		if resolved != aura {
-			t.Errorf("%s: the manifest pins spell %d, the game files resolve %d", row.Field, row.SpellID, aura)
+			t.Errorf("%s: the manifest pins spell %d, which stands for %d; the game files resolve %d", row.Field, row.SpellID, resolved, aura)
 		}
 		if row.CastID != 0 && row.CastID != cast.SpellID {
 			t.Errorf("%s: the manifest pins cast %d, the game files resolve %d", row.Field, row.CastID, cast.SpellID)

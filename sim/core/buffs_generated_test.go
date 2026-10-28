@@ -86,7 +86,7 @@ func battleShout(t *testing.T) float64 {
 
 // The trainer rank's copy of the player's own shout, which a warrior that shouts registers.
 func playerBattleShout(char *core.Character) *core.Aura {
-	return buffs.NewSpellDataBattleShoutAuraRank(&char.Unit, true, spelldata.MustFind(battleShoutTrainerRank))
+	return buffs.NewSpellDataBattleShoutRankAura(&char.Unit, true, spelldata.MustFind(battleShoutTrainerRank))
 }
 
 // The attack power three pieces of Battlegear of Wrath add to the shout.

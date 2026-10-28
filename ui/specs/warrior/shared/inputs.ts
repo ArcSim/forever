@@ -11,7 +11,7 @@ export const ShoutPicker = <SpecType extends WarriorSpecs>() =>
 		fieldName: 'useBattleShout',
 		label: i18n.t('settings_tab.other.default_shout.label'),
 		labelTooltip: i18n.t('settings_tab.other.default_shout.tooltip'),
-		id: ActionId.fromSpellId(25289),
+		id: ActionId.fromSpellId(11551),
 	});
 export const StancePicker = <SpecType extends WarriorSpecs>() =>
 	InputHelpers.makeClassOptionsEnumIconInput<SpecType, WarriorStance>({
