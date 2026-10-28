@@ -781,7 +781,18 @@
                               }
                             },
                             {
-                              "warlockAssignedCurseIsActive": {}
+                              "or": {
+                                "vals": [
+                                  {
+                                    "warlockAssignedCurseIsActive": {}
+                                  },
+                                  {
+                                    "warlockIsAssignedCurse": {
+                                      "curseType": "NoCurse"
+                                    }
+                                  }
+                                ]
+                              }
                             }
                           ]
                         }
@@ -889,22 +900,56 @@
                               "and": {
                                 "vals": [
                                   {
-                                    "warlockAssignedCurseIsActive": {}
+                                    "or": {
+                                      "vals": [
+                                        {
+                                          "warlockAssignedCurseIsActive": {}
+                                        },
+                                        {
+                                          "warlockIsAssignedCurse": {
+                                            "curseType": "NoCurse"
+                                          }
+                                        }
+                                      ]
+                                    }
                                   },
                                   {
                                     "or": {
                                       "vals": [
                                         {
-                                          "dotIsActive": {
-                                            "spellId": {
-                                              "spellId": 11713
-                                            }
+                                          "or": {
+                                            "vals": [
+                                              {
+                                                "dotIsActive": {
+                                                  "spellId": {
+                                                    "spellId": 11713
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "dotIsActive": {
+                                                  "spellId": {
+                                                    "spellId": 603
+                                                  }
+                                                }
+                                              }
+                                            ]
                                           }
                                         },
                                         {
-                                          "dotIsActive": {
-                                            "spellId": {
-                                              "spellId": 603
+                                          "not": {
+                                            "val": {
+                                              "cmp": {
+                                                "op": "OpLt",
+                                                "lhs": {
+                                                  "numberTargets": {}
+                                                },
+                                                "rhs": {
+                                                  "const": {
+                                                    "val": "5"
+                                                  }
+                                                }
+                                              }
                                             }
                                           }
                                         }
@@ -1037,22 +1082,56 @@
                               "and": {
                                 "vals": [
                                   {
-                                    "warlockAssignedCurseIsActive": {}
+                                    "or": {
+                                      "vals": [
+                                        {
+                                          "warlockAssignedCurseIsActive": {}
+                                        },
+                                        {
+                                          "warlockIsAssignedCurse": {
+                                            "curseType": "NoCurse"
+                                          }
+                                        }
+                                      ]
+                                    }
                                   },
                                   {
                                     "or": {
                                       "vals": [
                                         {
-                                          "dotIsActive": {
-                                            "spellId": {
-                                              "spellId": 11713
-                                            }
+                                          "or": {
+                                            "vals": [
+                                              {
+                                                "dotIsActive": {
+                                                  "spellId": {
+                                                    "spellId": 11713
+                                                  }
+                                                }
+                                              },
+                                              {
+                                                "dotIsActive": {
+                                                  "spellId": {
+                                                    "spellId": 603
+                                                  }
+                                                }
+                                              }
+                                            ]
                                           }
                                         },
                                         {
-                                          "dotIsActive": {
-                                            "spellId": {
-                                              "spellId": 603
+                                          "not": {
+                                            "val": {
+                                              "cmp": {
+                                                "op": "OpLt",
+                                                "lhs": {
+                                                  "numberTargets": {}
+                                                },
+                                                "rhs": {
+                                                  "const": {
+                                                    "val": "5"
+                                                  }
+                                                }
+                                              }
                                             }
                                           }
                                         }
@@ -1118,7 +1197,18 @@
                   "and": {
                     "vals": [
                       {
-                        "warlockAssignedCurseIsActiveOnAllTargets": {}
+                        "or": {
+                          "vals": [
+                            {
+                              "warlockAssignedCurseIsActiveOnAllTargets": {}
+                            },
+                            {
+                              "warlockIsAssignedCurse": {
+                                "curseType": "NoCurse"
+                              }
+                            }
+                          ]
+                        }
                       },
                       {
                         "or": {
