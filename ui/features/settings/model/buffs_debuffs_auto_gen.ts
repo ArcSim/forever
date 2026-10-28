@@ -198,7 +198,7 @@ export const FlametongueTotem = makeBooleanRaidBuffInput({
 });
 
 export const BattleShout = makeTristateRaidBuffInput({
-	actionId: ActionId.fromSpellId(25289),
+	actionId: ActionId.fromSpellId(11551),
 	impId: ActionId.fromSpellId(23563),
 	fieldName: 'battleShout',
 	label: 'Battle Shout',
@@ -233,6 +233,9 @@ export const MoonkinAura = makeBooleanRaidBuffInput({
 	fieldName: 'moonkinAura',
 	label: 'Moonkin Aura',
 });
+
+// battle_shout_book_rank: the raid's Battle Shout is Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6; driveBattleShout reads it, and
+// its hand-written input sits next to Battle Shout.
 
 export const GreaterBlessingOfKings = makeBooleanIndividualBuffInput({
 	actionId: ActionId.fromSpellId(25898),

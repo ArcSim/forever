@@ -1,4 +1,4 @@
-import { makeBooleanIndividualBuffInput, makeBooleanPartyBuffInput } from '@features/inputs/icon_inputs';
+import { makeBooleanIndividualBuffInput, makeBooleanPartyBuffInput, makeBooleanRaidBuffInput } from '@features/inputs/icon_inputs';
 import { Class, Stat } from '@generated/proto/common';
 import i18n from '@i18n/config';
 import { ActionId } from '@sim/proto/action_id';
@@ -17,6 +17,14 @@ export * from './buffs_debuffs_auto_gen';
 export const Innervate = Generated.Innervates;
 export const PowerInfusion = Generated.PowerInfusions;
 export const ManaTideTotem = Generated.ManaTideTotems;
+
+// Raid Buffs
+// Makes the raid's Battle Shout Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6.
+export const BattleShoutBookRank = makeBooleanRaidBuffInput({
+	actionId: ActionId.fromItemId(21298),
+	fieldName: 'battleShoutBookRank',
+	label: 'Battle Shout VII (Manual)',
+});
 
 // Individual Buffs
 export const GreaterBlessingOfSalvation = makeBooleanIndividualBuffInput({
@@ -85,6 +93,7 @@ export const BUFFS_CONFIG = inDisplayOrder(
 		Generated.WindfuryTotem,
 		Generated.FlametongueTotem,
 		statOptionGroup(i18n.t('settings_tab.raid_buffs.attack_power'), [Generated.BattleShout, Generated.FuriousHowl]),
+		{ config: BattleShoutBookRank, stats: [Stat.StatAttackPower], ownerClass: Class.ClassWarrior },
 		Generated.TrueshotAura,
 		Generated.LeaderOfThePack,
 		Generated.MoonkinAura,

@@ -6,7 +6,7 @@ option go_package = "./proto";
 import "common.proto";
 
 // Buffs that affect the entire raid.
-// Next index: 22
+// Next index: 23
 message RaidBuffs {
 	bool arcane_brilliance = 1;
 	bool prayer_of_spirit = 2;
@@ -29,6 +29,7 @@ message RaidBuffs {
 	bool aspect_of_the_wild = 19;
 	bool leader_of_the_pack = 20;
 	bool moonkin_aura = 21;
+	bool battle_shout_book_rank = 22;
 }
 
 // Buffs that affect a single party.

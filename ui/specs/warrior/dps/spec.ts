@@ -1,7 +1,7 @@
 import * as BuffDebuffInputs from '@features/settings/model/buffs_debuffs';
 import * as OtherInputs from '@features/settings/model/other_inputs';
 import { StatCapType } from '@generated/proto/api';
-import { APLRotation, APLRotation_Type, SimpleRotation } from '@generated/proto/apl';
+import { APLRotation, APLRotation_Type, APLValue, SimpleRotation } from '@generated/proto/apl';
 import { Cooldowns, HandType, ItemSlot, PseudoStat, Spec, Stat } from '@generated/proto/common';
 import { DpsWarriorSpec, WarriorSunder } from '@generated/proto/warrior';
 import * as Mechanics from '@sim/constants/mechanics';
@@ -144,6 +144,8 @@ export default defineSpec<Spec.SpecDpsWarrior>({
 			useRecklessness = false,
 			useStanceDance = false,
 			useHamstring = true,
+			useHeroicStrikeManual = false,
+			useBattleShoutManual = false,
 		} = simple;
 
 		if (!spec) {
@@ -198,6 +200,14 @@ export default defineSpec<Spec.SpecDpsWarrior>({
 			action => action.action?.action.oneofKind === 'groupReference' && action.action?.action.groupReference.groupName === 'Hamstring Weave ON/OFF',
 		);
 		if (hamstringWeaveAction) hamstringWeaveAction.hide = !useHamstring;
+
+		// A Manual variable set to true casts the rank its Ruins of Ahn'Qiraj class book teaches; false casts the top trainer rank.
+		const setManualVariable = (name: string, useManual: boolean) => {
+			const variable = rotation.valueVariables.find(v => v.name === name);
+			if (variable) variable.value = APLValue.fromJson({ const: { val: String(useManual) } });
+		};
+		setManualVariable('Manual: Heroic Strike IX', useHeroicStrikeManual);
+		setManualVariable('Manual: Battle Shout VII', useBattleShoutManual);
 
 		return APLRotation.create({
 			simple: SimpleRotation.create({}),

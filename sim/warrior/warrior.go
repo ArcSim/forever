@@ -36,7 +36,6 @@ type Warrior struct {
 	// Current state
 	thunderClapEffectBonus float64
 
-	BattleShout       *core.Spell
 	DemoralizingShout *core.Spell
 	BattleStance      *core.Spell
 	DefensiveStance   *core.Spell
@@ -47,7 +46,6 @@ type Warrior struct {
 	MortalStrike                    *core.Spell
 	SweepingStrikesNormalizedAttack *core.Spell
 
-	HeroicStrike      *core.Spell
 	Cleave            *core.Spell
 	MockingBlow       *core.Spell
 	ChallengingShout  *core.Spell

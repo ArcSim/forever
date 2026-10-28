@@ -108,6 +108,8 @@ message DpsWarrior {
 		bool use_rend = 6;
 		bool use_stance_dance = 7;
 		bool use_hamstring = 8;
+		bool use_heroic_strike_manual = 9;
+		bool use_battle_shout_manual = 10;
 	}
 
 	message Options {

@@ -22,7 +22,7 @@ through `spelldata.ParseEffects`, the same call a class's own aura reads its sta
 buff carries no effect routing of its own:
 
 ```go
-var battleShoutSpell = spelldata.MustFind(25289)
+var battleShoutSpell = spelldata.MustFind(11551)
 var battleShoutMeta = &Meta{
 	Label:      "Battle Shout",
 	Spell:      battleShoutSpell,
@@ -324,7 +324,7 @@ trait trees and the spell effects. It does not read `ItemSetSpell`, so a set tha
 cannot be a manifest `Talent`. It can be the row's `ImpAction`: the improved state a tristate row needs
 when no trait node prices one, and the icon that state shows. Battlegear of Wrath is the case: item set
 218's `ItemSetSpell` at three pieces (2336) is 23563, an `A_ADD_FLAT_MODIFIER` of 30 against every
-effect of the Battle Shout family, which raises the shout from 139 attack power to 169. The two halves
+effect of the Battle Shout family, which raises either rank of the shout by 30 attack power. The two halves
 of that are modelled separately. The warrior's own cast reads the `has_bs_t2` class option (the user's
 word that this warrior wears the set, not the equipped gear). The raid's copy is `battle_shout`'s
 improved state, which `driveBattleShout` reads because the resolver has no curve to give it. Both call `AddGeneratedFlatBonus`, which raises what the aura
@@ -333,6 +333,11 @@ character sheet shows. It is told what the buff is worth without the bonus, beca
 to the unit rather than to whoever raised it: two warriors in a party wearing the same set ask for
 the same total and the second call does nothing. The 30 itself lives in
 `buffs.BattleShoutT2Bonus`, with the set and the spell it came from written next to it.
+
+The row is Rank 6, the top rank the trainer teaches. Rank 7 comes from Manual of Battle Shout VII, and
+the `battle_shout_book_rank` flag makes the raid's copy that rank. `sim/core/buffs/battle_shout.go` builds
+either rank from the row's `Meta` with the rank's own spell and a label that names the rank, so the
+warrior's own copies of both ranks never share one aura.
 
 **A party or raid flag means an external caster provides the buff.** The generated apply block builds
 the row's `isPlayer=false` copy whenever the proto field is set, so a class port that registers its own

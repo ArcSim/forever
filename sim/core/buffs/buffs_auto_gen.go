@@ -585,7 +585,7 @@ func NewSpellDataFlametongueTotemAura(unit *core.Unit, isPlayer bool, talentPoin
 
 // Battle Shout
 var BattleShoutCategory = "BattleShout"
-var battleShoutSpell = spelldata.MustFind(25289)
+var battleShoutSpell = spelldata.MustFind(11551)
 var battleShoutMeta = &Meta{
 	Label:      "Battle Shout",
 	Spell:      battleShoutSpell,
@@ -696,6 +696,8 @@ func MoonkinAuraDuration(talentPoints int32) time.Duration {
 func NewSpellDataMoonkinAura(unit *core.Unit, isPlayer bool, talentPoints int32) *core.Aura {
 	return newBuff(unit, moonkinAuraMeta, isPlayer, talentPoints)
 }
+
+// func NewSpellDataBattleShoutBookRankAura(unit *core.Unit, isPlayer bool, talentPoints int32) *core.Aura // battle_shout_book_rank, KindFlag: the raid's Battle Shout is Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6; driveBattleShout reads it, and its hand-written input sits next to Battle Shout.
 
 // Greater Blessing of Kings
 var greaterBlessingOfKingsSpell = spelldata.MustFind(25898)

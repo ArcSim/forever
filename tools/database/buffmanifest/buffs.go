@@ -145,9 +145,11 @@ var Raid = []BuffSpec{
 	},
 	// The improved state is a warrior wearing three pieces of Battlegear of Wrath, whose set spell
 	// 23563 adds 30 to every effect of the shout. No set spell is resolved, so driveBattleShout adds it.
+	// The row is Rank 6, the top rank the trainer teaches; battle_shout_book_rank makes the raid's
+	// shout Rank 7 from Manual of Battle Shout VII.
 	{
 		Field:      "battle_shout",
-		SpellID:    25289,
+		SpellID:    11551,
 		Category:   "BattleShout",
 		SingleAura: true,
 		Driver:     true,
@@ -204,6 +206,12 @@ var Raid = []BuffSpec{
 		Stats: []proto.Stat{
 			proto.Stat_StatSpellDamage,
 		},
+	},
+	{
+		Field:  "battle_shout_book_rank",
+		Kind:   KindFlag,
+		Proto:  ProtoBool,
+		Reason: "the raid's Battle Shout is Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6; driveBattleShout reads it, and its hand-written input sits next to Battle Shout.",
 	},
 }
 

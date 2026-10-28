@@ -60,6 +60,7 @@ describe('the buff registries', () => {
 			'Windfury Totem',
 			'Flametongue Totem',
 			['settings_tab.raid_buffs.attack_power', ['Battle Shout', 'Furious Howl']],
+			'Battle Shout VII (Manual)',
 			'Trueshot Aura',
 			'Leader of the Pack',
 			'Moonkin Aura',
@@ -108,6 +109,15 @@ describe('the buff registries', () => {
 	it('offers Battle Shout as a single three-state icon', () => {
 		expect(BuffDebuffInputs.BattleShout.states).toBe(3);
 		expect(BuffDebuffInputs.BattleShout.improvedId?.equals(ActionId.fromSpellId(23563))).toBe(true);
+	});
+
+	// The shout's rank is a toggle of its own, since it stacks with the set's improved state.
+	it("offers the raid shout's book rank next to Battle Shout, shown as Manual of Battle Shout VII", () => {
+		const attackPower = groupWith(BuffDebuffInputs.BUFFS_CONFIG, BuffDebuffInputs.BattleShout);
+		const bookRank = BuffDebuffInputs.BUFFS_CONFIG[BuffDebuffInputs.BUFFS_CONFIG.findIndex(option => option === attackPower) + 1];
+		expect(bookRank.config).toBe(BuffDebuffInputs.BattleShoutBookRank);
+		expect(bookRank.ownerClass).toBe(Class.ClassWarrior);
+		expect(BuffDebuffInputs.BattleShoutBookRank.actionId.equals(ActionId.fromItemId(21298))).toBe(true);
 	});
 
 	it('gives the generated rows their owner class, so the settings tab can mark them external', () => {

@@ -55,5 +55,15 @@ export const RotationInputs = {
 			fieldName: 'useHamstring',
 			label: i18n.t('rotation_tab.options.warrior.dps.use_hamstring.label'),
 		}),
+		InputHelpers.makeRotationBooleanInput<Spec.SpecDpsWarrior>({
+			fieldName: 'useHeroicStrikeManual',
+			label: i18n.t('rotation_tab.options.warrior.dps.use_heroic_strike_manual.label'),
+			labelTooltip: i18n.t('rotation_tab.options.warrior.dps.use_heroic_strike_manual.tooltip'),
+		}),
+		InputHelpers.makeRotationBooleanInput<Spec.SpecDpsWarrior>({
+			fieldName: 'useBattleShoutManual',
+			label: i18n.t('rotation_tab.options.warrior.dps.use_battle_shout_manual.label'),
+			labelTooltip: i18n.t('rotation_tab.options.warrior.dps.use_battle_shout_manual.tooltip'),
+		}),
 	],
 };
