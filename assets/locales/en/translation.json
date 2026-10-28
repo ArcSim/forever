@@ -533,7 +533,8 @@
 				"source": "Source",
 				"raids": "Raids",
 				"faction_labels": {
-					"none": "None",
+					"from_race": "{{faction}} (from race)",
+					"none": "Any",
 					"alliance_only": "Alliance only",
 					"horde_only": "Horde only"
 				}

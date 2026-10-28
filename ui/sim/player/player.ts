@@ -29,7 +29,15 @@ import {
 	WeaponSkillValue,
 } from '@generated/proto/common';
 import { SimDatabase } from '@generated/proto/db';
-import { DungeonDifficulty, RaidFilterOption, SourceFilterOption, UIEnchant as Enchant, UIItem as Item, UIItem_FactionRestriction } from '@generated/proto/ui';
+import {
+	DungeonDifficulty,
+	FactionFilter,
+	RaidFilterOption,
+	SourceFilterOption,
+	UIEnchant as Enchant,
+	UIItem as Item,
+	UIItem_FactionRestriction,
+} from '@generated/proto/ui';
 
 import * as Mechanics from '../constants/mechanics';
 import { CURRENT_API_VERSION } from '../constants/other';
@@ -1232,11 +1240,17 @@ export class Player<SpecType extends Spec> {
 			itemData = filterItems(itemData, item => (item.scalingOptions?.[0].ilvl || item.ilvl) <= filters.maxIlvl);
 		}
 
-		if (filters.factionRestriction != UIItem_FactionRestriction.UNSPECIFIED) {
-			itemData = filterItems(
-				itemData,
-				item => item.factionRestriction == filters.factionRestriction || item.factionRestriction == UIItem_FactionRestriction.UNSPECIFIED,
-			);
+		// A binary link can carry a value the enum does not list. Such a value filters nothing.
+		const faction =
+			{
+				[FactionFilter.FactionFilterRace]: this.getFaction(),
+				[FactionFilter.FactionFilterAlliance]: Faction.Alliance,
+				[FactionFilter.FactionFilterHorde]: Faction.Horde,
+				[FactionFilter.FactionFilterAny]: Faction.Unknown,
+			}[filters.factionFilter] ?? Faction.Unknown;
+		if (faction != Faction.Unknown) {
+			const kept = faction == Faction.Horde ? UIItem_FactionRestriction.HORDE_ONLY : UIItem_FactionRestriction.ALLIANCE_ONLY;
+			itemData = filterItems(itemData, item => item.factionRestriction == kept || item.factionRestriction == UIItem_FactionRestriction.UNSPECIFIED);
 		}
 
 		if (!filters.sources.includes(SourceFilterOption.SourceSoldBy)) {

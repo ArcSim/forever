@@ -250,6 +250,15 @@ enum RaidFilterOption {
 	RaidNaxx = 16;
 }
 
+// Which faction's items the item list keeps, plus the items open to both. The zero value follows
+// the player's race; the others are the user's pick.
+enum FactionFilter {
+	FactionFilterRace = 0;
+	FactionFilterAlliance = 1;
+	FactionFilterHorde = 2;
+	FactionFilterAny = 3;
+}
+
 // The stats one panel works with. Unset in StatFilters means the spec's list for that panel.
 message StatSelection {
 	repeated UIStat stats = 1;
@@ -271,7 +280,7 @@ message DatabaseFilters {
 	repeated RangedWeaponType ranged_weapon_types = 16;
 	repeated SourceFilterOption sources = 17;
 	repeated RaidFilterOption raids = 18;
-	UIItem.FactionRestriction faction_restriction = 19;
+	FactionFilter faction_filter = 19;
 	int32 min_ilvl = 20;
 	int32 max_ilvl = 21;
 	// The consumable pickers hide a consumable below the level set for its ConsumableType (keyed by
