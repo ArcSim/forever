@@ -15,7 +15,7 @@ export interface AplListRootProps {
 	isGroup?: boolean;
 	/** `inline` for a pane whose items are rows, as `Rows` lays out the rows under a section. */
 	layout?: TreeLayout;
-	/** `default` boxes each item, as the rows under a section are; `compact` leaves them unframed. */
+	/** `compact` (the default here, unlike the kit's) leaves the items unframed; `default` boxes each, as the rows under a section are. */
 	density?: TreeDensity;
 	testId?: string;
 	children: ReactNode;
