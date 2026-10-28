@@ -303,7 +303,7 @@
             },
             "castSpell": {
               "spellId": {
-                "spellId": 11661
+                "spellId": 25307
               }
             }
           }
@@ -369,7 +369,7 @@
                 "lhs": {
                   "spellExpectedDpet": {
                     "spellId": {
-                      "spellId": 11672
+                      "spellId": 25311
                     }
                   }
                 },
@@ -382,13 +382,13 @@
             },
             "strictMultidot": {
               "spellId": {
-                "spellId": 11672
+                "spellId": 25311
               },
               "maxDots": 10,
               "maxOverlap": {
                 "spellCastTime": {
                   "spellId": {
-                    "spellId": 11672
+                    "spellId": 25311
                   }
                 }
               }
@@ -437,7 +437,7 @@
                 "lhs": {
                   "spellExpectedDpet": {
                     "spellId": {
-                      "spellId": 11668
+                      "spellId": 25309
                     }
                   }
                 },
@@ -450,13 +450,13 @@
             },
             "strictMultidot": {
               "spellId": {
-                "spellId": 11668
+                "spellId": 25309
               },
               "maxDots": 10,
               "maxOverlap": {
                 "spellCastTime": {
                   "spellId": {
-                    "spellId": 11668
+                    "spellId": 25309
                   }
                 }
               }
@@ -508,7 +508,7 @@
           "action": {
             "castSpell": {
               "spellId": {
-                "spellId": 11661
+                "spellId": 25307
               }
             }
           }
@@ -618,7 +618,7 @@
                 {
                   "spellExpectedDpet": {
                     "spellId": {
-                      "spellId": 11661
+                      "spellId": 25307
                     }
                   }
                 },

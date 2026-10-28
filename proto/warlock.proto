@@ -111,7 +111,7 @@ enum WarlockRotation {
 }
 
 message Warlock {
-	// The build rotations cast the trainer's top ranks; each use_ field casts the rank a book teaches in its place.
+	// The build rotations cast the ranks books teach; each use_ field left false casts the trainer's top rank in its place.
 	message Rotation {
 		WarlockRotation rotation = 1;
 		bool use_shadow_bolt_rank_10 = 2;

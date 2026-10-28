@@ -37,20 +37,26 @@ describe('Warlock simple rotation', () => {
 		[WarlockRotation.WarlockRotationDestro, DestroBuildJson],
 		[WarlockRotation.WarlockRotationSmRuin, SmRuinBuildJson],
 		[WarlockRotation.WarlockRotationAffWrack, AffWrackBuildJson],
-	])('runs the build rotation of choice %i as the build has it', (rotation, build) => {
-		expect(generate({ rotation })).toEqual(buildRotation(build));
+	])('runs the build rotation of choice %i as the build has it with every book rank chosen', (rotation, build) => {
+		expect(generate({ rotation, useShadowBoltRank10: true, useImmolateRank8: true, useCorruptionRank7: true })).toEqual(buildRotation(build));
 	});
 
 	it.each([
-		['useShadowBoltRank10', 11661, 25307],
-		['useImmolateRank8', 11668, 25309],
-		['useCorruptionRank7', 11672, 25311],
-	] as const)('%s casts the book rank in place of trainer rank %i', (field, trainerId, bookId) => {
+		['useShadowBoltRank10', 25307, 11661],
+		['useImmolateRank8', 25309, 11668],
+		['useCorruptionRank7', 25311, 11672],
+	] as const)('%s left false casts the trainer rank in place of book rank %i', (field, bookId, trainerId) => {
 		const build = buildRotation(DemoShadowBrandBuildJson);
-		const rotation = generate({ rotation: WarlockRotation.WarlockRotationDemoShadowBrand, [field]: true });
-		expect(count(build, trainerId)).toBeGreaterThan(0);
-		expect(count(rotation, trainerId)).toBe(0);
-		expect(count(rotation, bookId)).toBe(count(build, trainerId));
-		expect(spellIds(rotation).filter(id => id !== bookId)).toEqual(spellIds(build).filter(id => id !== trainerId));
+		const all = { useShadowBoltRank10: true, useImmolateRank8: true, useCorruptionRank7: true };
+		const rotation = generate({ ...all, rotation: WarlockRotation.WarlockRotationDemoShadowBrand, [field]: false });
+		expect(count(build, bookId)).toBeGreaterThan(0);
+		expect(count(rotation, bookId)).toBe(0);
+		expect(count(rotation, trainerId)).toBe(count(build, bookId));
+		expect(spellIds(rotation).filter(id => id !== trainerId)).toEqual(spellIds(build).filter(id => id !== bookId));
+	});
+
+	it('casts only the trainer ranks by default', () => {
+		const rotation = generate({ rotation: WarlockRotation.WarlockRotationDemoShadowBrand });
+		expect([25307, 25309, 25311].map(id => count(rotation, id))).toEqual([0, 0, 0]);
 	});
 });

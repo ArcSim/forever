@@ -122,7 +122,7 @@
                 "val": {
                   "dotIsActive": {
                     "spellId": {
-                      "spellId": 11672
+                      "spellId": 25311
                     }
                   }
                 }
@@ -130,7 +130,7 @@
             },
             "castSpell": {
               "spellId": {
-                "spellId": 11672
+                "spellId": 25311
               }
             }
           }
@@ -174,7 +174,7 @@
                 "val": {
                   "dotIsActive": {
                     "spellId": {
-                      "spellId": 11668
+                      "spellId": 25309
                     }
                   }
                 }
@@ -182,7 +182,7 @@
             },
             "castSpell": {
               "spellId": {
-                "spellId": 11668
+                "spellId": 25309
               }
             }
           }
@@ -202,7 +202,7 @@
                   {
                     "dotIsActive": {
                       "spellId": {
-                        "spellId": 11672
+                        "spellId": 25311
                       }
                     }
                   },
@@ -216,7 +216,7 @@
                   {
                     "dotIsActive": {
                       "spellId": {
-                        "spellId": 11668
+                        "spellId": 25309
                       }
                     }
                   },
@@ -251,7 +251,7 @@
             },
             "castSpell": {
               "spellId": {
-                "spellId": 11661
+                "spellId": 25307
               }
             }
           }
@@ -267,7 +267,7 @@
             },
             "castSpell": {
               "spellId": {
-                "spellId": 11661
+                "spellId": 25307
               }
             }
           }
@@ -300,7 +300,7 @@
           "action": {
             "castSpell": {
               "spellId": {
-                "spellId": 11661
+                "spellId": 25307
               }
             }
           }
@@ -357,7 +357,7 @@
                 {
                   "dotRemainingTime": {
                     "spellId": {
-                      "spellId": 11672
+                      "spellId": 25311
                     }
                   }
                 },

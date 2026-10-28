@@ -122,7 +122,7 @@ export const CursesSection: CustomSection<Spec.SpecWarlock> = {
 	],
 };
 
-// The simple rotation: a build's rotation, with each book rank cast in place of the trainer's top rank when chosen.
+// The simple rotation: a build's rotation, with the trainer's top rank cast in place of each book rank not chosen.
 export const RotationInputs = {
 	inputs: [
 		InputHelpers.makeRotationEnumInput<Spec.SpecWarlock, WarlockRotation>({

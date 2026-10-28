@@ -144,16 +144,16 @@ export default defineSpec<Spec.SpecWarlock>({
 		return Presets.DEMO_FIRE_BRAND_APL.rotation.rotation!;
 	},
 
-	// The chosen build's rotation, with every spell id of a chosen book rank's trainer rank (the cast, its dot
-	// and its aura) moved to the book rank.
+	// The chosen build's rotation, with every spell id of a book rank left unchosen (the cast, its dot and its
+	// aura) moved to the trainer's top rank.
 	simpleRotation: (_player: Player<Spec.SpecWarlock>, simple: SpecRotation<Spec.SpecWarlock>): APLRotation => {
-		const bookRanks = new Map<number, number>();
-		if (simple.useShadowBoltRank10) bookRanks.set(11661, 25307);
-		if (simple.useImmolateRank8) bookRanks.set(11668, 25309);
-		if (simple.useCorruptionRank7) bookRanks.set(11672, 25311);
+		const trainerRanks = new Map<number, number>();
+		if (!simple.useShadowBoltRank10) trainerRanks.set(25307, 11661);
+		if (!simple.useImmolateRank8) trainerRanks.set(25309, 11668);
+		if (!simple.useCorruptionRank7) trainerRanks.set(25311, 11672);
 
 		const rotation = Presets.SimpleRotationApls[simple.rotation].rotation.rotation!;
-		return APLRotation.fromJson(withSpellIds(APLRotation.toJson(rotation), bookRanks));
+		return APLRotation.fromJson(withSpellIds(APLRotation.toJson(rotation), trainerRanks));
 	},
 	sections: [WarlockInputs.CursesSection],
 
