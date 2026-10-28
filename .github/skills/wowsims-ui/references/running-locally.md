@@ -74,7 +74,9 @@ A change to rendering, layout or interaction gets screenshots of the real sim, b
 with headless `playwright-core`. It is not a dependency of this repo, so use a local install whose browser build is in
 `~/.cache/ms-playwright` (a `chromium_headless_shell-*` matching that install's version). What works:
 
-- Block `**/*wowhead.com/**` with `page.route` so tooltips and icons do not hang the page or redirect it.
+- Block `**/*wowhead.com/**` with `page.route` so tooltips and icons do not hang the page or redirect it, but let
+  `nether.wowhead.com` through. A spell missing from the database's spell icons, such as a triggered spell like
+  Divine Aegis 431624, takes its name and icon from that tooltip API, so blocking it leaves the row blank.
 - Load with `waitUntil: 'load'` and then wait about 8 seconds; the page never reaches `networkidle`.
 - A fresh profile opens the onboarding tour, whose shield takes every click. Set the localStorage key `__forever_onboarding` to `skipped`
   in `page.addInitScript` before the page loads.
