@@ -126,7 +126,8 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   stance-locked ability fires the moment its condition holds; when the GCD frees up, any line above that ability goes
   first, and a spender that leaves the condition false sends the swap back unused. Put the stance-locked ability above
   every spender that can take its GCD: it cannot be cast outside the stance, so it only wins once the swap is done.
-  The Fury preset holds its Overpower Weaving group above Execute for this.
+  The Fury preset holds its Overpower Weaving group above Execute, Bloodthirst and Whirlwind for this (PR #732). Its
+  Rend line stays below them: a Rend swap strands about 0.3 times a fight, and moving Rend up costs DPS.
 
 ## Keeping this skill true
 
