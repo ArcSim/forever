@@ -697,8 +697,6 @@ func NewSpellDataMoonkinAura(unit *core.Unit, isPlayer bool, talentPoints int32)
 	return newBuff(unit, moonkinAuraMeta, isPlayer, talentPoints)
 }
 
-// func NewSpellDataBattleShoutBookRankAura(unit *core.Unit, isPlayer bool, talentPoints int32) *core.Aura // battle_shout_book_rank, KindFlag: the raid's Battle Shout is Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6; driveBattleShout reads it, and its hand-written input sits next to Battle Shout.
-
 // Greater Blessing of Kings
 var greaterBlessingOfKingsSpell = spelldata.MustFind(25898)
 var greaterBlessingOfKingsMeta = &Meta{
@@ -939,7 +937,7 @@ func applyGeneratedBuffs(char *core.Character, raid *proto.RaidBuffs, party *pro
 	if raid.FlametongueTotem {
 		driveFlametongueTotem(char, raid)
 	}
-	if raid.BattleShout != proto.TristateEffect_TristateEffectMissing {
+	if raid.BattleShout > 0 {
 		driveBattleShout(char, raid)
 	}
 	if raid.TrueshotAura {

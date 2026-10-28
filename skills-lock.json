@@ -10,12 +10,12 @@
     "wowsims-abilities-auras": {
       "source": "./.github/skills",
       "sourceType": "local",
-      "computedHash": "ab1062a619eadb908adee39bc5f148848ca5cbc7b99e9b7fd9771502d4bb5f23"
+      "computedHash": "e679487c5fdf6b6af7a0eb796ee2d9dabb67893180556a896b62ad0a118a0d06"
     },
     "wowsims-apl": {
       "source": "./.github/skills",
       "sourceType": "local",
-      "computedHash": "a1f0e59ff133fe7a71f5f1e484b6fc8438a8956ff0148f2038957e3b3670a925"
+      "computedHash": "75fb196a3038a220803bcf85fdff3fe8c4b312cd225521b5b58f4062d98f7fee"
     },
     "wowsims-bulk-sim": {
       "source": "./.github/skills",

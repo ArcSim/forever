@@ -6,7 +6,7 @@ option go_package = "./proto";
 import "common.proto";
 
 // Buffs that affect the entire raid.
-// Next index: 23
+// Next index: 22
 message RaidBuffs {
 	bool arcane_brilliance = 1;
 	bool prayer_of_spirit = 2;
@@ -23,13 +23,12 @@ message RaidBuffs {
 	bool grace_of_air_totem = 13;
 	bool windfury_totem = 14;
 	bool flametongue_totem = 15;
-	TristateEffect battle_shout = 16;
+	int32 battle_shout = 16;
 	bool trueshot_aura = 17;
 	bool furious_howl = 18;
 	bool aspect_of_the_wild = 19;
 	bool leader_of_the_pack = 20;
 	bool moonkin_aura = 21;
-	bool battle_shout_book_rank = 22;
 }
 
 // Buffs that affect a single party.

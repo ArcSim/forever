@@ -8549,7 +8549,7 @@
 											"additionalProperties": false,
 											"required": ["label"]
 										},
-										"use_heroic_strike_manual": {
+										"use_heroic_strike_rank_9": {
 											"type": "object",
 											"properties": {
 												"label": {
@@ -8562,7 +8562,7 @@
 											"additionalProperties": false,
 											"required": ["label", "tooltip"]
 										},
-										"use_battle_shout_manual": {
+										"use_battle_shout_rank_7": {
 											"type": "object",
 											"properties": {
 												"label": {
@@ -8584,8 +8584,8 @@
 										"use_rend",
 										"use_stance_dance",
 										"use_hamstring",
-										"use_heroic_strike_manual",
-										"use_battle_shout_manual"
+										"use_heroic_strike_rank_9",
+										"use_battle_shout_rank_7"
 									]
 								}
 							},

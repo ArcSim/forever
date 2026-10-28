@@ -27,12 +27,13 @@ import (
 var BattleShoutT2Bonus = spelldata.MustFind(23563).EffectN(1).BaseValue()
 
 // The raid's Battle Shout is the external caster's copy, which chains behind
-// the player's own shout rather than being up from the start. Its improved
-// state says that warrior shouted with the set on.
+// the player's own shout rather than being up from the start. Its state is the
+// shout that warrior casts: 1 the trainer's Rank 6, 2 Rank 7 from Manual of
+// Battle Shout VII, 3 Rank 7 with the set on.
 func driveBattleShout(char *core.Character, raid *proto.RaidBuffs) {
-	rank := core.Ternary(raid.BattleShoutBookRank, battleShoutBookRank, battleShoutSpell)
+	rank := core.Ternary(raid.BattleShout == 1, battleShoutSpell, battleShoutBookRank)
 	aura := NewSpellDataBattleShoutRankAura(&char.Unit, false, rank)
-	if raid.BattleShout == proto.TristateEffect_TristateEffectImproved {
+	if raid.BattleShout >= 3 {
 		AddGeneratedFlatBonus(aura, stats.AttackPower, BattleShoutRankValue(rank), BattleShoutT2Bonus)
 	}
 	applyFixedShoutAura(char, aura, BattleShoutCategory)

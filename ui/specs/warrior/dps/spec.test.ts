@@ -25,7 +25,7 @@ describe.each([
 	});
 
 	it('casts the class book ranks when both toggles are on', () => {
-		const rotation = generate({ spec: warriorSpec, useHeroicStrikeManual: true, useBattleShoutManual: true });
+		const rotation = generate({ spec: warriorSpec, useHeroicStrikeRank9: true, useBattleShoutRank7: true });
 		expect(variable(rotation, 'Manual: Heroic Strike IX')).toBe('true');
 		expect(variable(rotation, 'Manual: Battle Shout VII')).toBe('true');
 	});

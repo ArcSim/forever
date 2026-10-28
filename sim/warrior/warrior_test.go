@@ -211,9 +211,9 @@ func battleShoutSpell(t *testing.T, war *dps.DpsWarrior, spellID int32) *core.Sp
 	return spell
 }
 
-// How the warrior treats the Battle Shout category, on the trainer's rank. The
-// buff belongs to the unit, so an improved shout from the raid and one from the
-// warrior standing next to this one fill the same category. Casting a weaker
+// How the warrior treats the Battle Shout category. The buff belongs to the
+// unit, so the raid's shout with the set and one from the warrior standing
+// next to this one fill the same category. Casting a weaker
 // shout the category would turn away wastes a global and rage, and so does
 // refreshing a copy with most of its three minutes left.
 func TestWarriorShoutsOnlyWhenTheCategoryWillTakeIt(t *testing.T) {
@@ -252,24 +252,27 @@ func TestWarriorShoutsOnlyWhenTheCategoryWillTakeIt(t *testing.T) {
 
 	withSet := buffs.BattleShoutValue(0) + buffs.BattleShoutT2Bonus
 
-	t.Run("an improved external shout outbids a warrior without the set", func(t *testing.T) {
+	t.Run("the raid's Rank 7 with the set outbids either rank of a warrior without it", func(t *testing.T) {
 		sim := &core.Simulation{}
-		env := build(&proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectImproved}, warriorProto("Bare", false))
+		env := build(&proto.RaidBuffs{BattleShout: 3}, warriorProto("Bare", false))
 		war := env.Raid.Parties[0].Players[0].(*dps.DpsWarrior)
 
-		external := war.GetAura("Battle Shout Rank 6 (External)")
+		external := war.GetAura("Battle Shout Rank 7 (External)")
 		if external == nil {
 			t.Fatal("the raid's copy is not registered")
 		}
+		raidBid := buffs.BattleShoutRankValue(spelldata.MustFind(battleShoutBookRank)) + buffs.BattleShoutT2Bonus
 		external.Activate(sim)
-		if !external.IsActive() || external.ExclusiveEffects[0].Priority != withSet {
+		if !external.IsActive() || external.ExclusiveEffects[0].Priority != raidBid {
 			t.Fatalf("the raid's copy is active %v at %v, want it up at %v",
-				external.IsActive(), external.ExclusiveEffects[0].Priority, withSet)
+				external.IsActive(), external.ExclusiveEffects[0].Priority, raidBid)
 		}
 
-		if battleShoutSpell(t, war, battleShoutTrainerRank).ExtraCastCondition(sim, &war.Unit) {
-			t.Errorf("the warrior would shout for %v while a %v copy holds the category, wasting the global",
-				buffs.BattleShoutValue(0), withSet)
+		for _, spellID := range []int32{battleShoutTrainerRank, battleShoutBookRank} {
+			if battleShoutSpell(t, war, spellID).ExtraCastCondition(sim, &war.Unit) {
+				t.Errorf("the warrior would shout %d for %v while a %v copy holds the category, wasting the global",
+					spellID, buffs.BattleShoutRankValue(spelldata.MustFind(spellID)), raidBid)
+			}
 		}
 	})
 
@@ -309,6 +312,57 @@ func TestWarriorShoutsOnlyWhenTheCategoryWillTakeIt(t *testing.T) {
 					got, row.want, row.remaining, warrior.ShoutExpirationThreshold)
 			}
 		})
+	}
+}
+
+// A warrior that never shouts shares the raid's copy of the rank the raid's state names, which keeps
+// the build phase the raid gave it so the character sheet shows it. The warrior registers the other
+// rank's copy itself, and that one stays off the sheet.
+func TestRaidShoutKeepsItsBuildPhaseOnAWarriorThatNeverShouts(t *testing.T) {
+	const rank6, rank7 = "Battle Shout Rank 6 (External)", "Battle Shout Rank 7 (External)"
+	for _, row := range []struct {
+		state     int32
+		raidLabel string
+		ownLabel  string
+	}{
+		{1, rank6, rank7},
+		{2, rank7, rank6},
+		{3, rank7, rank6},
+	} {
+		player := &proto.Player{
+			Name:          "Silent",
+			Race:          proto.Race_RaceOrc,
+			Class:         proto.Class_ClassWarrior,
+			Equipment:     &proto.EquipmentSpec{},
+			TalentsString: furyTalents,
+			Spec: &proto.Player_DpsWarrior{
+				DpsWarrior: &proto.DpsWarrior{
+					Options: &proto.DpsWarrior_Options{
+						ClassOptions: &proto.WarriorOptions{DefaultStance: proto.WarriorStance_WarriorStanceBerserker},
+					},
+				},
+			},
+		}
+		env, _, _ := core.NewEnvironment(
+			core.SinglePlayerRaidProto(player, &proto.PartyBuffs{}, &proto.RaidBuffs{BattleShout: row.state}, &proto.Debuffs{}),
+			core.MakeSingleTargetEncounter(0), false, true)
+		war := env.Raid.Parties[0].Players[0].(*dps.DpsWarrior)
+
+		for _, want := range []struct {
+			label string
+			phase core.CharacterBuildPhase
+		}{
+			{row.raidLabel, core.CharacterBuildPhaseBuffs},
+			{row.ownLabel, core.CharacterBuildPhaseNone},
+		} {
+			aura := war.GetAura(want.label)
+			if aura == nil {
+				t.Fatalf("state %d: the warrior carries no aura labelled %q", row.state, want.label)
+			}
+			if aura.BuildPhase != want.phase {
+				t.Errorf("state %d: %q is in build phase %v, want %v", row.state, want.label, aura.BuildPhase, want.phase)
+			}
+		}
 	}
 }
 

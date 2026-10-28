@@ -10,7 +10,6 @@ import {
 	makeMultistateIndividualBuffInput,
 	makeMultistatePartyBuffInput,
 	makeTristatePartyBuffInput,
-	makeTristateRaidBuffInput,
 } from '@features/inputs/icon_inputs';
 
 import type { RenderableStatOptions } from './stat_options';
@@ -197,12 +196,7 @@ export const FlametongueTotem = makeBooleanRaidBuffInput({
 	label: 'Flametongue Totem',
 });
 
-export const BattleShout = makeTristateRaidBuffInput({
-	actionId: ActionId.fromSpellId(11551),
-	impId: ActionId.fromSpellId(23563),
-	fieldName: 'battleShout',
-	label: 'Battle Shout',
-});
+// battle_shout: the hand-written input marks Rank 7 and the tier 2 set with an improved icon each, a second improved icon no manifest row carries.
 
 export const TrueshotAura = makeBooleanRaidBuffInput({
 	actionId: ActionId.fromSpellId(20906),
@@ -233,9 +227,6 @@ export const MoonkinAura = makeBooleanRaidBuffInput({
 	fieldName: 'moonkinAura',
 	label: 'Moonkin Aura',
 });
-
-// battle_shout_book_rank: the raid's Battle Shout is Rank 7 from Manual of Battle Shout VII in place of the trainer's Rank 6; driveBattleShout reads it, and
-// its hand-written input sits next to Battle Shout.
 
 export const GreaterBlessingOfKings = makeBooleanIndividualBuffInput({
 	actionId: ActionId.fromSpellId(25898),
@@ -489,11 +480,6 @@ export const GENERATED_RAID_BUFFS_CONFIG: RenderableStatOptions[] = [
 		config: FlametongueTotem,
 		stats: [Stat.StatAttackPower],
 		ownerClass: Class.ClassShaman,
-	},
-	{
-		config: BattleShout,
-		stats: [Stat.StatAttackPower],
-		ownerClass: Class.ClassWarrior,
 	},
 	{
 		config: TrueshotAura,

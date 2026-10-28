@@ -20,29 +20,39 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-// The raid's shout is the trainer's Rank 6, or Rank 7 from Manual of Battle Shout VII when the book
-// rank is ticked, each worth what its own row states.
-func TestRaidBattleShoutAppliesItsRank(t *testing.T) {
+// The raid's shout is off, the trainer's Rank 6, Rank 7 from Manual of Battle Shout VII, or Rank 7
+// from a warrior wearing three pieces of Battlegear of Wrath. Each rank is worth what its own row
+// states, and the set adds its bonus to what the copy applies and bids.
+func TestRaidBattleShoutAppliesItsState(t *testing.T) {
+	off := core.NewGeneratedBuffTestCharacter()
+	core.ApplyBuffEffects(off, &proto.RaidBuffs{BattleShout: 0}, &proto.PartyBuffs{}, &proto.IndividualBuffs{})
+	if tagged := off.GetAurasWithTag(buffs.BattleShoutCategory); len(tagged) != 0 {
+		t.Errorf("the off state registered %d Battle Shout auras, want none", len(tagged))
+	}
+
 	for _, row := range []struct {
-		name     string
-		bookRank bool
-		spellID  int32
-		label    string
+		name    string
+		state   int32
+		spellID int32
+		label   string
+		withSet bool
 	}{
-		{"the trainer's rank", false, battleShoutTrainerRank, "Battle Shout Rank 6 (External)"},
-		{"the book's rank", true, battleShoutBookRank, "Battle Shout Rank 7 (External)"},
+		{"the trainer's rank", 1, battleShoutTrainerRank, "Battle Shout Rank 6 (External)", false},
+		{"the book's rank", 2, battleShoutBookRank, "Battle Shout Rank 7 (External)", false},
+		{"the book's rank with the set", 3, battleShoutBookRank, "Battle Shout Rank 7 (External)", true},
 	} {
 		t.Run(row.name, func(t *testing.T) {
 			char := core.NewGeneratedBuffTestCharacter()
 
-			core.ApplyBuffEffects(char,
-				&proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectRegular, BattleShoutBookRank: row.bookRank},
-				&proto.PartyBuffs{}, &proto.IndividualBuffs{})
+			core.ApplyBuffEffects(char, &proto.RaidBuffs{BattleShout: row.state}, &proto.PartyBuffs{}, &proto.IndividualBuffs{})
 			char.ApplyBuildPhaseAuras(core.CharacterBuildPhaseBuffs)
 
 			shout := rowAmount(t, row.spellID, dbcenums.A_MOD_ATTACK_POWER)
+			if row.withSet {
+				shout += battleShoutSetBonus(t)
+			}
 			if got := char.GetStats()[stats.AttackPower]; got != shout {
-				t.Errorf("the raid's Battle Shout applied %v attack power, want the game files' %v", got, shout)
+				t.Errorf("the raid's Battle Shout applied %v attack power, want %v", got, shout)
 			}
 
 			aura := char.GetAura(row.label)
@@ -104,8 +114,7 @@ func battleShoutSetBonus(t *testing.T) float64 {
 func TestPlayerBattleShoutTakesTheCategoryOnATie(t *testing.T) {
 	char := core.NewGeneratedBuffTestCharacter()
 
-	core.ApplyBuffEffects(char,
-		&proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectRegular}, &proto.PartyBuffs{}, &proto.IndividualBuffs{})
+	core.ApplyBuffEffects(char, &proto.RaidBuffs{BattleShout: 1}, &proto.PartyBuffs{}, &proto.IndividualBuffs{})
 
 	player := playerBattleShout(char)
 	if want := (core.ActionID{SpellID: battleShoutTrainerRank, Tag: 0}); player.ActionID != want {
@@ -134,52 +143,20 @@ func TestPlayerBattleShoutTakesTheCategoryOnATie(t *testing.T) {
 	}
 }
 
-// The improved state says the warrior who shouted for the raid wears three
-// pieces of Battlegear of Wrath, so the external copy is worth the game files'
-// shout plus the set's bonus, on either rank.
-func TestImprovedRaidBattleShoutAddsTheTierTwoBonus(t *testing.T) {
-	bookShout := rowAmount(t, battleShoutBookRank, dbcenums.A_MOD_ATTACK_POWER)
-	for _, row := range []struct {
-		name  string
-		raid  *proto.RaidBuffs
-		label string
-		want  float64
-	}{
-		{"with the set", &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectImproved},
-			"Battle Shout Rank 6 (External)", battleShout(t) + battleShoutSetBonus(t)},
-		{"without it", &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectRegular},
-			"Battle Shout Rank 6 (External)", battleShout(t)},
-		{"with the set on the book's rank", &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectImproved, BattleShoutBookRank: true},
-			"Battle Shout Rank 7 (External)", bookShout + battleShoutSetBonus(t)},
-	} {
-		t.Run(row.name, func(t *testing.T) {
-			char := core.NewGeneratedBuffTestCharacter()
-
-			core.ApplyBuffEffects(char, row.raid, &proto.PartyBuffs{}, &proto.IndividualBuffs{})
-			char.ApplyBuildPhaseAuras(core.CharacterBuildPhaseBuffs)
-
-			if got := char.GetStats()[stats.AttackPower]; got != row.want {
-				t.Errorf("the raid's Battle Shout applied %v attack power, want %v", got, row.want)
-			}
-			if got := char.GetAura(row.label).ExclusiveEffects[0].Priority; got != row.want {
-				t.Errorf("the external copy bids %v, want %v", got, row.want)
-			}
-		})
-	}
-}
-
 // Two copies of the shout that are not worth the same: the stronger one
 // takes the category whichever side it is on, and the character sheet reads it
 // once rather than both added up.
 func TestTheStrongerBattleShoutTakesTheCategory(t *testing.T) {
 	for _, row := range []struct {
-		name         string
-		raid         *proto.RaidBuffs
-		playerBonus  float64
-		wantPlayerUp bool
+		name          string
+		raid          *proto.RaidBuffs
+		externalLabel string
+		playerBonus   float64
+		wantPlayerUp  bool
+		wantShout     int32
 	}{
-		{"the player wears the set", &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectRegular}, buffs.BattleShoutT2Bonus, true},
-		{"the external warrior does", &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectImproved}, 0, false},
+		{"the player wears the set", &proto.RaidBuffs{BattleShout: 1}, "Battle Shout Rank 6 (External)", buffs.BattleShoutT2Bonus, true, battleShoutTrainerRank},
+		{"the external warrior does", &proto.RaidBuffs{BattleShout: 3}, "Battle Shout Rank 7 (External)", 0, false, battleShoutBookRank},
 	} {
 		t.Run(row.name, func(t *testing.T) {
 			char := core.NewGeneratedBuffTestCharacter()
@@ -194,14 +171,15 @@ func TestTheStrongerBattleShoutTakesTheCategory(t *testing.T) {
 
 			char.ApplyBuildPhaseAuras(core.CharacterBuildPhaseBuffs)
 
-			external := char.GetAura("Battle Shout Rank 6 (External)")
+			external := char.GetAura(row.externalLabel)
 			if player.IsActive() != row.wantPlayerUp {
 				t.Errorf("the player's copy is active: %v, want %v", player.IsActive(), row.wantPlayerUp)
 			}
 			if external.IsActive() == row.wantPlayerUp {
 				t.Errorf("the external copy is active: %v, want %v", external.IsActive(), !row.wantPlayerUp)
 			}
-			if got, want := char.GetStats()[stats.AttackPower], battleShout(t)+battleShoutSetBonus(t); got != want {
+			stronger := rowAmount(t, row.wantShout, dbcenums.A_MOD_ATTACK_POWER) + battleShoutSetBonus(t)
+			if got, want := char.GetStats()[stats.AttackPower], stronger; got != want {
 				t.Errorf("both copies together applied %v attack power, want the stronger one's %v", got, want)
 			}
 		})
@@ -1716,7 +1694,7 @@ func TestGeneratedFuriousHowlDoesNotStackWithBattleShout(t *testing.T) {
 	}
 
 	char := core.NewGeneratedBuffTestCharacter()
-	core.ApplyBuffEffects(char, &proto.RaidBuffs{BattleShout: proto.TristateEffect_TristateEffectRegular, FuriousHowl: true},
+	core.ApplyBuffEffects(char, &proto.RaidBuffs{BattleShout: 1, FuriousHowl: true},
 		&proto.PartyBuffs{}, &proto.IndividualBuffs{})
 	char.ApplyBuildPhaseAuras(core.CharacterBuildPhaseBuffs)
 	if got, want := char.GetStats()[stats.AttackPower], max(battleShout(t), howl); got != want {

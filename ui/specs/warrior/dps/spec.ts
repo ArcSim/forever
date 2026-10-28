@@ -144,8 +144,8 @@ export default defineSpec<Spec.SpecDpsWarrior>({
 			useRecklessness = false,
 			useStanceDance = false,
 			useHamstring = true,
-			useHeroicStrikeManual = false,
-			useBattleShoutManual = false,
+			useHeroicStrikeRank9 = false,
+			useBattleShoutRank7 = false,
 		} = simple;
 
 		if (!spec) {
@@ -203,8 +203,8 @@ export default defineSpec<Spec.SpecDpsWarrior>({
 
 		// A Manual variable set to true casts the rank its Ruins of Ahn'Qiraj class book teaches; false casts the top trainer rank.
 		const values: Record<string, string> = {
-			'Manual: Heroic Strike IX': String(useHeroicStrikeManual),
-			'Manual: Battle Shout VII': String(useBattleShoutManual),
+			'Manual: Heroic Strike IX': String(useHeroicStrikeRank9),
+			'Manual: Battle Shout VII': String(useBattleShoutRank7),
 		};
 		rotation.valueVariables = rotation.valueVariables.map(variable =>
 			variable.name in values ? APLValueVariable.fromJson({ name: variable.name, value: { const: { val: values[variable.name] } } }) : variable,

@@ -2408,11 +2408,11 @@
 					"use_hamstring": {
 						"label": "Hamstring weave"
 					},
-					"use_heroic_strike_manual": {
+					"use_heroic_strike_rank_9": {
 						"label": "Heroic Strike IX (Manual)",
 						"tooltip": "Casts Heroic Strike IX, taught by the Manual of Heroic Strike IX from Ruins of Ahn'Qiraj. Unchecked, the rotation casts the trainer's Heroic Strike VIII."
 					},
-					"use_battle_shout_manual": {
+					"use_battle_shout_rank_7": {
 						"label": "Battle Shout VII (Manual)",
 						"tooltip": "Casts Battle Shout VII, taught by the Manual of Battle Shout VII from Ruins of Ahn'Qiraj. Unchecked, the rotation casts the trainer's Battle Shout VI."
 					}
