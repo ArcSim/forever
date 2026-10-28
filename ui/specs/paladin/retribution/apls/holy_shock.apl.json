@@ -69,7 +69,7 @@
 							{
 								"auraIsInactive": {
 									"sourceUnit": { "type": "CurrentTarget" },
-									"auraId": { "spellId": 1311597 },
+									"auraId": { "spellId": 1311599 },
 									"includeReactionTime": true
 								}
 							},
@@ -700,7 +700,7 @@
 						{
 							"auraIsActive": {
 								"sourceUnit": { "type": "CurrentTarget" },
-								"auraId": { "spellId": 1311597 }
+								"auraId": { "spellId": 1311599 }
 							}
 						}
 					]
