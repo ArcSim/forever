@@ -122,6 +122,11 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   with the points.
 - **Recklessness needs Berserker Stance** (ShapeshiftMask bit 18): Arms casts it only with the Stance Dance group on,
   and the dps suite never un-hides the Recklessness group, so the `.results` never show it (PR #653).
+- **An off-GCD swap goes out at once, mid-GCD, and the next GCD pick can strand it.** A stance swap that waits for a
+  stance-locked ability fires the moment its condition holds; when the GCD frees up, any line above that ability goes
+  first, and a spender that leaves the condition false sends the swap back unused. Put the stance-locked ability above
+  every spender that can take its GCD: it cannot be cast outside the stance, so it only wins once the swap is done.
+  The Fury preset holds its Overpower Weaving group above Execute for this.
 
 ## Keeping this skill true
 
