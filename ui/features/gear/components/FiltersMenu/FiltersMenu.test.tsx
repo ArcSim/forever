@@ -1,6 +1,5 @@
 import { ArmorType, Faction, ItemSlot, RangedWeaponType, WeaponType } from '@generated/proto/common';
 import { DatabaseFilters, FactionFilter, SourceFilterOption } from '@generated/proto/ui';
-import i18n from '@i18n/config';
 import { SimHostProvider } from '@sim/context/SimHostContext';
 import { storeSource as store } from '@testing/gear';
 import { renderWithHost } from '@testing/react';
@@ -8,9 +7,8 @@ import { fakeHost } from '@testing/sim/fake_host';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PortalContainerContext } from '@ui-kit/hooks/usePortalContainer';
-import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import english from '../../../../../assets/locales/en/translation.json';
 import type { FiltersMenuViewProps } from './FiltersMenu';
 
 vi.mock('@sim/state/subscriptions', async () =>
@@ -26,17 +24,7 @@ interface ClassStub {
 	canDualWield?: boolean;
 }
 
-// Only the from-race string is loaded, because the other assertions in this file read keys. The
-// faction that string names still shows as its key.
-beforeAll(() => {
-	const { from_race } = english.gear_tab.gear_picker.filters.faction_labels;
-	i18n.addResourceBundle('en', 'translation', { gear_tab: { gear_picker: { filters: { faction_labels: { from_race } } } } }, true, true);
-});
-afterAll(() => {
-	i18n.removeResourceBundle('en', 'translation');
-});
-
-const fromRace = (faction: string) => `gear_tab.gear_picker.filters.faction_labels.${faction} (from race)`;
+const factionLabel = (label: string) => `gear_tab.gear_picker.filters.faction_labels.${label}`;
 const factionOptions = () => screen.getAllByRole('option');
 
 describe('FiltersMenu', () => {
@@ -131,25 +119,24 @@ describe('FiltersMenu', () => {
 		fireEvent.click(rootElem.querySelector<HTMLInputElement>(`#filters-source-${source}`)!);
 		expect(setFilters.mock.calls[1][0].sources).not.toContain(source);
 
-		// The options run from race, any, alliance only, horde only.
 		await userEvent.click(rootElem.querySelector<HTMLElement>('#filters-faction-restriction')!);
-		expect(factionOptions()).toHaveLength(4);
+		expect(factionOptions().map(option => option.textContent)).toEqual([factionLabel('horde_only'), factionLabel('none')]);
 
-		await userEvent.click(factionOptions()[3]);
-		expect(setFilters.mock.lastCall![0].factionFilter).toBe(FactionFilter.FactionFilterHorde);
+		await userEvent.click(factionOptions()[1]);
+		expect(setFilters.mock.lastCall![0].factionFilter).toBe(FactionFilter.FactionFilterAny);
 
 		fireEvent.click(rootElem.querySelector<HTMLButtonElement>('[data-testid="filters-menu"] [data-testid="sim-dialog-close"]')!);
 		expect(onOpenChange).toHaveBeenCalledWith(false);
 	});
 
-	it("follows the race's faction until a pick, names it after a race change, and goes back to it", async () => {
+	it("names the race's faction by default, follows a race change, and goes back to it from any", async () => {
 		setup();
 		const trigger = () => rootElem.querySelector<HTMLElement>('#filters-faction-restriction')!;
-		expect(trigger().textContent).toContain(fromRace('horde_only'));
+		expect(trigger().textContent).toContain(factionLabel('horde_only'));
 
 		raceFaction = Faction.Alliance;
 		act(() => store.notify());
-		expect(trigger().textContent).toContain(fromRace('alliance_only'));
+		expect(trigger().textContent).toContain(factionLabel('alliance_only'));
 
 		await userEvent.click(trigger());
 		await userEvent.click(factionOptions()[1]);
@@ -228,14 +215,14 @@ describe('FiltersMenuView', () => {
 				sources: [SourceFilterOption.SourceCrafting],
 				minIlvl: 0,
 				maxIlvl: 528,
-				factionFilter: FactionFilter.FactionFilterHorde,
+				factionFilter: FactionFilter.FactionFilterAny,
 			}),
 		});
 		expect(input(`filters-source-${SourceFilterOption.SourceCrafting}`).checked).toBe(true);
 		expect(input('filters-min-ilvl').value).toBe('');
 		expect(input('filters-max-ilvl').value).toBe('528');
 		await userEvent.click(document.getElementById('filters-faction-restriction')!);
-		expect(factionOptions().map(option => option.getAttribute('aria-selected'))).toEqual(['false', 'false', 'false', 'true']);
+		expect(factionOptions().map(option => option.getAttribute('aria-selected'))).toEqual(['false', 'true']);
 	});
 
 	it('adds a ticked list entry and removes an unticked one', () => {
@@ -252,9 +239,9 @@ describe('FiltersMenuView', () => {
 	});
 
 	it('writes a faction pick', async () => {
-		const { lastEdit } = renderView();
+		const { lastEdit } = renderView({ filters: DatabaseFilters.create({ factionFilter: FactionFilter.FactionFilterAny }) });
 		await userEvent.click(document.getElementById('filters-faction-restriction')!);
-		await userEvent.click(factionOptions()[2]);
-		expect(lastEdit().factionFilter).toBe(FactionFilter.FactionFilterAlliance);
+		await userEvent.click(factionOptions()[0]);
+		expect(lastEdit(DatabaseFilters.create({ factionFilter: FactionFilter.FactionFilterAny })).factionFilter).toBe(FactionFilter.FactionFilterRace);
 	});
 });

@@ -1953,9 +1953,6 @@
 								"faction_labels": {
 									"type": "object",
 									"properties": {
-										"from_race": {
-											"type": "string"
-										},
 										"none": {
 											"type": "string"
 										},
@@ -1967,7 +1964,7 @@
 										}
 									},
 									"additionalProperties": false,
-									"required": ["from_race", "none", "alliance_only", "horde_only"]
+									"required": ["none", "alliance_only", "horde_only"]
 								}
 							},
 							"additionalProperties": false,

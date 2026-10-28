@@ -30,19 +30,16 @@ describe('Player.filterItemData faction filter', () => {
 		expect(listed()).toEqual([1, 3]);
 	});
 
-	it('keeps a picked faction through a race change until the race is picked again', async () => {
+	it('keeps every item on any, through a race change, until the race is picked again', async () => {
 		const { player, listed, pick } = await setup();
-		pick(FactionFilter.FactionFilterAlliance);
-		expect(listed()).toEqual([1, 3]);
-
-		player.setRace(Race.RaceTauren);
-		expect(listed()).toEqual([1, 3]);
-
 		pick(FactionFilter.FactionFilterAny);
 		expect(listed()).toEqual([1, 2, 3]);
 
+		player.setRace(Race.RaceHuman);
+		expect(listed()).toEqual([1, 2, 3]);
+
 		pick(FactionFilter.FactionFilterRace);
-		expect(listed()).toEqual([2, 3]);
+		expect(listed()).toEqual([1, 3]);
 
 		pick(99 as FactionFilter);
 		expect(listed()).toEqual([1, 2, 3]);

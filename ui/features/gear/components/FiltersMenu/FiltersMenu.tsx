@@ -42,7 +42,7 @@ export interface FiltersMenuViewProps {
 	weaponTypes: ReadonlyArray<WeaponType>;
 	rangedWeaponTypes: ReadonlyArray<RangedWeaponType>;
 	canDualWield: boolean;
-	/** The player's race's faction, which the faction filter follows until the user picks one. */
+	/** The player's race's faction, which names the faction filter's default option. */
 	raceFaction: Faction;
 }
 
@@ -107,13 +107,8 @@ export const FiltersMenuView = ({
 					id="filters-faction-restriction"
 					label={i18n.t('gear_tab.gear_picker.filters.faction_restrictions')}
 					options={[
-						{
-							value: FactionFilter.FactionFilterRace,
-							label: i18n.t('gear_tab.gear_picker.filters.faction_labels.from_race', { faction: factionLabels[raceFaction] }),
-						},
+						{ value: FactionFilter.FactionFilterRace, label: factionLabels[raceFaction] },
 						{ value: FactionFilter.FactionFilterAny, label: factionLabels[Faction.Unknown] },
-						{ value: FactionFilter.FactionFilterAlliance, label: factionLabels[Faction.Alliance] },
-						{ value: FactionFilter.FactionFilterHorde, label: factionLabels[Faction.Horde] },
 					]}
 					value={filters.factionFilter}
 					onChange={value =>

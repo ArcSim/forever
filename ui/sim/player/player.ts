@@ -1240,14 +1240,8 @@ export class Player<SpecType extends Spec> {
 			itemData = filterItems(itemData, item => (item.scalingOptions?.[0].ilvl || item.ilvl) <= filters.maxIlvl);
 		}
 
-		// A binary link can carry a value the enum does not list. Such a value filters nothing.
-		const faction =
-			{
-				[FactionFilter.FactionFilterRace]: this.getFaction(),
-				[FactionFilter.FactionFilterAlliance]: Faction.Alliance,
-				[FactionFilter.FactionFilterHorde]: Faction.Horde,
-				[FactionFilter.FactionFilterAny]: Faction.Unknown,
-			}[filters.factionFilter] ?? Faction.Unknown;
+		// Any filters nothing, and so does a value the enum does not list, which a binary link can carry.
+		const faction = filters.factionFilter == FactionFilter.FactionFilterRace ? this.getFaction() : Faction.Unknown;
 		if (faction != Faction.Unknown) {
 			const kept = faction == Faction.Horde ? UIItem_FactionRestriction.HORDE_ONLY : UIItem_FactionRestriction.ALLIANCE_ONLY;
 			itemData = filterItems(itemData, item => item.factionRestriction == kept || item.factionRestriction == UIItem_FactionRestriction.UNSPECIFIED);

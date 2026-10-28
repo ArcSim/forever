@@ -250,13 +250,11 @@ enum RaidFilterOption {
 	RaidNaxx = 16;
 }
 
-// Which faction's items the item list keeps, plus the items open to both. The zero value follows
-// the player's race; the others are the user's pick.
+// The item list's faction filter. The zero value keeps the items of the player's race's faction,
+// plus the items open to both; Any keeps every item.
 enum FactionFilter {
 	FactionFilterRace = 0;
-	FactionFilterAlliance = 1;
-	FactionFilterHorde = 2;
-	FactionFilterAny = 3;
+	FactionFilterAny = 1;
 }
 
 // The stats one panel works with. Unset in StatFilters means the spec's list for that panel.
