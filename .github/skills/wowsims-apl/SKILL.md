@@ -123,10 +123,17 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   with the points.
 - **Recklessness needs Berserker Stance** (ShapeshiftMask bit 18): Arms casts it only with the Stance Dance group on,
   and the dps suite never un-hides the Recklessness group, so the `.results` never show it (PR #653).
-- **The next GCD pick can strand an off-GCD stance swap.** The swap fires mid-GCD; a spender above the stance-locked
-  ability that takes the next GCD and leaves the swap condition false sends it back unused. Put the stance-locked
-  ability above those spenders: it cannot be cast outside the stance, so it wins only once the swap is done. Fury holds
-  Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732); Rend stays below them, since moving it up costs DPS.
+- **A stance swap and its ability go as one Strict Sequence.** A swap off the GCD that fires mid-GCD is stranded when
+  a spender takes the next GCD or the ability's window closes first. The Fury and Arms presets put the Battle Stance
+  swap and Overpower or Rend in one Strict Sequence, directly above the plain cast, with the ability's cooldown and
+  rage and the stance cooldown checked, and for Overpower its window outlasting the GCD (`Aura Remaining Time` above
+  `GCD Time To Ready`). A Strict Sequence starts only within 400 ms of the GCD and then holds the rotation until its
+  cast goes, so a spender whose cooldown or rage comes ready inside those 400 ms cannot take the GCD; a spender above
+  that is ready first keeps the sequence from starting. A stance cooldown still running would queue the swap, which
+  then fires without its condition. The swap drops the rage that came in since a mid-GCD swap would have fired, about
+  half a percent of DPS against one. Checking that the spenders above Rend are not ready by the GCD costs more DPS than
+  the swaps it saves. Fury holds Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732) and Rend below
+  them.
 
 ## Keeping this skill true
 
