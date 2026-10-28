@@ -530,6 +530,19 @@ export class ActionId {
 				}
 				break;
 			}
+			// Demonic Sacrifice's effects, each named with the demon sacrificed for it.
+			case 'Burning Shadow':
+				name += ` (${i18n.t('rotation_tab.apl.summon_types.imp')} Sac)`;
+				break;
+			case 'Touch of Fire':
+				name += ` (${i18n.t('rotation_tab.apl.summon_types.succubus')} Sac)`;
+				break;
+			case 'Fel Energy':
+				name += ` (${i18n.t('rotation_tab.apl.summon_types.voidwalker')} Sac)`;
+				break;
+			case 'Fel Stamina':
+				name += ` (${i18n.t('rotation_tab.apl.summon_types.felhunter')} Sac)`;
+				break;
 			case 'Unstable Affliction':
 			case 'Corruption':
 				if (tag == 1) {
