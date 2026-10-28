@@ -101,6 +101,11 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
 - **A major cooldown's Cast Spell is ready only at a GCD-ready look** unless it is reactive or inside a sequence
   (`APLActionCastSpell.IsReady`), so an off-GCD cooldown can wait a GCD after its window opens; the first warrior major
   cooldown chance comes about 4.5 s into the fight (PR #653).
+- **A Strict Sequence starts only with the GCD within 400 ms and its first step ready**
+  (`APLActionStrictSequence.IsReady` in `sim/core/apl_actions_sequences.go`, `MaxSpellQueueWindow`), then holds the
+  rotation until its cast goes or its queued cast fires. If the cast can neither go nor be queued once the GCD is within
+  400 ms, the sequence ends and the pick goes on down the list. A spender above it that is ready first keeps it from
+  starting.
 - **`Aura Is Inactive` with reaction time is the refresh check** for an aura the rotation keeps up:
   `not(Aura Is Active)` with reaction time reads a fresh landing as inactive and recasts (`APLValueAuraIsInactive`).
 - **`Aura Num Stacks` with reaction time returns the previous stacks for a full reaction time after any change**, the
@@ -123,17 +128,14 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   with the points.
 - **Recklessness needs Berserker Stance** (ShapeshiftMask bit 18): Arms casts it only with the Stance Dance group on,
   and the dps suite never un-hides the Recklessness group, so the `.results` never show it (PR #653).
-- **A stance swap and its ability go as one Strict Sequence.** A swap off the GCD that fires mid-GCD is stranded when
-  a spender takes the next GCD or the ability's window closes first. The Fury and Arms presets put the Battle Stance
-  swap and Overpower or Rend in one Strict Sequence, directly above the plain cast, with the ability's cooldown and
-  rage and the stance cooldown checked, and for Overpower its window outlasting the GCD (`Aura Remaining Time` above
-  `GCD Time To Ready`). A Strict Sequence starts only within 400 ms of the GCD and then holds the rotation until its
-  cast goes, so a spender whose cooldown or rage comes ready inside those 400 ms cannot take the GCD; a spender above
-  that is ready first keeps the sequence from starting. A stance cooldown still running would queue the swap, which
-  then fires without its condition. The swap drops the rage that came in since a mid-GCD swap would have fired, about
-  half a percent of DPS against one. Checking that the spenders above Rend are not ready by the GCD costs more DPS than
-  the swaps it saves. Fury holds Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732) and Rend below
-  them.
+- **A stance swap and its ability go as one Strict Sequence.** The Fury and Arms presets put the Battle Stance swap
+  and Overpower or Rend in one Strict Sequence directly above the plain cast. The sequence checks the stance cooldown
+  with `Spell Time To Ready <= 0s`, since a Cast Spell queues a spell whose own cooldown ends within 400 ms
+  (`Spell.CanQueue` in `sim/core/spell_queueing.go`) and `Spell Is Ready` would let a queued swap fire without its
+  condition; the ability's cooldown the same way; the rage; and for Overpower the proc outlasting the GCD
+  (`Aura Remaining Time` above `GCD Time To Ready`). Swapping at the GCD drops the rage gained since a mid-GCD swap
+  would have fired, about half a percent of DPS. Checking the spenders above Rend costs more DPS than the swaps it
+  saves, and Fury keeps Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732).
 
 ## Keeping this skill true
 
