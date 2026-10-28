@@ -44,3 +44,38 @@ func TestChangeTargetToCurrentTargetIsNotReady(t *testing.T) {
 		t.Errorf("Change Target to %q is not ready while %q is the current target", first.Label, second.Label)
 	}
 }
+
+// Inside a sequence, a Change Target to the unit already targeted is a step that does nothing, and the sequence
+// goes on to its next step.
+func TestSequenceStepChangeTargetToCurrentTargetPasses(t *testing.T) {
+	changeTo := func(index int32) *proto.APLAction {
+		return &proto.APLAction{Action: &proto.APLAction_ChangeTarget{ChangeTarget: &proto.APLActionChangeTarget{
+			NewTarget: &proto.UnitReference{Type: proto.UnitReference_Target, Index: index},
+		}}}
+	}
+	request := fakeRageSimRequest()
+	request.Encounter.Targets = append(request.Encounter.Targets, &proto.Target{Name: "second target", Level: 63, MobType: proto.MobType_MobTypeHumanoid, SwingSpeed: 2})
+	sim := setupFakeRageSimFrom(request)
+	fw := sim.Raid.Parties[0].Players[0].(*FakeRageWarrior)
+	fw.Rotation = fw.newAPLRotation(&proto.APLRotation{
+		Type: proto.APLRotation_TypeAPL,
+		PriorityList: []*proto.APLListItem{{Action: &proto.APLAction{Action: &proto.APLAction_Sequence{Sequence: &proto.APLActionSequence{
+			Name:    "same then second",
+			Actions: []*proto.APLAction{changeTo(0), changeTo(1)},
+		}}}}},
+	})
+	sim.Cleanup()
+	sim.Reset()
+
+	sequence := fw.Rotation.priorityList[0]
+	second := sim.Encounter.AllTargetUnits[1]
+	for step := range 2 {
+		if !sequence.IsReady(sim) {
+			t.Fatalf("sequence is not ready at step %d", step+1)
+		}
+		sequence.Execute(sim)
+	}
+	if fw.CurrentTarget != second {
+		t.Errorf("after the sequence, current target is %q, want %q", fw.CurrentTarget.Label, second.Label)
+	}
+}
