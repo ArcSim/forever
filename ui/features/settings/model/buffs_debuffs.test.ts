@@ -1,4 +1,5 @@
 import { Class, Stat } from '@generated/proto/common';
+import i18n from '@i18n/config';
 import { ActionId } from '@sim/proto/action_id';
 import { describe, expect, it } from 'vitest';
 
@@ -96,6 +97,9 @@ describe('the buff registries', () => {
 			BuffDebuffInputs.BattleShout,
 			BuffDebuffInputs.FuriousHowl,
 		]);
+		expect(attackPower && isMultiIconOption(attackPower) ? attackPower.config.tooltip : undefined).toBe(
+			i18n.t('settings_tab.raid_buffs.attack_power_tooltip'),
+		);
 		expect(groupWith(BuffDebuffInputs.DEBUFFS_CONFIG, BuffDebuffInputs.SunderArmor)?.stats).toEqual([Stat.StatAttackPower]);
 	});
 

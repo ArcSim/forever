@@ -83,6 +83,7 @@ message WarriorOptions {
 	bool has_bs_t2 = 4;
 	bool use_battle_shout = 5;
 	int32 queue_delay = 6;
+	bool has_battle_shout_rank_7 = 7;
 }
 
 enum DpsWarriorSpec {

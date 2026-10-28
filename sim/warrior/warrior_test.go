@@ -201,6 +201,57 @@ func TestWarriorShoutsForTheTierTwoBonus(t *testing.T) {
 	}
 }
 
+// The class option decides which rank's own copy the character sheet shows; both ranks stay registered.
+func TestWarriorSheetShowsTheShoutRankTheOptionPicks(t *testing.T) {
+	for _, row := range []struct {
+		name         string
+		rank7        bool
+		wantOnSheet  string
+		wantOffSheet string
+	}{
+		{"off", false, "Battle Shout Rank 6 (Player)", "Battle Shout Rank 7 (Player)"},
+		{"on", true, "Battle Shout Rank 7 (Player)", "Battle Shout Rank 6 (Player)"},
+	} {
+		t.Run(row.name, func(t *testing.T) {
+			player := &proto.Player{
+				Name:          "Sheet",
+				Race:          proto.Race_RaceOrc,
+				Class:         proto.Class_ClassWarrior,
+				Equipment:     &proto.EquipmentSpec{},
+				TalentsString: furyTalents,
+				Spec: &proto.Player_DpsWarrior{
+					DpsWarrior: &proto.DpsWarrior{
+						Options: &proto.DpsWarrior_Options{
+							ClassOptions: &proto.WarriorOptions{
+								UseBattleShout:       true,
+								DefaultStance:        proto.WarriorStance_WarriorStanceBerserker,
+								HasBattleShoutRank_7: row.rank7,
+							},
+						},
+					},
+				},
+			}
+			env, _, _ := core.NewEnvironment(
+				core.SinglePlayerRaidProto(player, &proto.PartyBuffs{}, &proto.RaidBuffs{}, &proto.Debuffs{}),
+				core.MakeSingleTargetEncounter(0), false, true)
+			war := env.Raid.Parties[0].Players[0].(*dps.DpsWarrior)
+
+			for label, want := range map[string]core.CharacterBuildPhase{
+				row.wantOnSheet:  core.CharacterBuildPhaseBuffs,
+				row.wantOffSheet: core.CharacterBuildPhaseNone,
+			} {
+				aura := war.GetAura(label)
+				if aura == nil {
+					t.Fatalf("the warrior carries no aura labelled %q", label)
+				}
+				if aura.BuildPhase != want {
+					t.Errorf("%s has build phase %v, want %v", label, aura.BuildPhase, want)
+				}
+			}
+		})
+	}
+}
+
 // The shout the rotation casts by the rank's spell id.
 func battleShoutSpell(t *testing.T, war *dps.DpsWarrior, spellID int32) *core.Spell {
 	t.Helper()

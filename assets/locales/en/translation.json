@@ -645,6 +645,7 @@
 			},
 			"stats": "Stats",
 			"attack_power": "Attack Power",
+			"attack_power_tooltip": "Battle Shout: click to cycle Rank 6 (trainer), Rank 7 (Manual of Battle Shout VII), Rank 7 with three pieces of Battlegear of Wrath. Furious Howl shares its category; the stronger applies.",
 			"attack_speed": "Attack Speed",
 			"spell_power": "Spell Power",
 			"spell_haste": "Spell Haste",
@@ -821,6 +822,10 @@
 			"has_bs_tier_2": {
 				"label": "Battle Shout: Battlegear of Wrath",
 				"tooltip": "Three pieces of Battlegear of Wrath add 30 attack power to Battle Shout. Set this when the pieces arrive through an item swap rather than the worn set."
+			},
+			"has_battle_shout_rank_7": {
+				"label": "Battle Shout: Rank 7",
+				"tooltip": "Sets the character sheet's Battle Shout to Rank 7 (Manual of Battle Shout VII) instead of Rank 6. The rotation's Manual: Battle Shout VII variable picks the rank that is cast."
 			},
 			"queue_delay": {
 				"label": "HS/Cleave Queue Delay (ms)",

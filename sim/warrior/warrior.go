@@ -18,6 +18,8 @@ type WarriorInputs struct {
 	QueueDelay     int32
 	StanceSnapshot bool
 	HasBsT2        bool
+
+	HasBattleShoutRank7 bool
 }
 
 // The game files' SpellClassOptions for the Sweeping Strikes copy, a sim-only sub-spell that takes its

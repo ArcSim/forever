@@ -99,7 +99,11 @@ export const BUFFS_CONFIG = inDisplayOrder(
 		Generated.GraceOfAirTotem,
 		Generated.WindfuryTotem,
 		Generated.FlametongueTotem,
-		statOptionGroup(i18n.t('settings_tab.raid_buffs.attack_power'), [BattleShout, Generated.FuriousHowl]),
+		statOptionGroup(
+			i18n.t('settings_tab.raid_buffs.attack_power'),
+			[BattleShout, Generated.FuriousHowl],
+			i18n.t('settings_tab.raid_buffs.attack_power_tooltip'),
+		),
 		Generated.TrueshotAura,
 		Generated.LeaderOfThePack,
 		Generated.MoonkinAura,

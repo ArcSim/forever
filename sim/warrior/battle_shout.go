@@ -38,8 +38,10 @@ func (warrior *Warrior) registerBattleShoutRank(rank *spelldata.Spell) {
 		battleShoutValue += buffs.BattleShoutT2Bonus
 	}
 
-	// The character sheet shows the trainer rank's copy: the rank the rotation picks is unknown when the sheet is built.
-	ownBuildPhase := core.Ternary(castsOwnShout && rank == battleShoutTrainerRank, core.CharacterBuildPhaseBuffs, core.CharacterBuildPhaseNone)
+	// The class option decides which rank's own copy the character sheet shows, as the rank the
+	// rotation picks is unknown when the sheet is built. The rotation alone decides the rank cast.
+	sheetRank := core.Ternary(warrior.HasBattleShoutRank7, battleShoutBookRank, battleShoutTrainerRank)
+	ownBuildPhase := core.Ternary(castsOwnShout && rank == sheetRank, core.CharacterBuildPhaseBuffs, core.CharacterBuildPhaseNone)
 
 	auras := warrior.NewAllyAuraArray(func(unit *core.Unit) *core.Aura {
 		// The raid's Battle Shout registers the external copy of its rank before this runs, and
