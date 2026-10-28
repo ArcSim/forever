@@ -125,7 +125,7 @@
 			"action": {
 				"castSpell": {
 					"spellId": {
-						"spellId": 14271
+						"spellId": 1317257
 					}
 				}
 			}
@@ -134,7 +134,7 @@
 			"action": {
 				"castSpell": {
 					"spellId": {
-						"spellId": 1317257
+						"spellId": 14271
 					}
 				}
 			}
@@ -170,6 +170,40 @@
 				"castSpell": {
 					"spellId": {
 						"spellId": 14268
+					}
+				},
+				"condition": {
+					"or": {
+						"vals": [
+							{
+								"not": {
+									"val": {
+										"spellIsKnown": {
+											"spellId": {
+												"spellId": 1317257
+											}
+										}
+									}
+								}
+							},
+							{
+								"cmp": {
+									"op": "OpGt",
+									"lhs": {
+										"spellTimeToReady": {
+											"spellId": {
+												"spellId": 1317257
+											}
+										}
+									},
+									"rhs": {
+										"const": {
+											"val": "1.5s"
+										}
+									}
+								}
+							}
+						]
 					}
 				}
 			}

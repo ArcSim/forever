@@ -1500,91 +1500,91 @@ dps_results: {
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-FullBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 934.49724
-  tps: 673.08547
-  hps: 15.14833
+  dps: 934.91691
+  tps: 673.33795
+  hps: 15.72444
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-FullBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 742.59904
-  tps: 537.23983
-  hps: 15.21611
+  dps: 747.3218
+  tps: 540.61974
+  hps: 15.75833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-FullBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 767.8643
-  tps: 554.41137
+  dps: 756.6298
+  tps: 546.5542
   hps: 15.14833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-NoBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 291.46311
-  tps: 293.62977
+  dps: 291.70087
+  tps: 293.86753
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-NoBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 275.15511
-  tps: 277.294
+  dps: 275.09401
+  tps: 277.28845
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-clean_weave-NoBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 381.77461
-  tps: 384.10794
+  dps: 380.89267
+  tps: 383.22601
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-FullBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 934.49724
-  tps: 673.08547
-  hps: 15.14833
+  dps: 934.91691
+  tps: 673.33795
+  hps: 15.72444
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-FullBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 742.59904
-  tps: 537.23983
-  hps: 15.21611
+  dps: 747.3218
+  tps: 540.61974
+  hps: 15.75833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-FullBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 767.8643
-  tps: 554.41137
+  dps: 756.6298
+  tps: 546.5542
   hps: 15.14833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-NoBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 291.46311
-  tps: 293.62977
+  dps: 291.70087
+  tps: 293.86753
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-NoBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 275.15511
-  tps: 277.294
+  dps: 275.09401
+  tps: 277.28845
  }
 }
 dps_results: {
  key: "TestHunter-Settings-NightElf-p1-SV-Default-default-NoBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 381.77461
-  tps: 384.10794
+  dps: 380.89267
+  tps: 383.22601
  }
 }
 dps_results: {
@@ -1684,91 +1684,91 @@ dps_results: {
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-FullBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 933.91456
-  tps: 672.70206
-  hps: 15.06361
+  dps: 931.74147
+  tps: 671.04458
+  hps: 15.72444
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-FullBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 740.02819
-  tps: 535.39651
-  hps: 15.11444
+  dps: 743.21924
+  tps: 537.65964
+  hps: 15.75833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-FullBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 759.99832
-  tps: 549.046
+  dps: 744.26682
+  tps: 537.87508
   hps: 15.14833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-NoBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 286.89488
-  tps: 289.03377
+  dps: 287.25752
+  tps: 289.45197
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-NoBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 269.38581
-  tps: 271.55247
+  dps: 273.6123
+  tps: 275.77897
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-clean_weave-NoBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 371.9898
-  tps: 374.32313
+  dps: 372.09498
+  tps: 374.42831
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-FullBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 933.91456
-  tps: 672.70206
-  hps: 15.06361
+  dps: 931.74147
+  tps: 671.04458
+  hps: 15.72444
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-FullBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 740.02819
-  tps: 535.39651
-  hps: 15.11444
+  dps: 743.21924
+  tps: 537.65964
+  hps: 15.75833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-FullBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 759.99832
-  tps: 549.046
+  dps: 744.26682
+  tps: 537.87508
   hps: 15.14833
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-NoBuffs-12.0yards-LongMultiTarget"
  value: {
-  dps: 286.89488
-  tps: 289.03377
+  dps: 287.25752
+  tps: 289.45197
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-NoBuffs-12.0yards-LongSingleTarget"
  value: {
-  dps: 269.38581
-  tps: 271.55247
+  dps: 273.6123
+  tps: 275.77897
  }
 }
 dps_results: {
  key: "TestHunter-Settings-Orc-p1-SV-Default-default-NoBuffs-12.0yards-ShortSingleTarget"
  value: {
-  dps: 371.9898
-  tps: 374.32313
+  dps: 372.09498
+  tps: 374.42831
  }
 }
 dps_results: {
