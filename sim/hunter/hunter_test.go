@@ -45,6 +45,7 @@ func TestHunter(t *testing.T) {
 			Consumables:      DefaultConsumables,
 			SpecOptions:      core.SpecOptionsCombo{Label: "Default", SpecOptions: DefaultOptions},
 			StartingDistance: 12,
+			ReactionTimeMs:   250,
 			Profession1:      proto.Profession_Engineering,
 			Profession2:      proto.Profession_Blacksmithing,
 
@@ -109,6 +110,7 @@ func TestHunterPets(t *testing.T) {
 			SpecOptions:      families[0],
 			OtherSpecOptions: families[1:],
 			StartingDistance: 12,
+			ReactionTimeMs:   250,
 			Rotation:         turretRotation,
 			ItemFilter:       core.ItemFilter{ArmorType: proto.ArmorType_ArmorTypeMail},
 		},
