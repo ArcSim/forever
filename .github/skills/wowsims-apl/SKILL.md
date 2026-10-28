@@ -122,12 +122,10 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   with the points.
 - **Recklessness needs Berserker Stance** (ShapeshiftMask bit 18): Arms casts it only with the Stance Dance group on,
   and the dps suite never un-hides the Recklessness group, so the `.results` never show it (PR #653).
-- **An off-GCD swap goes out at once, mid-GCD, and the next GCD pick can strand it.** A stance swap that waits for a
-  stance-locked ability fires the moment its condition holds; when the GCD frees up, any line above that ability goes
-  first, and a spender that leaves the condition false sends the swap back unused. Put the stance-locked ability above
-  every spender that can take its GCD: it cannot be cast outside the stance, so it only wins once the swap is done.
-  The Fury preset holds its Overpower Weaving group above Execute, Bloodthirst and Whirlwind for this (PR #732). Its
-  Rend line stays below them: a Rend swap strands about 0.3 times a fight, and moving Rend up costs DPS.
+- **The next GCD pick can strand an off-GCD stance swap.** The swap fires mid-GCD; a spender above the stance-locked
+  ability that takes the next GCD and leaves the swap condition false sends it back unused. Put the stance-locked
+  ability above those spenders: it cannot be cast outside the stance, so it wins only once the swap is done. Fury holds
+  Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732); Rend stays below them, since moving it up costs DPS.
 
 ## Keeping this skill true
 
