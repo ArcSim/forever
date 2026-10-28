@@ -92,9 +92,9 @@ Proto field numbers on a merge are `wowsims-core-mechanics` `## Protos`.
 
 The end of `docs/spell_data/partial-updates.md` §Commands describes the hotfix flow, and `tools/db2tool/README.md`
 §Usage the carry rules. A single-item hotfix is the items-only run Update Items performs,
-`make db CLASSES=none SHARED=0 DB2TOOL_FLAGS="--cdn --dbcache <forever DBCache.bin> --dbcache <beta DBCache.bin> --carry-hotfixes"`,
-with raidbots' `forever` file and the last `classic_beta` file (build 70532) the workflows name. Without the beta
-file about 4,300 item rows drop out. A new `forever` file can be for an older build than the CDN serves and
+`make db CLASSES=none SHARED=0 DB2TOOL_FLAGS="--cdn --dbcache <DBCache.bin> --carry-hotfixes"`, with raidbots'
+`forever` file. Only live `forever` files apply; a `classic_beta` file is never carried, so a row only the beta
+held stays out. A new `forever` file can be for an older build than the CDN serves and
 `--carry-hotfixes` carries it onto the extracted build, so that is the normal case, not a reason to wait. Update
 Items moves the items alone: a hotfix to a class, racial or shared row (Aspect of the Hawk, Trueshot Aura) reaches
 the store only through a run that takes that group, `make db` with the same flags. A checkout gets
