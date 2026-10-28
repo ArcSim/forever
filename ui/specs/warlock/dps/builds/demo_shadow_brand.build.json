@@ -203,6 +203,13 @@
         },
         {
           "action": {
+            "groupReference": {
+              "groupName": "SIngle/Multi Target Curse Logic"
+            }
+          }
+        },
+        {
+          "action": {
             "condition": {
               "and": {
                 "vals": [
@@ -318,7 +325,7 @@
               }
             },
             "groupReference": {
-              "groupName": "Single Target DoT/Curse Logic"
+              "groupName": "Single Target DoT Logic"
             }
           }
         },
@@ -338,7 +345,7 @@
               }
             },
             "groupReference": {
-              "groupName": "Multi Target DoT/Curse Logic"
+              "groupName": "Multi Target DoT Logic"
             }
           }
         },
@@ -656,7 +663,7 @@
       ],
       "groups": [
         {
-          "name": "Multi Target DoT/Curse Logic",
+          "name": "SIngle/Multi Target Curse Logic",
           "actions": [
             {
               "action": {
@@ -684,6 +691,19 @@
                             "warlockAssignedCurseIsActiveOnAllTargets": {}
                           }
                         }
+                      },
+                      {
+                        "cmp": {
+                          "op": "OpGt",
+                          "lhs": {
+                            "numberTargets": {}
+                          },
+                          "rhs": {
+                            "const": {
+                              "val": "1"
+                            }
+                          }
+                        }
                       }
                     ]
                   }
@@ -694,7 +714,12 @@
                   }
                 }
               }
-            },
+            }
+          ]
+        },
+        {
+          "name": "Multi Target DoT Logic",
+          "actions": [
             {
               "action": {
                 "condition": {
@@ -1343,20 +1368,8 @@
           ]
         },
         {
-          "name": "Single Target DoT/Curse Logic",
+          "name": "Single Target DoT Logic",
           "actions": [
-            {
-              "action": {
-                "condition": {
-                  "not": {
-                    "val": {
-                      "warlockAssignedCurseIsActive": {}
-                    }
-                  }
-                },
-                "castWarlockAssignedCurse": {}
-              }
-            },
             {
               "action": {
                 "condition": {
@@ -1841,7 +1854,7 @@
                           },
                           "rhs": {
                             "const": {
-                              "val": "22s"
+                              "val": "15s"
                             }
                           }
                         }
