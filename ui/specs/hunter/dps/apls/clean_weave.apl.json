@@ -740,7 +740,7 @@
 			"name": "Ranged range",
 			"value": {
 				"const": {
-					"val": "12"
+					"val": "13.19"
 				}
 			}
 		},
@@ -756,7 +756,7 @@
 			"name": "Max Auto Shot delay",
 			"value": {
 				"const": {
-					"val": "1.5s"
+					"val": "2.4s"
 				}
 			}
 		},
