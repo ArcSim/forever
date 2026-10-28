@@ -41,13 +41,14 @@ func (action *APLActionChangeTarget) IsReady(sim *Simulation) bool {
 }
 func (action *APLActionChangeTarget) Execute(sim *Simulation) {
 	action.lastExecutedAt = sim.CurrentTime
-	if action.newTarget.Get() == action.unit.CurrentTarget {
+	newTarget := action.newTarget.Get()
+	if newTarget == action.unit.CurrentTarget {
 		return
 	}
 	if sim.Log != nil {
-		action.unit.Log(sim, "Changing target to %s", action.newTarget.Get().Label)
+		action.unit.Log(sim, "Changing target to %s", newTarget.Label)
 	}
-	action.unit.CurrentTarget = action.newTarget.Get()
+	action.unit.CurrentTarget = newTarget
 }
 func (action *APLActionChangeTarget) String() string {
 	return fmt.Sprintf("Change Target(%s)", action.newTarget.Get().Label)
