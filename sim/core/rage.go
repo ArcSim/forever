@@ -99,7 +99,7 @@ func (unit *Unit) EnableRageBar(options RageBarOptions) {
 		}
 
 		attackerLevel := spell.Unit.Level
-		generatedRage := DamageTakenRageFactor * (1 - damageTakenRageArmorReduction(attackerLevel)) * result.PreMitigationDamage /
+		generatedRage := DamageTakenRageFactor * (1 - damageTakenRageArmorReduction(attackerLevel)) * result.PreArmorDamage /
 			rageConversion(attackerLevel) * unit.rageBar.damageTakenRageMultiplier
 
 		unit.AddRage(sim, generatedRage, rageFromDamageTakenMetrics)

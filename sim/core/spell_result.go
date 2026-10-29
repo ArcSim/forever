@@ -21,7 +21,7 @@ type SpellResult struct {
 	ArmorAndResistanceMultiplier float64 // Armor multiplier
 	PostOutcomeDamage            float64 // Damage done by this cast after Outcome is applied
 	BlockedDamage                float64 // Damage a block took off this cast
-	PreMitigationDamage          float64 // Damage done by this cast with the Outcome's multiplier and the target's damage taken multipliers but before the target's armor, resistances, flat damage taken bonuses, block and absorbs
+	PreArmorDamage               float64 // Damage done by this cast with the Outcome's multiplier and the target's damage taken multipliers but before the target's armor, resistances, flat damage taken bonuses, block and absorbs
 
 	inUse           bool
 	castResultDealt bool
@@ -79,7 +79,7 @@ func (spell *Spell) NewResult(target *Unit) *SpellResult {
 	result.ArmorAndResistanceMultiplier = 0
 	result.PostOutcomeDamage = 0
 	result.BlockedDamage = 0
-	result.PreMitigationDamage = 0
+	result.PreArmorDamage = 0
 	result.castResultDealt = false
 
 	return result
@@ -98,7 +98,7 @@ func (spell *Spell) CloneResult(result *SpellResult) *SpellResult {
 	newResult.ArmorAndResistanceMultiplier = result.ArmorAndResistanceMultiplier
 	newResult.PostOutcomeDamage = result.PostOutcomeDamage
 	newResult.BlockedDamage = result.BlockedDamage
-	newResult.PreMitigationDamage = result.PreMitigationDamage
+	newResult.PreArmorDamage = result.PreArmorDamage
 
 	return newResult
 }
@@ -393,9 +393,9 @@ func (spell *Spell) calcDamageInternal(sim *Simulation, target *Unit, baseDamage
 
 	// The outcome scales the mitigated damage by its multiplier and then takes the block off, so the
 	// multiplier is the blocked and unblocked damage over the damage before the outcome.
-	result.PreMitigationDamage = afterAttackMods * targetMultiplier
+	result.PreArmorDamage = afterAttackMods * targetMultiplier
 	if afterTargetMods > 0 {
-		result.PreMitigationDamage = result.PreMitigationDamage * (afterOutcome + result.BlockedDamage) / afterTargetMods
+		result.PreArmorDamage = result.PreArmorDamage * (afterOutcome + result.BlockedDamage) / afterTargetMods
 	}
 
 	// Restore partial outcome
