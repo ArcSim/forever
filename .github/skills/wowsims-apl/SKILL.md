@@ -46,7 +46,9 @@ A value or action reaches the rotation and the kind picker in five places, all i
    `Type()`; the other getters panic. Core's switch sets `Uuid` by reflection; a class `NewAPLValue` returns before it,
    so a class value passes `config.Uuid` along itself (`sim/shaman/apl_values.go`).
 4. The entry in `valueKinds` or `actionKinds`: label, submenu, `includeIf` (prepull, spec) and fields. The mapped type
-   fails `npm run type-check` without one.
+   fails `npm run type-check` without one. Only boolean, number and string fields put their label in the row
+   (`INLINE_KINDS` in `ui/features/apl/components/FieldGroup/utils.ts`); a labelled enum or picker stacks its label
+   above the input and breaks the row, so a value's enum field goes unlabelled and lets its options name it.
 5. The label and tooltip keys in `assets/locales/en/translation.json`, which `ui/i18n/locale_keys.test.ts` checks.
 
 - **Nothing forces step 2.** The switch's `default` returns nil with no warning, so a oneof without a case is dropped
