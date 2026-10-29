@@ -61,10 +61,10 @@ export const IDS_TO_GROUP_FOR_ROTATION: Array<number> = [
 	16387, // Shaman - Flametongue Totem (the totem and its strikes)
 ];
 
-// An aura drawn on another aura's row, keyed by equalityKey, with the key of the aura that owns the row.
-// It keeps a row of its own when that aura never shows up.
-const AURA_ROW_HOSTS = new Map<string, string>([
-	// The raid's Windfury Totem standing, on the row of its raid aura, which rolls the proc while the totem holds the category.
+// An aura left off the timeline while another aura, which is up over the same time, has its row; keyed by
+// equalityKey, with the key of that other aura. It keeps a row of its own when that aura never shows up.
+const AURAS_SHOWN_BY = new Map<string, string>([
+	// The raid's Windfury Totem standing, shown by its raid aura, which rolls the proc while the totem holds the category.
 	[ActionId.fromSpellId(10614, 0, -1).equalityKey(), ActionId.fromSpellId(10612, 0, -1).equalityKey()],
 ]);
 
@@ -107,11 +107,9 @@ function groupBy<T>(values: ReadonlyArray<T>, key: (value: T) => string): Array<
 export function groupedAurasByAbility(auraUptimeLogs: ReadonlyArray<AuraUptimeLog>): Array<Array<AuraUptimeLog>> {
 	const aurasByAbility = groupBy(auraUptimeLogs, log => log.actionId!.equalityKey());
 	const byKey = new Map(aurasByAbility.map(logs => [logs[0].actionId!.equalityKey(), logs]));
-	AURA_ROW_HOSTS.forEach((hostKey, key) => {
-		const host = byKey.get(hostKey);
+	AURAS_SHOWN_BY.forEach((shownByKey, key) => {
 		const logs = byKey.get(key);
-		if (!host || !logs) return;
-		host.push(...logs);
+		if (!byKey.has(shownByKey) || !logs) return;
 		aurasByAbility.splice(aurasByAbility.indexOf(logs), 1);
 	});
 	aurasByAbility.sort((a, b) => compareNames(a[0].actionId!.name, b[0].actionId!.name));
