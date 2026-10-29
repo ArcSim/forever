@@ -98,6 +98,7 @@ export const FiltersMenuView = ({
 			bodyClassName="gap-2"
 			title={i18n.t('gear_tab.gear_picker.filters.title')}>
 			<MenuSection name={i18n.t('gear_tab.gear_picker.filters.general')}>
+				{numberInput('maxRequiredLevel', 'filters-required-level', i18n.t('gear_tab.gear_picker.filters.required_level'), { showZeroes: false })}
 				<div className="grid grid-cols-split gap-x-(--modal-padding)">
 					{numberInput('minIlvl', 'filters-min-ilvl', i18n.t('gear_tab.gear_picker.filters.min_ilvl'), { showZeroes: false })}
 					<span className="flex justify-center self-end py-2">-</span>
