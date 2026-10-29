@@ -415,8 +415,7 @@ func (wa *WeaponAttack) swing(sim *Simulation) time.Duration {
 
 	// Capture how late this swing is vs. when it would have been ready in an
 	// uncontested rotation, then advance naturalReadyAt for the next cycle.
-	// Clamped to >=0 because PauseMelee / haste re-scheduling can in principle
-	// produce a negative diff.
+	// Clamped to >=0 because PauseMelee can in principle produce a negative diff.
 	wa.pendingSwingDelay = max(0, sim.CurrentTime-wa.naturalReadyAt)
 	wa.naturalReadyAt = wa.swingAt
 	wa.logSwingDelay(sim, attackSpell, isRanged)
@@ -1008,6 +1007,10 @@ func (aa *AutoAttacks) UpdateSwingTimers(sim *Simulation) {
 		if remainingSwingTime := aa.mh.swingAt - sim.CurrentTime; remainingSwingTime > 0 {
 			aa.mh.swingAt = sim.CurrentTime + time.Duration(float64(remainingSwingTime)*f)
 		}
+		// The uncontested ready time moves with the attack speed too, so a haste change is no swing delay.
+		if remainingReadyTime := aa.mh.naturalReadyAt - sim.CurrentTime; remainingReadyTime > 0 {
+			aa.mh.naturalReadyAt = sim.CurrentTime + time.Duration(float64(remainingReadyTime)*f)
+		}
 
 		sim.rescheduleWeaponAttack(aa.mh.swingAt)
 
@@ -1016,6 +1019,9 @@ func (aa *AutoAttacks) UpdateSwingTimers(sim *Simulation) {
 
 			if remainingSwingTime := aa.oh.swingAt - sim.CurrentTime; remainingSwingTime > 0 {
 				aa.oh.swingAt = sim.CurrentTime + time.Duration(float64(remainingSwingTime)*f)
+			}
+			if remainingReadyTime := aa.oh.naturalReadyAt - sim.CurrentTime; remainingReadyTime > 0 {
+				aa.oh.naturalReadyAt = sim.CurrentTime + time.Duration(float64(remainingReadyTime)*f)
 			}
 
 			sim.rescheduleWeaponAttack(aa.oh.swingAt)
