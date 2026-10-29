@@ -78,7 +78,7 @@ message UIItem {
 	double weapon_speed = 14;
 
 	int32 ilvl = 15;
-	int32 required_level = 36; // The character level that can equip the item; 0 for none.
+	int32 req_lvl = 36; // The character level that can equip the item; 0 for none.
 	int32 phase = 16;
 	ItemQuality quality = 17;
 	double quality_modifier = 33; // Negative for caster weapons; used by Seal of Righteousness proc among others.

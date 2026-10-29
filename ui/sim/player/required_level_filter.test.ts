@@ -7,8 +7,8 @@ vi.mock('@sim/workers/worker_pool', async () => (await import('@testing/sim/work
 
 beforeAll(() => serveDatabase());
 
-const LEVEL_40 = Item.create({ id: 2, requiredLevel: 40 });
-const LEVEL_60 = Item.create({ id: 3, requiredLevel: 60 });
+const LEVEL_40 = Item.create({ id: 2, reqLvl: 40 });
+const LEVEL_60 = Item.create({ id: 3, reqLvl: 60 });
 // No requirement in the game files, so the item level places it.
 const QUEST_ILVL_60 = Item.create({ id: 4, scalingOptions: { 0: ScalingItemProperties.create({ ilvl: 60 }) } });
 const QUEST_ILVL_34 = Item.create({ id: 5, scalingOptions: { 0: ScalingItemProperties.create({ ilvl: 34 }) } });

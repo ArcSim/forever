@@ -71,7 +71,7 @@ func (item *Item) ToScaledUIItem(itemLevel int) *proto.UIItem {
 		WeaponSpeed:         float64(item.ItemDelay) / 1000,
 		NameDescription:     item.NameDescription,
 		LimitCategory:       int32(item.LimitCategory),
-		RequiredLevel:       int32(item.RequiredLevel),
+		ReqLvl:              int32(item.RequiredLevel),
 		QualityModifier:     item.GetWeaponQualityModifier(),
 	}
 

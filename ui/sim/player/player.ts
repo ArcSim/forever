@@ -1229,7 +1229,7 @@ export class Player<SpecType extends Spec> {
 	// The game files give a quest reward no required level, since the quest carries it. Such an item is placed
 	// by its item level, which tracks the level that equips it: 60 from item level 60, 5 below it otherwise.
 	static requiredLevelOf(item: Item): number {
-		if (item.requiredLevel != 0) return item.requiredLevel;
+		if (item.reqLvl != 0) return item.reqLvl;
 		const ilvl = item.scalingOptions?.[0].ilvl || item.ilvl;
 		return ilvl >= Mechanics.CHARACTER_LEVEL ? Mechanics.CHARACTER_LEVEL : Math.max(1, ilvl - 5);
 	}
