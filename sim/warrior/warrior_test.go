@@ -500,12 +500,13 @@ func TestRetaliationCounterattackSpendsNoFlurryCharge(t *testing.T) {
 	}
 }
 
-// Every white swing uses a Flurry charge whatever its outcome, and a Heroic Strike uses one only
-// when it misses.
+// Every white swing uses a Flurry charge whatever its outcome, and a Heroic Strike or Cleave uses
+// one only when it misses.
 func TestFlurryChargesFollowTheSwingOutcome(t *testing.T) {
 	mainHand := core.ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 1}
 	offHand := core.ActionID{OtherID: proto.OtherAction_OtherActionAttack, Tag: 2}
 	heroicStrike := core.ActionID{SpellID: 11567}
+	cleave := core.ActionID{SpellID: 20569}
 	cases := []struct {
 		name    string
 		spell   core.ActionID
@@ -523,6 +524,8 @@ func TestFlurryChargesFollowTheSwingOutcome(t *testing.T) {
 		{"a dodged Heroic Strike uses none", heroicStrike, core.OutcomeDodge, 3, 3},
 		{"a parried Heroic Strike uses none", heroicStrike, core.OutcomeParry, 3, 3},
 		{"a landed Heroic Strike uses none", heroicStrike, core.OutcomeHit, 3, 3},
+		{"a missed Cleave uses a charge", cleave, core.OutcomeMiss, 3, 2},
+		{"a dodged Cleave uses none", cleave, core.OutcomeDodge, 3, 3},
 		{"a missed swing does not start Flurry", mainHand, core.OutcomeMiss, 0, 0},
 	}
 

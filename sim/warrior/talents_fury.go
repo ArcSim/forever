@@ -153,9 +153,12 @@ func (warrior *Warrior) registerFlurry() {
 
 	// The proc shape with no roll: 12319 states its rate as "always" and the crit is the
 	// condition, which this handler reads off the result because the same listener hears every
-	// melee result. Every white swing uses a charge whatever its outcome, and a Heroic Strike uses
-	// one only when it misses. The row's mask reaches ranged and spell hits too; the tooltip says a
-	// melee critical strike, so the mask stays the caller's.
+	// melee result. Every white swing uses a charge whatever its outcome, and a Heroic Strike or
+	// Cleave uses one only when it misses. The row's mask reaches ranged and spell hits too; the
+	// tooltip says a melee critical strike, so the mask stays the caller's.
+	//
+	// TODO: Ingame test needed: the Cleave miss follows the measured Heroic Strike miss; no log
+	// holds a missed Cleave yet.
 	trigger := spelldata.ProcTrigger(&warrior.Character, spellData.Flurry.Rank(warrior.Talents.Flurry),
 		func(sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {
 			if spellData.Whirlwind.Contains(spell) && spell.ProcMask.Matches(core.ProcMaskMeleeOH) {
@@ -173,7 +176,8 @@ func (warrior *Warrior) registerFlurry() {
 			}
 
 			if spell.ProcMask.Matches(core.ProcMaskMeleeWhiteHit) ||
-				(result.Outcome.Matches(core.OutcomeMiss) && spellData.HeroicStrike.Contains(spell)) {
+				(result.Outcome.Matches(core.OutcomeMiss) &&
+					(spellData.HeroicStrike.Contains(spell) || spellData.Cleave.Contains(spell))) {
 				flurryAura.RemoveStack(sim)
 			}
 		})
