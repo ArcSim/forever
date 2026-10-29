@@ -23,8 +23,8 @@ Specialization, the `BlockValueMultiplier` line in `sim/paladin/talents_protecti
 hand-read, because its 30 is a percentage and the parse reads `A_MOD_INCREASE_HEALTH` as flat
 health.
 
-**A parsed school hit talent shows on the sheet only when asked.** Arcane Focus, Elemental Precision,
-Shadow Focus, Holy Precision and Divine Precision state their hit on class flags, so a plain
+**A parsed school hit talent shows on the sheet only when asked.** Shadow Focus, Holy Precision and
+Divine Precision state their hit on class flags, so a plain
 `ParseStatic` raises the hit of their spells and leaves the character sheet's school hit rows where
 they were. Pass `spelldata.ShowAsSchoolHit` with the schools the tooltip names. Writing the hit into
 `PseudoStats.SchoolBonusHitChance` instead drops the row's spell list, and Divine Precision would lose
