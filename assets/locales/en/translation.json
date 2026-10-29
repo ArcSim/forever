@@ -435,6 +435,8 @@
 			"hit": "Hit",
 			"external": "External",
 			"self": "self",
+			"shield": "Shield",
+			"amplified": "Amplified",
 			"custom_boss": "Custom Boss",
 			"thrash": "Thrash",
 			"stacks": "{{stacks}} Stacks",

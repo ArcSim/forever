@@ -356,31 +356,13 @@ export class ActionId {
 					name += ` (${i18n.t('common.action_tags.shiv')})`;
 				}
 				break;
-			case 'Bladestorm':
-				if (tag == 1) {
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (tag == 2) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
-				}
-				break;
 			case 'Mutilate':
-				if (tag == 0) {
-					name += ` (${i18n.t('common.action_tags.cast')})`;
-				} else if (tag == 1) {
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (tag == 2) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
-				}
+			case 'Stormstrike': {
+				// The cast is untagged; a strike it makes with one hand carries that hand's slot.
+				const label = tag == 0 ? i18n.t('common.action_tags.cast') : weaponHandName(tag);
+				if (label) name += ` (${label})`;
 				break;
-			case 'Stormstrike':
-				if (tag == 0) {
-					name += ` (${i18n.t('common.action_tags.cast')})`;
-				} else if (tag == 1) {
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (tag == 2) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
-				}
-				break;
+			}
 			case 'Chain Lightning':
 			case 'Lightning Bolt':
 			case 'Lava Burst':
@@ -449,15 +431,6 @@ export class ActionId {
 			case 'Berserking':
 				if (tag > 0) {
 					name += ` (${10 + (tag - 1) * 5}%)`;
-				}
-				break;
-			case 'Whirlwind':
-			case 'Windfury Weapon':
-			case 'Enchant Weapon - Crusader':
-				if (tag == 1) {
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (tag == 2) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
 				}
 				break;
 			case 'Heroic Strike':
@@ -557,6 +530,12 @@ export class ActionId {
 			case 'Retribution Aura':
 			case 'Holy Shield':
 			case 'Thorns':
+			case 'Brambles':
+			case 'Bristlecone':
+			case 'Heart of the Scale':
+			case 'Immolation':
+			case 'Fiery Aura':
+			case 'Chitinous Spikes':
 				// A damage shield's proc is tagged two past the aura that carries it: tag 2 is the
 				// player's own copy, tag 1 the copy an outside caster provides, and that copy's
 				// aura is the tag -1 this case names below.
@@ -625,28 +604,76 @@ export class ActionId {
 					name += ' (Mace)';
 				}
 				break;
-			case 'Demonic Rune':
-				if (tag) {
-					name += ' (Damage)';
-				}
-				break;
 			case 'Judgement of Fury':
 				if (this.spellId === 20232) {
 					name += ' (Taunt)';
 				}
 				break;
-			default:
+			case 'Weaponmaster': {
+				// One aura per branch of the talent, tagged by the weapons it reads.
+				const weapons = (
+					{
+						1: ['axe', 'polearm'],
+						2: ['mace', 'staff'],
+						3: ['sword'],
+					} as const
+				)[tag];
+				if (weapons) {
+					name += ` (${weapons.map(weapon => i18n.t(`common.weapon_types.${weapon}`)).join('/')})`;
+				}
+				break;
+			}
+			case 'Seal of Fury':
+			case 'Power Word: Shield':
+				// The shield the spell puts up is tagged 1.
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.shield')})`;
+				}
+				break;
+			case 'Vindication':
+				// The paladin's own attack power buff is tagged 1 and the debuff left untagged.
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.self')})`;
+				} else if (tag === -1) {
+					name += ` (${i18n.t('common.action_tags.external')})`;
+				}
+				break;
+			case 'Curse of Weakness':
+				// The curse raised by Amplify Curse is tagged 1.
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.amplified')})`;
+				} else if (tag === -1) {
+					name += ` (${i18n.t('common.action_tags.external')})`;
+				}
+				break;
+			case 'Bane of Havoc':
+				// The share of damage the bane deals again is tagged 1.
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_tags.damage')})`;
+				}
+				break;
+			case 'Feral Charge (Bear)':
+				// The charge's run to the target is tagged 1.
+				if (tag === 1) {
+					name += ` (${i18n.t('common.action_names.moving')})`;
+				}
+				break;
+			default: {
+				const hand = weaponHandName(tag);
 				if (tag === -1) {
 					name += ` (${i18n.t('common.action_tags.external')})`;
-				} else if (tag === ItemSlot.ItemSlotMainHand) {
-					// A copy one weapon hand carries is tagged with that hand's item slot.
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (tag === ItemSlot.ItemSlotOffHand) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
+				} else if (hand) {
+					name += ` (${hand})`;
+				} else if (this.itemId && tag === 1) {
+					// A consumable's damage to its user is tagged 1 and a cloud's ticks 2 (sim/common/shared/consumable_explosives.go).
+					name += ` (${i18n.t('common.action_tags.self')})`;
+				} else if (this.itemId && tag === 2) {
+					name += ` (${i18n.t('common.action_tags.dot')})`;
 				} else if (tag) {
 					name += ' (??)';
 				}
 				break;
+			}
 		}
 
 		let iconUrl = ActionId.makeIconUrl(tooltipData['icon']);
@@ -896,6 +923,13 @@ const rankSuffixPattern = (): RegExp => {
 	const rank = after === undefined ? escape(before) : `${escape(before)}\\d+${escape(after)}`;
 	return new RegExp(` \\(${rank}\\)`, 'g');
 };
+
+// A copy one weapon hand carries is tagged with that hand's item slot (ActionID.WithHand in sim/core/agent.go).
+function weaponHandName(tag: number): string | undefined {
+	if (tag === ItemSlot.ItemSlotMainHand) return i18n.t('common.action_tags.main_hand');
+	if (tag === ItemSlot.ItemSlotOffHand) return i18n.t('common.action_tags.off_hand');
+	return undefined;
+}
 
 type ActionIdOverride = { itemId?: number; spellId?: number };
 
