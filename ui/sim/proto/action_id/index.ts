@@ -358,8 +358,7 @@ export class ActionId {
 					name += ` (${i18n.t('common.action_tags.shiv')})`;
 				}
 				break;
-			case 'Mutilate':
-			case 'Stormstrike': {
+			case 'Mutilate': {
 				// The cast is untagged; a strike it makes with one hand carries that hand's slot.
 				const label = tag == 0 ? i18n.t('common.action_tags.cast') : weaponHandName(tag);
 				if (label) name += ` (${label})`;
@@ -668,6 +667,7 @@ export class ActionId {
 					name += ` (${hand})`;
 				} else if (this.itemId && tag === 1) {
 					// A consumable's damage to its user is tagged 1 and a cloud's ticks 2 (sim/common/shared/consumable_explosives.go).
+					// A stat consumable with more than one buff also tags its auras 1, 2, … (consumable_stats.go); none has more than one.
 					name += ` (${i18n.t('common.action_tags.self')})`;
 				} else if (this.itemId && tag === 2) {
 					name += ` (${i18n.t('common.action_tags.dot')})`;
