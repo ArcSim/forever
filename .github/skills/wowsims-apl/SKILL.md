@@ -144,9 +144,10 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   would have fired, about half a percent of DPS. Checking the spenders above Rend costs more DPS than the swaps it
   saves, and Fury keeps Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732).
 - **`Selected Potion` reads every potion slot unless its Slot is set** (`sim/core/apl_values_consumables.go`). A line
-  that treats one slot's potion differently reads that slot: the Fury and Arms presets keep a rage potion picked as
-  the offensive potion on the Resource Potion line's rage check (`Offensive Potion: Rage`), and an offensive potion
-  beside a rage potion in another slot still aligns with the cooldowns.
+  that treats one slot's potion differently reads that slot: the Fury and Arms presets read each placeholder's own slot
+  (`Resource Potion: Rage`, `Offensive Potion: Rage`), so a rage potion picked as the offensive potion follows the
+  Resource Potion line's rage check, and an offensive potion beside a rage potion in another slot still aligns with the
+  cooldowns.
 
 ## Keeping this skill true
 

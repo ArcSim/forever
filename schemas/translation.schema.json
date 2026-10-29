@@ -7851,16 +7851,6 @@
 							"additionalProperties": false,
 							"required": ["main", "swapped"]
 						},
-						"potion_slots": {
-							"type": "object",
-							"properties": {
-								"any": {
-									"type": "string"
-								}
-							},
-							"additionalProperties": false,
-							"required": ["any"]
-						},
 						"helpers": {
 							"type": "object",
 							"properties": {
@@ -8098,7 +8088,6 @@
 						"summon_types",
 						"submenus",
 						"item_swap_sets",
-						"potion_slots",
 						"helpers"
 					]
 				},

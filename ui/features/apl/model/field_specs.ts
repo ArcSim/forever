@@ -7,7 +7,7 @@ import {
 	APLValueIsExecutePhase_ExecutePhaseThreshold as ExecutePhaseThreshold,
 	APLValueMath_MathOperator as MathOperator,
 } from '@generated/proto/apl';
-import { ActionID, AreaType, MobType, PotionClass, RangedWeaponType, Stat } from '@generated/proto/common';
+import { ActionID, AreaType, MobType, OtherAction, RangedWeaponType, Stat } from '@generated/proto/common';
 import { ShamanTotems_TotemType as TotemType } from '@generated/proto/shaman';
 import { WarlockOptions_CurseOptions as CurseOptions, WarlockOptions_Summon as Summon } from '@generated/proto/warlock';
 import i18n from '@i18n/config';
@@ -142,10 +142,10 @@ const ITEM_SWAP_SETS: EnumTable = {
 const POTION_SLOTS: EnumTable = {
 	defaultLabel: none(),
 	options: [
-		{ value: PotionClass.PotionClassUnknown, label: i18n.t('rotation_tab.apl.potion_slots.any') },
-		{ value: PotionClass.PotionClassOffensive, label: i18n.t('settings_tab.consumables.potions.offensive') },
-		{ value: PotionClass.PotionClassDefensive, label: i18n.t('settings_tab.consumables.potions.defensive') },
-		{ value: PotionClass.PotionClassResource, label: i18n.t('settings_tab.consumables.potions.resource') },
+		{ value: OtherAction.OtherActionNone, label: i18n.t('common.any') },
+		{ value: OtherAction.OtherActionOffensivePotion, label: i18n.t('settings_tab.consumables.potions.offensive') },
+		{ value: OtherAction.OtherActionDefensivePotion, label: i18n.t('settings_tab.consumables.potions.defensive') },
+		{ value: OtherAction.OtherActionResourcePotion, label: i18n.t('settings_tab.consumables.potions.resource') },
 	],
 };
 
@@ -268,9 +268,9 @@ export const resolveField = (descriptor: APLFieldDescriptor, player: Player<any>
 		case 'itemSwapSet':
 			return asEnum(descriptor.field, ITEM_SWAP_SETS, () => ItemSwapSet.Swap1);
 		case 'potionSlot':
-			// Unknown is 0, which fieldInputConfig reads as unset and replaces with this default, so the
-			// default has to be Unknown for every slot to stay selectable.
-			return asEnum(descriptor.field, POTION_SLOTS, () => PotionClass.PotionClassUnknown, i18n.t('rotation_tab.apl.values.selected_potion.slot'));
+			// None is 0, which fieldInputConfig reads as unset and replaces with this default, so the
+			// default has to be None for every slot to stay selectable.
+			return asEnum(descriptor.field, POTION_SLOTS, () => OtherAction.OtherActionNone, i18n.t('rotation_tab.apl.values.selected_potion.slot'));
 		case 'comparisonOperator':
 			return asEnum(descriptor.field, COMPARISON_OPERATORS, () => ComparisonOperator.OpEq);
 		case 'mathOperator':

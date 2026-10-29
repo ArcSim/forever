@@ -2090,7 +2090,7 @@
 				},
 				"selected_potion": {
 					"label": "Selected Potion",
-					"tooltip": "Returns <b>True</b> if the potion is picked in the chosen potion slot, or with <b>Any slot</b> in any of them: offensive, defensive or resource.",
+					"tooltip": "Returns <b>True</b> if the potion is picked in the chosen potion slot, or with <b>Any</b> in any of them: offensive, defensive or resource.",
 					"slot": "Slot"
 				},
 				"selected_conjured": {
@@ -2210,9 +2210,6 @@
 			"item_swap_sets": {
 				"main": "Main",
 				"swapped": "Swapped"
-			},
-			"potion_slots": {
-				"any": "Any slot"
 			},
 			"helpers": {
 				"action_id_sets": {

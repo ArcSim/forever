@@ -861,7 +861,7 @@ message APLValueActiveItemSwapSet {
 
 message APLValueSelectedPotion {
 	ActionID potion_id = 1;
-	PotionClass slot = 2; // The potion slot to read; unset reads every slot.
+	OtherAction slot = 2; // The potion placeholder whose pick to read; unset reads every slot.
 }
 
 message APLValueSelectedConjured {

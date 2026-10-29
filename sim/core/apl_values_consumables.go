@@ -10,13 +10,7 @@ type APLValueSelectedPotion struct {
 	DefaultAPLValueImpl
 	character *Character
 	potionId  int32
-	slot      proto.OtherAction // The placeholder whose pick it reads, OtherActionNone for every slot.
-}
-
-var potionSlotPlaceholders = map[proto.PotionClass]proto.OtherAction{
-	proto.PotionClass_PotionClassResource:  proto.OtherAction_OtherActionResourcePotion,
-	proto.PotionClass_PotionClassDefensive: proto.OtherAction_OtherActionDefensivePotion,
-	proto.PotionClass_PotionClassOffensive: proto.OtherAction_OtherActionOffensivePotion,
+	slot      proto.OtherAction
 }
 
 func (rot *APLRotation) newValueSelectedPotion(config *proto.APLValueSelectedPotion, uuid *proto.UUID) APLValue {
@@ -29,7 +23,7 @@ func (rot *APLRotation) newValueSelectedPotion(config *proto.APLValueSelectedPot
 	return &APLValueSelectedPotion{
 		character: character,
 		potionId:  config.PotionId.GetItemId(),
-		slot:      potionSlotPlaceholders[config.Slot],
+		slot:      config.Slot,
 	}
 }
 func (value *APLValueSelectedPotion) Type() proto.APLValueType {
