@@ -123,9 +123,7 @@ export const PreBiSArmsEpWeights = PresetUtils.makePresetEpWeights(
 	),
 );
 
-// Bloodrage waits for an Execute short of rage once less than its cooldown remains, which assumes an execute phase.
 export const FURY_DEFAULT_ROTATION = PresetUtils.makePresetAPLRotation('Fury', DefaultFuryApl);
-// Bloodrage goes out whenever rage is below 90: holding it for Execute, as Fury does, loses Arms DPS from 60 s to 300 s.
 export const ARMS_DEFAULT_ROTATION = PresetUtils.makePresetAPLRotation('Arms', DefaultArmsApl);
 
 export const SIMPLE_ROTATION = DpsWarrior_Rotation.create({
