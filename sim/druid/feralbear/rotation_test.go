@@ -38,7 +38,7 @@ func bearNakedRequest() *proto.RaidSimRequest {
 	for i := range items {
 		items[i] = &proto.ItemSpec{}
 	}
-	items[proto.ItemSlot_ItemSlotMainHand].Id = 866
+	items[proto.ItemSlot_ItemSlotMainHand].Id = 1613
 	return &proto.RaidSimRequest{
 		SimOptions: &proto.SimOptions{RandomSeed: 1, Iterations: 1, IsTest: true},
 		Raid: &proto.Raid{Parties: []*proto.Party{{
@@ -494,7 +494,7 @@ func bearRequest(rotation *proto.APLRotation, iterations int32) *proto.RaidSimRe
 				},
 			}},
 			Buffs: &proto.RaidBuffs{
-				BattleShout:              proto.TristateEffect_TristateEffectRegular,
+				BattleShout:              1,
 				ArcaneBrilliance:         true,
 				GiftOfTheWild:            true,
 				PrayerOfFortitude:        true,

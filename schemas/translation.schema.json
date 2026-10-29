@@ -912,22 +912,7 @@
 						"ranged_crit_rating": {
 							"type": "string"
 						},
-						"melee_crit_suppression": {
-							"type": "string"
-						},
 						"ranged_crit_suppression": {
-							"type": "string"
-						},
-						"main_hand_miss": {
-							"type": "string"
-						},
-						"main_hand_dodge": {
-							"type": "string"
-						},
-						"main_hand_parry": {
-							"type": "string"
-						},
-						"main_hand_glance": {
 							"type": "string"
 						},
 						"healing_power": {
@@ -1056,12 +1041,7 @@
 						"off_hand_crit_rating",
 						"ranged_hit_rating",
 						"ranged_crit_rating",
-						"melee_crit_suppression",
 						"ranged_crit_suppression",
-						"main_hand_miss",
-						"main_hand_dodge",
-						"main_hand_parry",
-						"main_hand_glance",
 						"healing_power",
 						"spell_damage",
 						"arcane_damage",
@@ -2375,6 +2355,9 @@
 						"attack_power": {
 							"type": "string"
 						},
+						"attack_power_tooltip": {
+							"type": "string"
+						},
 						"attack_speed": {
 							"type": "string"
 						},
@@ -2411,6 +2394,7 @@
 						"misc",
 						"stats",
 						"attack_power",
+						"attack_power_tooltip",
 						"attack_speed",
 						"spell_power",
 						"spell_haste",
@@ -2981,6 +2965,19 @@
 							"additionalProperties": false,
 							"required": ["label", "tooltip"]
 						},
+						"has_battle_shout_rank_7": {
+							"type": "object",
+							"properties": {
+								"label": {
+									"type": "string"
+								},
+								"tooltip": {
+									"type": "string"
+								}
+							},
+							"additionalProperties": false,
+							"required": ["label", "tooltip"]
+						},
 						"assume_bleed_active": {
 							"type": "object",
 							"properties": {
@@ -3318,6 +3315,7 @@
 						"starting_rage",
 						"stance_snapshot",
 						"has_bs_tier_2",
+						"has_battle_shout_rank_7",
 						"queue_delay",
 						"assume_bleed_active",
 						"prepull_clearcasting",
@@ -8568,10 +8566,45 @@
 											},
 											"additionalProperties": false,
 											"required": ["label"]
+										},
+										"use_heroic_strike_rank_9": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
+										},
+										"use_battle_shout_rank_7": {
+											"type": "object",
+											"properties": {
+												"label": {
+													"type": "string"
+												},
+												"tooltip": {
+													"type": "string"
+												}
+											},
+											"additionalProperties": false,
+											"required": ["label", "tooltip"]
 										}
 									},
 									"additionalProperties": false,
-									"required": ["spec", "use_recklessness", "use_overpower", "use_rend", "use_stance_dance", "use_hamstring"]
+									"required": [
+										"spec",
+										"use_recklessness",
+										"use_overpower",
+										"use_rend",
+										"use_stance_dance",
+										"use_hamstring",
+										"use_heroic_strike_rank_9",
+										"use_battle_shout_rank_7"
+									]
 								}
 							},
 							"additionalProperties": false,
@@ -11373,6 +11406,9 @@
 								"to_exp_cap": {
 									"type": "string"
 								},
+								"block": {
+									"type": "string"
+								},
 								"spec_offsets": {
 									"type": "string"
 								},
@@ -11384,7 +11420,7 @@
 								}
 							},
 							"additionalProperties": false,
-							"required": ["glancing", "suppression", "to_hit_cap", "to_exp_cap", "spec_offsets", "final_crit_cap", "can_raise_by"]
+							"required": ["glancing", "suppression", "to_hit_cap", "to_exp_cap", "block", "spec_offsets", "final_crit_cap", "can_raise_by"]
 						},
 						"crit_cap": {
 							"type": "object",

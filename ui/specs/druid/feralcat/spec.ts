@@ -94,7 +94,7 @@ export default defineSpec<Spec.SpecFeralCatDruid>({
 			strengthOfEarthTotem: true,
 			graceOfAirTotem: true,
 			windfuryTotem: true,
-			battleShout: TristateEffect.TristateEffectRegular,
+			battleShout: 1, // Rank 6
 		}),
 		partyBuffs: PartyBuffs.create({ manaSpringTotem: TristateEffect.TristateEffectRegular }),
 		individualBuffs: IndividualBuffs.create({ greaterBlessingOfKings: true, greaterBlessingOfMight: true, greaterBlessingOfSalvation: true }),
