@@ -276,9 +276,10 @@ func TestDamageTakenRageGeneration(t *testing.T) {
 }
 
 func TestPreMitigationDamage(t *testing.T) {
-	// A 1000 hit through 5755 armor against a level 63 attacker (half), a 10% damage taken reduction,
-	// a crit, a 100 block and a 300 absorb: 1000 * 0.5 * 0.9 * 2 - 100 - 300 = 500 taken. Before
-	// mitigation the crit and the damage taken reduction count and nothing else does: 1800.
+	// A 1000 hit through 5755 armor against a level 63 attacker (half), 50 flat physical damage taken,
+	// a 10% damage taken reduction, a crit, a 100 block and a 300 absorb:
+	// (1000 * 0.5 + 50) * 0.9 * 2 - 100 - 300 = 590 taken. The damage rage reads keeps the crit and the
+	// 10% reduction and drops the rest: 1000 * 0.9 * 2 = 1800.
 	sim := SetupFakeRageSim()
 	fw := sim.Raid.Parties[0].Players[0].(*FakeRageWarrior)
 	attacker := sim.Encounter.ActiveTargetUnits[0]
@@ -287,6 +288,7 @@ func TestPreMitigationDamage(t *testing.T) {
 	fw.stats[stats.Armor] = 5755
 	fw.stats[stats.BlockValue] = 100
 	fw.PseudoStats.CanBlock = true
+	fw.PseudoStats.BonusPhysicalDamageTaken = 50
 	fw.PseudoStats.DamageTakenMultiplier = 0.9
 	fw.DynamicDamageTakenModifiers = append(fw.DynamicDamageTakenModifiers, func(_ *Simulation, _ *Spell, result *SpellResult, _ bool) {
 		result.Damage -= 300
@@ -304,8 +306,8 @@ func TestPreMitigationDamage(t *testing.T) {
 	spell.DealDamage(sim, result)
 	gained := fw.CurrentRage() - rageBefore
 
-	if !WithinToleranceFloat64(500, result.Damage, 0.001) {
-		t.Fatalf("Damage taken: Expected: %0.3f, Actual: %0.3f", 500.0, result.Damage)
+	if !WithinToleranceFloat64(590, result.Damage, 0.001) {
+		t.Fatalf("Damage taken: Expected: %0.3f, Actual: %0.3f", 590.0, result.Damage)
 	}
 	if !WithinToleranceFloat64(1800, result.PreMitigationDamage, 0.001) {
 		t.Fatalf("Damage before mitigation: Expected: %0.3f, Actual: %0.3f", 1800.0, result.PreMitigationDamage)
