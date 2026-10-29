@@ -98,9 +98,13 @@ export const FiltersMenuView = ({
 			bodyClassName="gap-2"
 			title={i18n.t('gear_tab.gear_picker.filters.title')}>
 			<MenuSection name={i18n.t('gear_tab.gear_picker.filters.general')}>
-				<div className="grid grid-cols-split gap-x-(--modal-padding) gap-y-2">
+				<div className="relative grid grid-cols-2 gap-x-(--modal-padding)">
+					{numberInput('minIlvl', 'filters-min-ilvl', i18n.t('gear_tab.gear_picker.filters.min_ilvl'), { showZeroes: false })}
+					<span className="absolute bottom-0 left-1/2 -translate-x-1/2 py-2">-</span>
+					{numberInput('maxIlvl', 'filters-max-ilvl', i18n.t('gear_tab.gear_picker.filters.max_ilvl'), { showZeroes: false })}
+				</div>
+				<div className="grid grid-cols-2 gap-x-(--modal-padding)">
 					{numberInput('maxRequiredLevel', 'filters-required-level', i18n.t('gear_tab.gear_picker.filters.required_level'), { showZeroes: false })}
-					<span aria-hidden />
 					<ChoiceField
 						id="filters-faction-restriction"
 						label={i18n.t('gear_tab.gear_picker.filters.faction_restrictions')}
@@ -115,9 +119,6 @@ export const FiltersMenuView = ({
 							})
 						}
 					/>
-					{numberInput('minIlvl', 'filters-min-ilvl', i18n.t('gear_tab.gear_picker.filters.min_ilvl'), { showZeroes: false })}
-					<span className="flex justify-center self-end py-2">-</span>
-					{numberInput('maxIlvl', 'filters-max-ilvl', i18n.t('gear_tab.gear_picker.filters.max_ilvl'), { showZeroes: false })}
 				</div>
 			</MenuSection>
 			<MenuSection name={i18n.t('gear_tab.gear_picker.filters.source')} className="ui-filters-menu-section-bool-list">
