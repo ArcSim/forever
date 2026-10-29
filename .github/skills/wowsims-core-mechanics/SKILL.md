@@ -1,6 +1,6 @@
 ---
 name: wowsims-core-mechanics
-description: "Use when WoWSims Forever Go code depends on what sim/core does around a spell that its row cannot show: the order of applyEffects, OnCastComplete and proc handlers (TriggerImmediately, SpellBatchWindow), costs, miss refunds, combo points and charges, how damage scales, how many targets an area hits, what CastRequirement refuses, registration hooks, whose auras a tag reads, aura lifetimes, exclusive categories, hit tables, resists, dot tick outcomes, pets, rage and threat, and proto field rules. Use it too when asked whether the sim models something (a racial, crit damage, resists, rage, stat scaling), when a handler sees or misses the cast that procced it, a refund goes wrong, another caster's dot counts, a registration panics, or a new proto bool reads false in saved settings. Reading a row is wowsims-spell-store; building an ability or aura is wowsims-abilities-auras; proc triggers are wowsims-procs; the pick at a cast end is wowsims-apl; runtime proofs are wowsims-testing; the map is wowsims-spells."
+description: "Use when WoWSims Forever Go code depends on what sim/core does around a spell that its row cannot show: the order of applyEffects, OnCastComplete and proc handlers (TriggerImmediately, SpellBatchWindow), costs, miss refunds, combo points and charges, how damage scales, how many targets an area hits, what CastRequirement refuses, registration hooks, whose auras a tag reads, the ActionID tag of a weapon hand's copy, aura lifetimes, exclusive categories, hit tables, resists, dot tick outcomes, pets, rage and threat, and proto field rules. Use it too when asked whether the sim models something (a racial, crit damage, resists, rage, stat scaling), when a handler sees or misses the cast that procced it, a refund goes wrong, another caster's dot counts, a registration panics, or a new proto bool reads false in saved settings. Reading a row is wowsims-spell-store; building an ability or aura is wowsims-abilities-auras; proc triggers are wowsims-procs; the pick at a cast end is wowsims-apl; runtime proofs are wowsims-testing; the map is wowsims-spells."
 ---
 
 # wowsims-core-mechanics
@@ -88,6 +88,10 @@ rulings the code follows are in `references/rulings.md`; text here follows `wows
   active or not, and `HasAuraWithTag` is true for a registered aura that is not up (`aura.go`); filter by caster and use
   `GetActiveAuraWithTag` or `IsActive()`. A per-caster debuff's label and slots are `wowsims-abilities-auras` §An aura
   or dot.
+- **A per-hand copy's `ActionID.Tag` is its hand's `ItemSlot`.** `ActionID.WithHand` (`sim/core/agent.go`) tags the
+  main-hand copy 14 and the off-hand copy 15, and the UI names those two tags as the hands
+  (`ui/sim/proto/action_id/index.ts`). On a spell or an item, tags 1 and 2 are not hands: each gives them its own meaning,
+  such as a queue spell or Weaponmaster's weapon branches. Only the auto attack's two swings keep tags 1 and 2.
 
 ## Auras and exclusive effects
 
