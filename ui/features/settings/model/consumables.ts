@@ -44,7 +44,7 @@ export interface ConsumableInputOptions {
 
 // The class, race and profession decide whether a consumable is offered at all, picked or not. The
 // minimum level and the stat rule only trim what is offered: a consumable already picked stays
-// offered below the level and with its stats hidden, marked as kept.
+// offered below the level or with its stats hidden, marked as kept.
 const trimmed = (consumable: Consumable, relevance: ConsumableRelevance, player: Player<any>) =>
 	consumable.lvl < player.sim.getMinConsumableLvl(consumable.type) || !relevance.relevant(consumable, player);
 
