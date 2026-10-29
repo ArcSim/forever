@@ -176,7 +176,7 @@ export const rotationCategoryOverrides: Record<number, number> = {
 	[23894]: MELEE_ACTION_CATEGORY + 0.1, // Bloodthirst
 	[23925]: MELEE_ACTION_CATEGORY + 0.1, // Shield Slam
 	[1680]: MELEE_ACTION_CATEGORY + 0.24, // Whirlwind
-	// The swing and the tag 1 queue press share a category, so their rows sit together
+	// The swing and the tag 1 queue spell share a category, so their rows sit together
 	[11567]: MELEE_ACTION_CATEGORY + 0.3, // Heroic Strike (rank 8)
 	[25286]: MELEE_ACTION_CATEGORY + 0.3, // Heroic Strike (rank 9)
 	[412609]: SPELL_ACTION_CATEGORY + 0.51, // Deep Wounds

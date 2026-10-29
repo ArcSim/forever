@@ -1,7 +1,7 @@
 import { OtherAction } from '@generated/proto/common';
 import { ResourceType } from '@generated/proto/spell';
 import { ActionId } from '@sim/proto/action_id';
-import type { CastLog, ResourceGroupLog } from '@sim/proto/combat_log';
+import type { AuraUptimeLog, CastLog, ResourceGroupLog } from '@sim/proto/combat_log';
 import type { UnitMetrics } from '@sim/proto/sim_result';
 import { describe, expect, it } from 'vitest';
 
@@ -64,6 +64,41 @@ describe('wand shots', () => {
 
 	it('keeps the tags of a spell outside the grouped list in rows of their own', () => {
 		expect(castRows([castOf(ActionId.fromSpellId(20293), 1), castOf(ActionId.fromSpellId(20293, 0, 1), 2)])).toHaveLength(2);
+	});
+});
+
+describe('buffs section', () => {
+	const aura = (actionId: ActionId): AuraUptimeLog => ({ actionId, timestamp: 1, gainedAt: 1, fadedAt: 3, stacksChange: [] }) as unknown as AuraUptimeLog;
+
+	const build = (castLogs: Array<CastLog>, auraUptimeLogs: Array<AuraUptimeLog>) => {
+		const player = { ...unit(castLogs), auraUptimeLogs } as unknown as UnitMetrics;
+		return buildRotationModel({ player, targets: [unit([])], duration: 30, showGcd: false });
+	};
+
+	const OVERPOWER_WINDOW = ActionId.fromSpellId(1282733);
+
+	it('draws an aura mapped onto a cast row in that row and gives it no Buffs row', () => {
+		const model = build([castOf(ActionId.fromSpellId(11585), 1)], [aura(OVERPOWER_WINDOW)]);
+		const rows = model.rows.filter((r): r is CastRow => r.kind === 'cast');
+		expect(rows).toHaveLength(1);
+		expect(rows[0].items.filter(item => item.kind === 'aura')).toHaveLength(1);
+		expect(model.rows.filter(r => r.kind === 'aura')).toHaveLength(0);
+	});
+
+	it('keeps the Buffs row of an aura with no cast to map onto', () => {
+		const model = build([castOf(ActionId.fromSpellId(11585), 1)], [aura(ActionId.fromSpellId(12345))]);
+		expect(model.rows.filter(r => r.kind === 'aura')).toHaveLength(1);
+	});
+
+	it('shows a stance only in its resource row, with no cast row for the stance', () => {
+		const battleStance = ActionId.fromSpellId(2457);
+		const bloodthirst = ActionId.fromSpellId(23894);
+		const model = build([castOf(battleStance, 1), castOf(bloodthirst, 2)], [aura(battleStance)]);
+		const castRows = model.rows.filter((r): r is CastRow => r.kind === 'cast');
+		expect(castRows.map(r => r.actionId.spellId)).toEqual([23894]);
+		const auraRows = model.rows.filter(r => r.kind === 'aura');
+		expect(auraRows).toHaveLength(1);
+		expect(auraRows[0].section).toBe(castRows[0].section);
 	});
 });
 

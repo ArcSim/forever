@@ -316,8 +316,12 @@ export function buildRotationModel({ player, targets, duration, showGcd }: Build
 
 	addGcdRow(playerSection, player);
 
+	const auraAsResourceKeys = new Set(AURA_AS_RESOURCE.map(auraId => auraId.equalityKey()));
 	const playerCastsByAbility = sortedCastsByAbility(player);
-	playerCastsByAbility.forEach(castLogs => addCastRow(playerSection, castLogs, buffsAndDebuffsById));
+	// A cast whose aura has its row in the resource section, a warrior stance, shows there and gets no row of its own.
+	playerCastsByAbility
+		.filter(castLogs => !auraAsResourceKeys.has(castLogs[0].actionId!.equalityKey()))
+		.forEach(castLogs => addCastRow(playerSection, castLogs, buffsAndDebuffsById));
 
 	if (player.pets.length > 0) {
 		const playerPets = new Map<string, { pet: UnitMetrics; castsByAbility: Array<Array<CastLog>> }>();
@@ -336,7 +340,6 @@ export function buildRotationModel({ player, targets, duration, showGcd }: Build
 		});
 	}
 
-	const auraAsResourceKeys = new Set(AURA_AS_RESOURCE.map(auraId => auraId.equalityKey()));
 	const playerCastKeys = new Set(playerCastsByAbility.map(casts => casts[0].actionId!.equalityKeyIgnoringTag()));
 	const buffsToShow = buffsById.filter(auraUptimeLogs => {
 		const actionId = auraUptimeLogs[0].actionId;
@@ -344,7 +347,8 @@ export function buildRotationModel({ player, targets, duration, showGcd }: Build
 		// scan, so with no player casts at all it never ran. Kept that way here: this is a
 		// performance change, and correcting it would move rows.
 		if (!actionId || playerCastKeys.size === 0) return true;
-		return !playerCastKeys.has(actionId.equalityKeyIgnoringTag()) && !auraAsResourceKeys.has(actionId.equalityKey());
+		const mapped = buffAuraToSpellIdMap[actionId.spellId] ?? actionId;
+		return !playerCastKeys.has(mapped.equalityKeyIgnoringTag()) && !auraAsResourceKeys.has(actionId.equalityKey());
 	});
 	if (buffsToShow.length > 0) {
 		const section = addSection('buffs', 'buffs', '', true, null);
