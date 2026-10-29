@@ -1,5 +1,5 @@
 import { APLActionItemSwap_SwapSet } from '@generated/proto/apl';
-import { ActionID as ActionIdProto, ItemRandomSuffix, OtherAction } from '@generated/proto/common';
+import { ActionID as ActionIdProto, ItemRandomSuffix, ItemSlot, OtherAction } from '@generated/proto/common';
 import { ResourceType } from '@generated/proto/spell';
 import { IconData, UIItem as Item } from '@generated/proto/ui';
 import { WarlockOptions_Summon as Summon } from '@generated/proto/warlock';
@@ -638,6 +638,11 @@ export class ActionId {
 			default:
 				if (tag === -1) {
 					name += ` (${i18n.t('common.action_tags.external')})`;
+				} else if (tag === ItemSlot.ItemSlotMainHand) {
+					// A copy one weapon hand carries is tagged with that hand's item slot.
+					name += ` (${i18n.t('common.action_tags.main_hand')})`;
+				} else if (tag === ItemSlot.ItemSlotOffHand) {
+					name += ` (${i18n.t('common.action_tags.off_hand')})`;
 				} else if (tag) {
 					name += ' (??)';
 				}
