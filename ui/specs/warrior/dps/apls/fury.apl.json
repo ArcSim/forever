@@ -25,10 +25,7 @@
 	{"action":{"condition":{"isExecutePhase":{"threshold":"E20"}},"castSpell":{"spellId":{"spellId":20662}}}},
 	{"action":{"castSpell":{"spellId":{"spellId":1680,"tag":1}}}},
 	{"action":{"castSpell":{"spellId":{"spellId":23894}}}},
-	{"action":{"condition":{"and":{"vals":[{"variableRef":{"name":"Manual: Heroic Strike IX"}},{"cmp":{"op":"OpEq","lhs":{"numberTargets":{}},"rhs":{"const":{"val":"1"}}}},{"not":{"val":{"isExecutePhase":{"threshold":"E20"}}}},{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"40"}}}}]}},"castSpell":{"spellId":{"spellId":25286,"tag":1}}}},
-	{"action":{"condition":{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Heroic Strike IX"}}}},{"cmp":{"op":"OpEq","lhs":{"numberTargets":{}},"rhs":{"const":{"val":"1"}}}},{"not":{"val":{"isExecutePhase":{"threshold":"E20"}}}},{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"40"}}}}]}},"castSpell":{"spellId":{"spellId":11567,"tag":1}}}},
-	{"action":{"condition":{"and":{"vals":[{"variableRef":{"name":"Manual: Heroic Strike IX"}},{"variableRef":{"name":"Delay Check"}},{"cmp":{"op":"OpGt","lhs":{"currentRage":{}},"rhs":{"const":{"val":"60"}}}}]}},"castSpell":{"spellId":{"spellId":25286,"tag":1}}}},
-	{"action":{"condition":{"and":{"vals":[{"not":{"val":{"variableRef":{"name":"Manual: Heroic Strike IX"}}}},{"variableRef":{"name":"Delay Check"}},{"cmp":{"op":"OpGt","lhs":{"currentRage":{}},"rhs":{"const":{"val":"60"}}}}]}},"castSpell":{"spellId":{"spellId":11567,"tag":1}}}},
+	{"action":{"condition":{"or":{"vals":[{"and":{"vals":[{"cmp":{"op":"OpEq","lhs":{"numberTargets":{}},"rhs":{"const":{"val":"1"}}}},{"not":{"val":{"isExecutePhase":{"threshold":"E20"}}}},{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"40"}}}}]}},{"and":{"vals":[{"variableRef":{"name":"Delay Check"}},{"cmp":{"op":"OpGt","lhs":{"currentRage":{}},"rhs":{"const":{"val":"60"}}}}]}}]}},"groupReference":{"groupName":"Queue Heroic Strike"}}},
 	{"action":{"condition":{"and":{"vals":[{"cmp":{"op":"OpGt","lhs":{"numberTargets":{}},"rhs":{"const":{"val":"1"}}}},{"or":{"vals":[{"cmp":{"op":"OpGe","lhs":{"currentRage":{}},"rhs":{"const":{"val":"40"}}}}]}}]}},"castSpell":{"spellId":{"spellId":20569,"tag":1}}}},
 	{"action":{"condition":{"variableRef":{"name":"Rend: Can Cast"}},"castSpell":{"spellId":{"spellId":11574}}}},
 	{"action":{"condition":{"variableRef":{"name":"Battle Stance: Wanted"}},"castSpell":{"spellId":{"spellId":2457}}}},
@@ -54,7 +51,8 @@
 	{"name":"Sunder Armor","actions":[{"action":{"condition":{"cmp":{"op":"OpLt","lhs":{"auraNumStacks":{"sourceUnit":{"type":"CurrentTarget"},"auraId":{"spellId":11597},"includeReactionTime":true}},"rhs":{"const":{"val":"5"}}}},"castSpell":{"spellId":{"spellId":11597}}}}]},
 	{"name":"Sunder Armor: Refresh","actions":[{"action":{"condition":{"and":{"vals":[{"variableRef":{"name":"Delay Check"}},{"cmp":{"op":"OpLe","lhs":{"auraRemainingTime":{"sourceUnit":{"type":"CurrentTarget"},"auraId":{"spellId":11597}}},"rhs":{"const":{"val":"10s"}}}}]}},"castSpell":{"spellId":{"spellId":11597}}}}]},
 	{"name":"CD: Trinkets","actions":[{"action":{"castAllStatBuffCooldowns":{"statType1":0,"statType2":14,"statType3":19}}},{"action":{"castAllStatBuffCooldowns":{"statType1":18,"statType2":20,"statType3":-1}}},{"action":{"castSpell":{"spellId":{"itemId":21670}}}},{"action":{"castSpell":{"spellId":{"itemId":23041}}}},{"action":{"castSpell":{"spellId":{"itemId":22954}}}},{"action":{"castSpell":{"spellId":{"spellId":29602}}}},{"action":{"castSpell":{"spellId":{"itemId":21891}}}},{"action":{"castSpell":{"spellId":{"itemId":274759}}}}]},
-	{"name":"Overpower Weaving","actions":[{"action":{"condition":{"variableRef":{"name":"Overpower: Can Cast"}},"castSpell":{"spellId":{"spellId":11585}}}}]}
+	{"name":"Overpower Weaving","actions":[{"action":{"condition":{"variableRef":{"name":"Overpower: Can Cast"}},"castSpell":{"spellId":{"spellId":11585}}}}]},
+	{"name":"Queue Heroic Strike","actions":[{"action":{"condition":{"variableRef":{"name":"Manual: Heroic Strike IX"}},"castSpell":{"spellId":{"spellId":25286,"tag":1}}}},{"action":{"condition":{"not":{"val":{"variableRef":{"name":"Manual: Heroic Strike IX"}}}},"castSpell":{"spellId":{"spellId":11567,"tag":1}}}}]}
 	],
 	"valueVariables": [
 	{"name":"Manual: Heroic Strike IX","value":{"const":{"val":"false"}}},
