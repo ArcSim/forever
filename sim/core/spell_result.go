@@ -395,7 +395,7 @@ func (spell *Spell) calcDamageInternal(sim *Simulation, target *Unit, baseDamage
 	// multiplier is the blocked and unblocked damage over the damage before the outcome.
 	result.PreMitigationDamage = afterAttackMods * targetMultiplier
 	if afterTargetMods > 0 {
-		result.PreMitigationDamage = afterAttackMods * targetMultiplier * (afterOutcome + result.BlockedDamage) / afterTargetMods
+		result.PreMitigationDamage = result.PreMitigationDamage * (afterOutcome + result.BlockedDamage) / afterTargetMods
 	}
 
 	// Restore partial outcome
