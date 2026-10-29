@@ -7290,13 +7290,10 @@
 										},
 										"tooltip": {
 											"type": "string"
-										},
-										"slot": {
-											"type": "string"
 										}
 									},
 									"additionalProperties": false,
-									"required": ["label", "tooltip", "slot"]
+									"required": ["label", "tooltip"]
 								},
 								"selected_conjured": {
 									"type": "object",

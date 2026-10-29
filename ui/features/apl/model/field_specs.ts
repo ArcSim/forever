@@ -270,7 +270,7 @@ export const resolveField = (descriptor: APLFieldDescriptor, player: Player<any>
 		case 'potionSlot':
 			// None is 0, which fieldInputConfig reads as unset and replaces with this default, so the
 			// default has to be None for every slot to stay selectable.
-			return asEnum(descriptor.field, POTION_SLOTS, () => OtherAction.OtherActionNone, i18n.t('rotation_tab.apl.values.selected_potion.slot'));
+			return asEnum(descriptor.field, POTION_SLOTS, () => OtherAction.OtherActionNone);
 		case 'comparisonOperator':
 			return asEnum(descriptor.field, COMPARISON_OPERATORS, () => ComparisonOperator.OpEq);
 		case 'mathOperator':
