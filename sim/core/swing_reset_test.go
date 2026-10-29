@@ -291,3 +291,18 @@ func TestHasteLossMidSwingIsNoSwingDelay(t *testing.T) {
 		t.Fatalf("expected no swing delay after a haste loss, got MH %v and OH %v", aa.mh.pendingSwingDelay, aa.oh.pendingSwingDelay)
 	}
 }
+
+// A haste gain mid-swing brings the swing in, and a delay on top of it still counts in full.
+func TestDelayAfterHasteGainIsTheWholeDelay(t *testing.T) {
+	sim, fc := setupSwingResetSim(t)
+	aa := &fc.AutoAttacks
+	const delay = 200 * time.Millisecond
+
+	fc.MultiplyMeleeSpeed(sim, 1.3)
+	aa.DelayMeleeBy(sim, delay)
+	stepSwingSim(t, sim, max(aa.MainhandSwingAt(), aa.OffhandSwingAt()))
+
+	if aa.mh.pendingSwingDelay != delay || aa.oh.pendingSwingDelay != delay {
+		t.Fatalf("expected a %v swing delay on each hand, got MH %v and OH %v", delay, aa.mh.pendingSwingDelay, aa.oh.pendingSwingDelay)
+	}
+}
