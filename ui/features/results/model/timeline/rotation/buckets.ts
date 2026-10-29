@@ -49,11 +49,6 @@ export const AURA_AS_RESOURCE: ActionId[] = [
 
 	// Warlock
 	ActionId.fromItemId(6265), // Soul Shards
-
-	// Warrior stances
-	ActionId.fromSpellId(2457), // Battle Stance
-	ActionId.fromSpellId(71), // Defensive Stance
-	ActionId.fromSpellId(2458), // Berserker Stance
 ];
 export const IDS_TO_GROUP_FOR_ROTATION: Array<number> = [
 	6774, // Rogue - Slice and Dice

@@ -316,12 +316,8 @@ export function buildRotationModel({ player, targets, duration, showGcd }: Build
 
 	addGcdRow(playerSection, player);
 
-	const auraAsResourceKeys = new Set(AURA_AS_RESOURCE.map(auraId => auraId.equalityKey()));
 	const playerCastsByAbility = sortedCastsByAbility(player);
-	// A cast whose aura has its row in the resource section, a warrior stance, shows there and gets no row of its own.
-	playerCastsByAbility
-		.filter(castLogs => !auraAsResourceKeys.has(castLogs[0].actionId!.equalityKey()))
-		.forEach(castLogs => addCastRow(playerSection, castLogs, buffsAndDebuffsById));
+	playerCastsByAbility.forEach(castLogs => addCastRow(playerSection, castLogs, buffsAndDebuffsById));
 
 	if (player.pets.length > 0) {
 		const playerPets = new Map<string, { pet: UnitMetrics; castsByAbility: Array<Array<CastLog>> }>();
@@ -340,6 +336,7 @@ export function buildRotationModel({ player, targets, duration, showGcd }: Build
 		});
 	}
 
+	const auraAsResourceKeys = new Set(AURA_AS_RESOURCE.map(auraId => auraId.equalityKey()));
 	const playerCastKeys = new Set(playerCastsByAbility.map(casts => casts[0].actionId!.equalityKeyIgnoringTag()));
 	const buffsToShow = buffsById.filter(auraUptimeLogs => {
 		const actionId = auraUptimeLogs[0].actionId;

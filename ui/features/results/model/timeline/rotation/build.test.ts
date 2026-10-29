@@ -89,17 +89,6 @@ describe('buffs section', () => {
 		const model = build([castOf(ActionId.fromSpellId(11585), 1)], [aura(ActionId.fromSpellId(12345))]);
 		expect(model.rows.filter(r => r.kind === 'aura')).toHaveLength(1);
 	});
-
-	it('shows a stance only in its resource row, with no cast row for the stance', () => {
-		const battleStance = ActionId.fromSpellId(2457);
-		const bloodthirst = ActionId.fromSpellId(23894);
-		const model = build([castOf(battleStance, 1), castOf(bloodthirst, 2)], [aura(battleStance)]);
-		const castRows = model.rows.filter((r): r is CastRow => r.kind === 'cast');
-		expect(castRows.map(r => r.actionId.spellId)).toEqual([23894]);
-		const auraRows = model.rows.filter(r => r.kind === 'aura');
-		expect(auraRows).toHaveLength(1);
-		expect(auraRows[0].section).toBe(castRows[0].section);
-	});
 });
 
 describe('resource rows', () => {
