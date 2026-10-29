@@ -1,12 +1,13 @@
 import { OtherAction } from '@generated/proto/common';
 import { ResourceType } from '@generated/proto/spell';
+import i18n from '@i18n/config';
 import { ActionId } from '@sim/proto/action_id';
 import type { AuraUptimeLog, CastLog, ResourceGroupLog } from '@sim/proto/combat_log';
 import type { UnitMetrics } from '@sim/proto/sim_result';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { buildRotationModel } from './build';
-import type { CastItem, CastRow, ResourceItem, ResourceRow } from './types';
+import type { AuraRow, CastItem, CastRow, ResourceItem, ResourceRow } from './types';
 
 const SEAL = ActionId.fromSpellId(20293);
 
@@ -88,6 +89,30 @@ describe('buffs section', () => {
 	it('keeps the Buffs row of an aura with no cast to map onto', () => {
 		const model = build([castOf(ActionId.fromSpellId(11585), 1)], [aura(ActionId.fromSpellId(12345))]);
 		expect(model.rows.filter(r => r.kind === 'aura')).toHaveLength(1);
+	});
+
+	describe("the raid's Windfury Totem", () => {
+		const auraRows = async (spellIds: Array<number>) => {
+			vi.spyOn(ActionId, 'getTooltipData').mockImplementation(async () => ({ name: 'Windfury Totem', icon: '' }) as never);
+			const ids = await Promise.all(spellIds.map(spellId => ActionId.fromSpellId(spellId, 0, -1).fill()));
+			return build([], ids.map(aura)).rows.filter((r): r is AuraRow => r.kind === 'aura');
+		};
+
+		it('draws the standing totem on the row of the aura that rolls its proc, and the attack power on a row of its own', async () => {
+			const rows = await auraRows([10614, 10612, 10610]);
+			const external = i18n.t('common.action_tags.external');
+			expect(rows.map(row => [row.actionId.spellId, row.label, row.items.length])).toEqual(
+				expect.arrayContaining([
+					[10612, `Windfury Totem (${external})`, 2],
+					[10610, `Windfury Totem (${i18n.t('common.stats.attack_power')} - ${external})`, 1],
+				]),
+			);
+			expect(rows).toHaveLength(2);
+		});
+
+		it('keeps the standing totem on a row of its own without the aura that rolls the proc', async () => {
+			expect((await auraRows([10614])).map(row => row.actionId.spellId)).toEqual([10614]);
+		});
 	});
 });
 

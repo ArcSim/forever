@@ -576,6 +576,15 @@ export class ActionId {
 					name += ` (${i18n.t('common.action_tags.external')})`;
 				}
 				break;
+			case 'Windfury Totem':
+				// The totem, its raid aura and the attack power its proc grants (10610) share one name.
+				if (this.spellId === 10610) {
+					const attackPower = i18n.t('common.stats.attack_power');
+					name += tag === -1 ? ` (${attackPower} - ${i18n.t('common.action_tags.external')})` : ` (${attackPower})`;
+				} else if (tag === -1) {
+					name += ` (${i18n.t('common.action_tags.external')})`;
+				}
+				break;
 			case 'Dummy Spell':
 				if (tag === 100000) {
 					[
