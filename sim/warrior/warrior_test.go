@@ -500,6 +500,69 @@ func TestRetaliationCounterattackSpendsNoFlurryCharge(t *testing.T) {
 	}
 }
 
+// Every white swing uses a Flurry charge whatever its outcome, and a Heroic Strike uses one only
+// when it misses.
+func TestFlurryChargesFollowTheSwingOutcome(t *testing.T) {
+	cases := []struct {
+		name    string
+		spell   func(*dps.DpsWarrior) *core.Spell
+		outcome core.HitOutcome
+		want    int32
+	}{
+		{"a missed main-hand swing uses a charge", mainHandSwing, core.OutcomeMiss, 2},
+		{"a dodged main-hand swing uses a charge", mainHandSwing, core.OutcomeDodge, 2},
+		{"a parried main-hand swing uses a charge", mainHandSwing, core.OutcomeParry, 2},
+		{"a missed off-hand swing uses a charge", offHandSwing, core.OutcomeMiss, 2},
+		{"a dodged off-hand swing uses a charge", offHandSwing, core.OutcomeDodge, 2},
+		{"a parried off-hand swing uses a charge", offHandSwing, core.OutcomeParry, 2},
+		{"a missed Heroic Strike uses a charge", heroicStrike, core.OutcomeMiss, 2},
+		{"a dodged Heroic Strike uses none", heroicStrike, core.OutcomeDodge, 3},
+		{"a parried Heroic Strike uses none", heroicStrike, core.OutcomeParry, 3},
+		{"a landed Heroic Strike uses none", heroicStrike, core.OutcomeHit, 3},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			sim, warrior := orcWarriorSim(t, "p1_fury", furyTalents)
+			flurry := warrior.GetAura("Flurry")
+			spell := c.spell(warrior)
+			if flurry == nil || spell == nil {
+				t.Fatalf("Flurry %v, spell %v; want both registered", flurry, spell)
+			}
+			flurry.Activate(sim)
+			flurry.SetStacks(sim, 3)
+
+			dealOutcome(sim, warrior, spell, c.outcome)
+
+			if got := flurry.GetStacks(); got != c.want {
+				t.Errorf("Flurry holds %d charges, want %d", got, c.want)
+			}
+		})
+	}
+
+	t.Run("a missed swing does not start Flurry", func(t *testing.T) {
+		sim, warrior := orcWarriorSim(t, "p1_fury", furyTalents)
+		dealOutcome(sim, warrior, mainHandSwing(warrior), core.OutcomeMiss)
+		if warrior.GetAura("Flurry").IsActive() {
+			t.Error("Flurry is up after a missed swing, want it down")
+		}
+	})
+}
+
+func mainHandSwing(warrior *dps.DpsWarrior) *core.Spell { return warrior.AutoAttacks.MHAuto() }
+func offHandSwing(warrior *dps.DpsWarrior) *core.Spell  { return warrior.AutoAttacks.OHAuto() }
+func heroicStrike(warrior *dps.DpsWarrior) *core.Spell {
+	return warrior.GetSpell(core.ActionID{SpellID: 11567})
+}
+
+func dealOutcome(sim *core.Simulation, warrior *dps.DpsWarrior, spell *core.Spell, outcome core.HitOutcome) {
+	result := &core.SpellResult{Target: warrior.CurrentTarget, Outcome: outcome}
+	if outcome.Matches(core.OutcomeLanded) {
+		result.Damage = 100
+	}
+	warrior.OnSpellHitDealt(sim, spell, result)
+}
+
 // Death Wish takes the global cooldown its row states and does not hold the rotation beyond it, so
 // an off-GCD ability can follow it at once.
 func TestDeathWishLeavesTheRotationFree(t *testing.T) {
