@@ -5,7 +5,7 @@
       "source": "blader/humanizer",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": "d85c4727f62296887c3206e32a99caeed7611af7c4701c1b9931897260e31a73"
+      "computedHash": "1e67c3a4a675bd0c961b1fd8ebb718174f9a61a547d9bedad2ade5eb99cce831"
     },
     "wowsims-abilities-auras": {
       "source": "./.github/skills",
@@ -15,7 +15,7 @@
     "wowsims-apl": {
       "source": "./.github/skills",
       "sourceType": "local",
-      "computedHash": "8aa6e2908f26a65faf043ac872384d3fcad37d015492bb501f42b5ad412f9d2a"
+      "computedHash": "bef3ba26242e60b0fdfaf5a65a2324b479387ff41a59a6e2b783ff2f95256f9f"
     },
     "wowsims-bulk-sim": {
       "source": "./.github/skills",
