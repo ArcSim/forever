@@ -56,7 +56,8 @@ func (mage *Mage) registerIncineration() {
 	spelldata.ParseStatic(&mage.Character, spellData.Incineration.Rank(mage.Talents.Incineration))
 }
 
-// "Reduces the casting time of your Fireball, Frostfire Bolt, and Arcane Wrath spells by 0.1/0.2/0.3/0.4/0.5 sec."
+// "Reduces the casting time of your Fireball, Frostfire Bolt, and Arcane Wrath spells by
+// 0.1/0.2/0.3/0.4/0.5 sec."
 func (mage *Mage) registerAccelerant() {
 	if mage.Talents.Accelerant == 0 {
 		return
