@@ -278,7 +278,7 @@ func TestDamageTakenRageGeneration(t *testing.T) {
 func TestPreMitigationDamage(t *testing.T) {
 	// A 1000 hit through 5755 armor against a level 63 attacker (half), a 10% damage taken reduction,
 	// a crit, a 100 block and a 300 absorb: 1000 * 0.5 * 0.9 * 2 - 100 - 300 = 500 taken. Before
-	// mitigation the crit counts and nothing else does: 2000.
+	// mitigation the crit and the damage taken reduction count and nothing else does: 1800.
 	sim := SetupFakeRageSim()
 	fw := sim.Raid.Parties[0].Players[0].(*FakeRageWarrior)
 	attacker := sim.Encounter.ActiveTargetUnits[0]
@@ -307,12 +307,12 @@ func TestPreMitigationDamage(t *testing.T) {
 	if !WithinToleranceFloat64(500, result.Damage, 0.001) {
 		t.Fatalf("Damage taken: Expected: %0.3f, Actual: %0.3f", 500.0, result.Damage)
 	}
-	if !WithinToleranceFloat64(2000, result.PreMitigationDamage, 0.001) {
-		t.Fatalf("Damage before mitigation: Expected: %0.3f, Actual: %0.3f", 2000.0, result.PreMitigationDamage)
+	if !WithinToleranceFloat64(1800, result.PreMitigationDamage, 0.001) {
+		t.Fatalf("Damage before mitigation: Expected: %0.3f, Actual: %0.3f", 1800.0, result.PreMitigationDamage)
 	}
-	// 2.5 * 0.6 * 2000 / 243.64 = 12.313.
-	if !WithinToleranceFloat64(12.313, gained, 0.001) {
-		t.Fatalf("Rage from the hit: Expected: %0.3f, Actual: %0.3f", 12.313, gained)
+	// 2.5 * 0.6 * 1800 / 243.64 = 11.082.
+	if !WithinToleranceFloat64(11.082, gained, 0.001) {
+		t.Fatalf("Rage from the hit: Expected: %0.3f, Actual: %0.3f", 11.082, gained)
 	}
 }
 
