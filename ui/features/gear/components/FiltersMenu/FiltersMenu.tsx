@@ -98,26 +98,27 @@ export const FiltersMenuView = ({
 			bodyClassName="gap-2"
 			title={i18n.t('gear_tab.gear_picker.filters.title')}>
 			<MenuSection name={i18n.t('gear_tab.gear_picker.filters.general')}>
-				{numberInput('maxRequiredLevel', 'filters-required-level', i18n.t('gear_tab.gear_picker.filters.required_level'), { showZeroes: false })}
-				<div className="grid grid-cols-split gap-x-(--modal-padding)">
+				<div className="grid grid-cols-split gap-x-(--modal-padding) gap-y-2">
+					{numberInput('maxRequiredLevel', 'filters-required-level', i18n.t('gear_tab.gear_picker.filters.required_level'), { showZeroes: false })}
+					<span aria-hidden />
+					<ChoiceField
+						id="filters-faction-restriction"
+						label={i18n.t('gear_tab.gear_picker.filters.faction_restrictions')}
+						options={[
+							{ value: FactionFilter.FactionFilterRace, label: factionLabels[raceFaction] },
+							{ value: FactionFilter.FactionFilterAny, label: factionLabels[Faction.Unknown] },
+						]}
+						value={filters.factionFilter}
+						onChange={value =>
+							onFiltersChange(next => {
+								next.factionFilter = value;
+							})
+						}
+					/>
 					{numberInput('minIlvl', 'filters-min-ilvl', i18n.t('gear_tab.gear_picker.filters.min_ilvl'), { showZeroes: false })}
 					<span className="flex justify-center self-end py-2">-</span>
 					{numberInput('maxIlvl', 'filters-max-ilvl', i18n.t('gear_tab.gear_picker.filters.max_ilvl'), { showZeroes: false })}
 				</div>
-				<ChoiceField
-					id="filters-faction-restriction"
-					label={i18n.t('gear_tab.gear_picker.filters.faction_restrictions')}
-					options={[
-						{ value: FactionFilter.FactionFilterRace, label: factionLabels[raceFaction] },
-						{ value: FactionFilter.FactionFilterAny, label: factionLabels[Faction.Unknown] },
-					]}
-					value={filters.factionFilter}
-					onChange={value =>
-						onFiltersChange(next => {
-							next.factionFilter = value;
-						})
-					}
-				/>
 			</MenuSection>
 			<MenuSection name={i18n.t('gear_tab.gear_picker.filters.source')} className="ui-filters-menu-section-bool-list">
 				{SOURCES.map(source => {
