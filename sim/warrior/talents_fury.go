@@ -153,10 +153,9 @@ func (warrior *Warrior) registerFlurry() {
 
 	// The proc shape with no roll: 12319 states its rate as "always" and the crit is the
 	// condition, which this handler reads off the result because the same listener hears every
-	// melee result, whatever its outcome. A white swing uses a charge on a hit, a glance, a miss, a
-	// dodge or a parry. A missed Heroic Strike uses a charge, and a dodged, parried or landed one
-	// does not. The row's mask reaches ranged and spell hits too; the tooltip says a melee critical
-	// strike, so the mask stays the caller's.
+	// melee result. Every white swing uses a charge whatever its outcome, and a Heroic Strike uses
+	// one only when it misses. The row's mask reaches ranged and spell hits too; the tooltip says a
+	// melee critical strike, so the mask stays the caller's.
 	trigger := spelldata.ProcTrigger(&warrior.Character, spellData.Flurry.Rank(warrior.Talents.Flurry),
 		func(sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {
 			if spellData.Whirlwind.Contains(spell) && spell.ProcMask.Matches(core.ProcMaskMeleeOH) {
@@ -174,13 +173,14 @@ func (warrior *Warrior) registerFlurry() {
 			}
 
 			if spell.ProcMask.Matches(core.ProcMaskMeleeWhiteHit) ||
-				(spellData.HeroicStrike.Contains(spell) && result.Outcome.Matches(core.OutcomeMiss)) {
+				(result.Outcome.Matches(core.OutcomeMiss) && spellData.HeroicStrike.Contains(spell)) {
 				flurryAura.RemoveStack(sim)
 			}
 		})
 	trigger.Name = "Flurry - Trigger"
 	trigger.ProcMask = core.ProcMaskMelee
 	trigger.Outcome = core.OutcomeEmpty
+	trigger.RequireDamageDealt = false
 	trigger.TriggerImmediately = true
 
 	warrior.MakeProcTriggerAura(trigger)
