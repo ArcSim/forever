@@ -305,10 +305,10 @@ func (mage *Mage) registerFingersOfFrost() {
 //
 // The tooltip still names Frost Blast, which the game files do not ship. The talent (11180) names no
 // class mask, so the spells are checked here; its chance is effect 2, which the resolver reads, and
-// its stack cap effect 1. The debuff's (12579) damage taken is
-// A_MOD_SPELL_DAMAGE_FROM_CASTER on Cone of Cold's class flags, so it is parsed onto this mage's
-// attack table against the target; its spell damage is a dummy (effect 2), which Cone of Cold adds
-// to its coefficient per stack (wintersChillCoefficient). Cone of Cold spends the stacks on each
+// its stack cap effect 1. The debuff's (12579) damage taken is A_MOD_SPELL_DAMAGE_FROM_CASTER on Cone
+// of Cold's class flags, so it is parsed onto this mage's attack table against the target; its spell
+// damage is a dummy (effect 2), which Cone of Cold adds to its coefficient per stack
+// (wintersChillCoefficient). Cone of Cold spends the stacks on each
 // target it lands on (consumeWintersChill). Each mage's debuff carries its own label.
 func (mage *Mage) registerWinterChill() {
 	if mage.Talents.WintersChill == 0 {
