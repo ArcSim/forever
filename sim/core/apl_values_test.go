@@ -966,6 +966,13 @@ func TestValueSelectedConsumables(t *testing.T) {
 		t.Errorf("Selected Potion: resource pick = %t, offensive pick = %t, other = %t, want true, true, false",
 			selected.GetBool(sim), selectedOffensive.GetBool(sim), other.GetBool(sim))
 	}
+	inSlot := func(id int32, slot proto.PotionClass) bool {
+		return rot.newValueSelectedPotion(&proto.APLValueSelectedPotion{PotionId: ActionID{ItemID: id}.ToProto(), Slot: slot}, nil).GetBool(sim)
+	}
+	if !inSlot(102, proto.PotionClass_PotionClassOffensive) || inSlot(100, proto.PotionClass_PotionClassOffensive) || inSlot(102, proto.PotionClass_PotionClassDefensive) {
+		t.Errorf("Selected Potion in a slot: offensive pick = %t, resource pick = %t, offensive pick in the defensive slot = %t, want true, false, false",
+			inSlot(102, proto.PotionClass_PotionClassOffensive), inSlot(100, proto.PotionClass_PotionClassOffensive), inSlot(102, proto.PotionClass_PotionClassDefensive))
+	}
 
 	selectedConjured := rot.newValueSelectedConjured(&proto.APLValueSelectedConjured{ConjuredId: ActionID{ItemID: 200}.ToProto()}, nil)
 	otherConjured := rot.newValueSelectedConjured(&proto.APLValueSelectedConjured{ConjuredId: ActionID{ItemID: 201}.ToProto()}, nil)

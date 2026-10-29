@@ -143,11 +143,10 @@ with `core.SinglePlayerRaidProto` and the rotation from the suite's loader (`cor
   (`Aura Remaining Time` above `GCD Time To Ready`). Swapping at the GCD drops the rage gained since a mid-GCD swap
   would have fired, about half a percent of DPS. Checking the spenders above Rend costs more DPS than the swaps it
   saves, and Fury keeps Overpower Weaving above Execute, Bloodthirst and Whirlwind (PR #732).
-- **`Selected Potion` reads every potion slot** (`Character.IsPickedPotion` in `sim/core/consumes.go`), so a line
-  cannot tell which placeholder holds the potion. The Fury and Arms presets keep a picked rage potion on their rage
-  rule in either slot: the Offensive Potion line aligns with the cooldowns only when no rage potion is picked, and a
-  second Offensive Potion line with the Resource Potion line's rage check sits right below that one. A non-rage
-  offensive potion beside a rage potion in the resource slot waits for the same rage check.
+- **`Selected Potion` reads every potion slot unless its Slot is set** (`sim/core/apl_values_consumables.go`). A line
+  that treats one slot's potion differently reads that slot: the Fury and Arms presets keep a rage potion picked as
+  the offensive potion on the Resource Potion line's rage check (`Offensive Potion: Rage`), and an offensive potion
+  beside a rage potion in another slot still aligns with the cooldowns.
 
 ## Keeping this skill true
 

@@ -7,7 +7,7 @@ import {
 	APLValueIsExecutePhase_ExecutePhaseThreshold as ExecutePhaseThreshold,
 	APLValueMath_MathOperator as MathOperator,
 } from '@generated/proto/apl';
-import { ActionID, AreaType, MobType, RangedWeaponType, Stat } from '@generated/proto/common';
+import { ActionID, AreaType, MobType, PotionClass, RangedWeaponType, Stat } from '@generated/proto/common';
 import { ShamanTotems_TotemType as TotemType } from '@generated/proto/shaman';
 import { WarlockOptions_CurseOptions as CurseOptions, WarlockOptions_Summon as Summon } from '@generated/proto/warlock';
 import i18n from '@i18n/config';
@@ -139,6 +139,16 @@ const ITEM_SWAP_SETS: EnumTable = {
 	],
 };
 
+const POTION_SLOTS: EnumTable = {
+	defaultLabel: none(),
+	options: [
+		{ value: PotionClass.PotionClassUnknown, label: i18n.t('rotation_tab.apl.potion_slots.any') },
+		{ value: PotionClass.PotionClassOffensive, label: i18n.t('settings_tab.consumables.potions.offensive') },
+		{ value: PotionClass.PotionClassDefensive, label: i18n.t('settings_tab.consumables.potions.defensive') },
+		{ value: PotionClass.PotionClassResource, label: i18n.t('settings_tab.consumables.potions.resource') },
+	],
+};
+
 const COMPARISON_OPERATORS: EnumTable = {
 	defaultLabel: none(),
 	options: [
@@ -257,6 +267,10 @@ export const resolveField = (descriptor: APLFieldDescriptor, player: Player<any>
 			return asEnum(descriptor.field, STAT_TYPES, () => 0, i18n.t('rotation_tab.apl.helpers.field_configs.buff_type'));
 		case 'itemSwapSet':
 			return asEnum(descriptor.field, ITEM_SWAP_SETS, () => ItemSwapSet.Swap1);
+		case 'potionSlot':
+			// Unknown is 0, which fieldInputConfig reads as unset and replaces with this default, so the
+			// default has to be Unknown for every slot to stay selectable.
+			return asEnum(descriptor.field, POTION_SLOTS, () => PotionClass.PotionClassUnknown, i18n.t('rotation_tab.apl.values.selected_potion.slot'));
 		case 'comparisonOperator':
 			return asEnum(descriptor.field, COMPARISON_OPERATORS, () => ComparisonOperator.OpEq);
 		case 'mathOperator':
