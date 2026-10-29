@@ -96,15 +96,14 @@ export class ActionId {
 				baseName = i18n.t('common.action_names.rage_gain');
 				iconUrl = resourceTypeToIcon[ResourceType.ResourceTypeRage];
 				break;
-			case OtherAction.OtherActionAttack:
+			case OtherAction.OtherActionAttack: {
 				iconUrl = 'https://wow.zamimg.com/images/wow/icons/large/inv_sword_04.jpg';
 				// A name handed in is a filled one: an extra attack's, from the spell that tagged it.
 				if (name) break;
 				name = i18n.t('common.action_names.attack');
-				if (this.tag == 1) {
-					name += ` (${i18n.t('common.action_tags.main_hand')})`;
-				} else if (this.tag == 2) {
-					name += ` (${i18n.t('common.action_tags.off_hand')})`;
+				const hand = weaponHandName(this.tag);
+				if (hand) {
+					name += ` (${hand})`;
 				} else if (this.tag == 10610) {
 					// Windfury Totem's swings, tagged with 10610, the spell that grants them.
 					name += ` (${i18n.t('common.action_tags.windfury')})`;
@@ -118,6 +117,7 @@ export class ActionId {
 					name += ` (${i18n.t('common.action_tags.custom_boss')}) - ${i18n.t('common.action_tags.thrash')}`;
 				}
 				break;
+			}
 			case OtherAction.OtherActionShoot:
 				name = i18n.t('common.action_names.shoot');
 				iconUrl = 'https://wow.zamimg.com/images/wow/icons/large/ability_marksmanship.jpg';
@@ -258,7 +258,9 @@ export class ActionId {
 	// Returns an ActionId with the name and iconUrl fields filled.
 	// playerIndex is the optional index of the player to whom this ID corresponds.
 	async fill(playerIndex?: number): Promise<ActionId> {
-		if (this.otherId == OtherAction.OtherActionAttack && this.name == i18n.t('common.action_names.attack') && this.tag > 2) {
+		// The constructor names a hand's swing and a unit's attack by their tags, so a tagged attack
+		// it left bare is an extra attack.
+		if (this.otherId == OtherAction.OtherActionAttack && this.name == i18n.t('common.action_names.attack') && this.tag != 0) {
 			return this.fillExtraAttack();
 		}
 		if (this.name || this.iconUrl) {

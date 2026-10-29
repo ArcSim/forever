@@ -1,7 +1,8 @@
-import { ItemSlot } from '@generated/proto/common';
+import { ItemSlot, OtherAction } from '@generated/proto/common';
 import i18n from '@i18n/config';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { Database } from '../database';
 import { ActionId } from '.';
 
 afterEach(() => vi.restoreAllMocks());
@@ -19,6 +20,16 @@ describe('ActionId.fill', () => {
 		expect(await filledName(ActionId.fromSpellId(20007, 0, ItemSlot.ItemSlotMainHand), 'Holy Strength')).toBe(`Holy Strength (${mainHand})`);
 		expect(await filledName(ActionId.fromSpellId(28093, 0, ItemSlot.ItemSlotOffHand), 'Lightning Speed')).toBe(`Lightning Speed (${offHand})`);
 		expect(await filledName(ActionId.fromItemId(20749, ItemSlot.ItemSlotOffHand), 'Brilliant Wizard Oil')).toBe(`Brilliant Wizard Oil (${offHand})`);
+	});
+
+	it("names the auto attack's swings by their item slot and an extra attack by the spell that granted it", async () => {
+		const spellNames = vi.spyOn(Database, 'getSpellIconData').mockImplementation(async id => ({ name: id === 3391 ? 'Thrash' : '' }) as never);
+		const attack = (tag: number) => ActionId.fromOtherId(OtherAction.OtherActionAttack, tag).fill();
+		const name = i18n.t('common.action_names.attack');
+		expect((await attack(ItemSlot.ItemSlotMainHand)).name).toBe(`${name} (${mainHand})`);
+		expect((await attack(ItemSlot.ItemSlotOffHand)).name).toBe(`${name} (${offHand})`);
+		expect(spellNames).not.toHaveBeenCalled();
+		expect((await attack(3391)).name).toBe(`${name} (Thrash)`);
 	});
 
 	it("names a strike's hand beside its untagged cast", async () => {

@@ -89,9 +89,10 @@ rulings the code follows are in `references/rulings.md`; text here follows `wows
   `GetActiveAuraWithTag` or `IsActive()`. A per-caster debuff's label and slots are `wowsims-abilities-auras` §An aura
   or dot.
 - **A per-hand copy's `ActionID.Tag` is its hand's `ItemSlot`.** `ActionID.WithHand` (`sim/core/agent.go`) tags the
-  main-hand copy 14 and the off-hand copy 15, and the UI names those two tags as the hands
-  (`ui/sim/proto/action_id/index.ts`). On a spell or an item, tags 1 and 2 are not hands: each gives them its own meaning,
-  such as a queue spell or Weaponmaster's weapon branches. Only the auto attack's two swings keep tags 1 and 2.
+  main-hand copy 14 and the off-hand copy 15, the auto attack's two swings included, and the UI names those two tags as
+  the hands (`ui/sim/proto/action_id/index.ts`). An extra attack is the main-hand swing tagged with the granting spell's
+  id. Tags 1 and 2 are not hands: each spell or item gives them its own meaning, such as a queue spell or Weaponmaster's
+  weapon branches.
 
 ## Auras and exclusive effects
 
