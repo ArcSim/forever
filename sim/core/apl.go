@@ -3,6 +3,8 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
+	"time"
 
 	"github.com/wowsims/forever/sim/core/proto"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -15,6 +17,9 @@ type APLRotation struct {
 	groups         []*APLGroup
 	valueVariables []*APLValueVariable
 	resetActions   []*APLAction
+
+	// Walking in leaves the melee attack off: the rotation turns it on with Start Attack, or it comes on in melee range.
+	manualStartAttack bool
 
 	canMoveCloserKnown bool // canMoveCloser's answer is set once, as it depends only on the rotation.
 	canMoveCloserValue bool
@@ -59,6 +64,12 @@ type APLRotation struct {
 
 	// Used to avoid recursive APL loops.
 	inLoop bool
+
+	// The last "GCD free" line logged, so the log writes one only when it changes.
+	lastFreeGcdNote string
+
+	// This pass's earliest end of a press reaction, NeverExpires with none waiting.
+	arcReactionEnds time.Duration
 
 	// Set while a sequence asks whether its step is ready or runs it: major cooldowns skip their GCD
 	// wait, and a Change Target to the current target is a step that does nothing.
@@ -141,6 +152,7 @@ func (unit *Unit) newAPLRotation(config *proto.APLRotation) *APLRotation {
 	groupsConfig := config.Groups
 	rotation := &APLRotation{
 		unit:                    unit,
+		manualStartAttack:       config.ManualStartAttack,
 		variableCaches:          make(map[string]*variableCache),
 		evalGeneration:          1, // Start at 1 so zero-value generation fields never match
 		prepullValidations:      make([][]*proto.APLValidation, len(config.PrepullActions)),
@@ -427,6 +439,11 @@ func (rot *APLRotation) allPrepullActions() []*APLAction {
 func (rot *APLRotation) reset(sim *Simulation) {
 	rot.controllingActions = rot.controllingActions[:0]
 	rot.inLoop = false
+	rot.lastFreeGcdNote = ""
+	rot.arcReactionEnds = NeverExpires
+	for _, action := range rot.priorityList {
+		action.arcSeenReady = false
+	}
 	rot.interruptChannelIf = nil
 	rot.allowChannelRecastOnInterrupt = false
 	rot.evalGeneration++ // Invalidate any variable caches from previous iteration or initialization
@@ -492,6 +509,7 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 		}
 	}
 	free := apl.unit.GCD.IsReady(sim) && apl.unit.Hardcast.Expires <= sim.CurrentTime
+	apl.arcReactionEnds = NeverExpires
 	apl.unit.costBlocked = false
 	for nextAction := apl.firstAction(sim); ; i, nextAction = i+1, apl.getNextAction(sim) {
 		if i > 1000 {
@@ -533,10 +551,17 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 	if sim.Log != nil && i == 0 && !waitsOnCast {
 		apl.unit.Log(sim, "No available actions!")
 	}
+	// after the OOM check, as its CanCast calls mark the pass cost blocked
+	if sim.Log != nil {
+		apl.logFreeGcd(sim, apl.unit.GCD.IsReady(sim))
+	}
 
 	// Schedule the next rotation evaluation based on either the GCD or reaction time
 	if apl.unit.RotationTimer.IsReady(sim) {
 		nextEvaluation := sim.CurrentTime + apl.unit.ReactionTime
+		if ForeverWalkRules {
+			nextEvaluation = sim.CurrentTime + ForeverRotationPoll
+		}
 
 		// A rotation that moves keeps looking through the GCD, so a walk timed to a swing timer starts
 		// when its condition turns true, as a player watching the timer starts it.
@@ -549,11 +574,48 @@ func (apl *APLRotation) DoNextAction(sim *Simulation) {
 			nextEvaluation = apl.unit.Hardcast.Expires
 		}
 
+		// Arc's engine pauses an idle rotation by holding the GCD: for the pause no spell on the GCD starts, while a
+		// move still can (a walk out decided at a swing goes before a Wing Clip on the same condition)
+		if ForeverWalkRules && !waitsOnCast && apl.unit.GCD.IsReady(sim) && apl.arcReactionEnds == NeverExpires {
+			apl.unit.ExtendGCDUntil(sim, sim.CurrentTime+ForeverRotationPoll)
+		}
+		// a press waiting out its reaction goes the moment it ends
+		nextEvaluation = min(nextEvaluation, apl.arcReactionEnds)
 		if waitsOnCast {
 			apl.unit.SetRotationTimer(sim, nextEvaluation)
 		} else {
 			apl.unit.WaitUntil(sim, nextEvaluation)
 		}
+	}
+}
+
+// For the timeline's free GCD stretches: which of the rotation's own GCD spells could have been pressed while the GCD
+// sat unused (in range, off cooldown, affordable), logged when that list changes.
+func (apl *APLRotation) logFreeGcd(sim *Simulation, gcdReady bool) {
+	if !gcdReady || sim.CurrentTime < 0 {
+		apl.lastFreeGcdNote = ""
+		return
+	}
+	var ids []string
+	seen := map[*Spell]bool{}
+	for _, action := range apl.priorityList {
+		for _, spell := range action.GetAllSpells() {
+			if seen[spell] || spell.DefaultCast.GCD == 0 || spell.Flags.Matches(SpellFlagPassiveSpell) {
+				continue
+			}
+			seen[spell] = true
+			if spell.CanCast(sim, apl.unit.CurrentTarget) {
+				ids = append(ids, spell.ActionID.String())
+			}
+		}
+	}
+	note := "GCD free, nothing to press"
+	if len(ids) > 0 {
+		note = "GCD free, could press: " + strings.Join(ids, ", ")
+	}
+	if note != apl.lastFreeGcdNote {
+		apl.lastFreeGcdNote = note
+		apl.unit.Log(sim, "%s", note)
 	}
 }
 
@@ -566,7 +628,14 @@ func (apl *APLRotation) getNextAction(sim *Simulation) *APLAction {
 
 	held := apl.unit.queuedSpellHoldsCasts(sim)
 	for _, action := range apl.priorityList {
-		if !(held && action.heldByQueuedSpell(sim)) && action.IsReady(sim) {
+		if held && action.heldByQueuedSpell(sim) {
+			continue
+		}
+		if !action.IsReady(sim) {
+			action.arcSeenReady = false
+			continue
+		}
+		if apl.arcPressReacted(sim, action) {
 			return action
 		}
 	}

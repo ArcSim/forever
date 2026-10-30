@@ -140,7 +140,7 @@ func SpellConfig(unit *core.Unit, s *Spell, opts ...SpellOpt) core.SpellConfig {
 	// where the row states a range (Flamestrike's 18818 states 30 and reaches its 10 yd radius); a cone,
 	// or an area on another effect, does so only where the row states none.
 	if radius, ok := casterAreaRadius(s); ok && (config.MaxRange == 0 || damage.HitsAroundTheCaster()) {
-		config.MaxRange = core.TernaryFloat64(config.Flags.Matches(core.SpellFlagPassiveSpell), 0, float64(radius))
+		config.MaxRange = core.TernaryFloat64(config.Flags.Matches(core.SpellFlagPassiveSpell), 0, float64(radius)+core.ForeverAreaReachBonus())
 	}
 	return config
 }

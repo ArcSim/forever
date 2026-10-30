@@ -5,7 +5,7 @@ import (
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
-var aspectOfTheHawkRank = spellData.AspectOfTheHawk.Highest()
+var aspectOfTheHawkRank = trainerRank(spellData.AspectOfTheHawk, topTrainerRankHawk)
 var aspectOfTheBeastRank = spellData.AspectOfTheBeast.Highest()
 var aspectOfTheCheetahRank = spellData.AspectOfTheCheetah.Highest()
 var dazedRank = spellData.AspectOfTheCheetahTriggered.Highest()

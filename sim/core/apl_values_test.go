@@ -562,7 +562,8 @@ func TestValueAutoAttacks(t *testing.T) {
 		{proto.APLValueAutoAttackType_MeleeAuto, time.Second, 1 * time.Second},
 		{proto.APLValueAutoAttackType_MainHandAuto, 2 * time.Second, time.Second},
 		{proto.APLValueAutoAttackType_OffHandAuto, time.Second, 2 * time.Second},
-		{proto.APLValueAutoAttackType_RangedAuto, 5 * time.Second, 500 * time.Millisecond},
+		// the ranged auto's windup has not started: the shot leaves a windup after its swing time
+		{proto.APLValueAutoAttackType_RangedAuto, 5*time.Second + RangedSwingWindup, 500 * time.Millisecond},
 	} {
 		toNext := rot.newValueAutoTimeToNext(&proto.APLValueAutoTimeToNext{AutoType: c.auto}, nil).GetDuration(sim)
 		if toNext != c.wantToNext {
@@ -578,6 +579,12 @@ func TestValueAutoAttacks(t *testing.T) {
 	anySinceLast := rot.newValueAutoTimeSinceLast(&proto.APLValueAutoTimeSinceLast{AutoType: proto.APLValueAutoAttackType_AnyAuto}, nil).GetDuration(sim)
 	if anyToNext != time.Second || anySinceLast != 500*time.Millisecond {
 		t.Errorf("Any auto: time to next %v, since last %v, want 1s, 500ms", anyToNext, anySinceLast)
+	}
+
+	// with the windup running, the swing time is the shot
+	aa.ranged.windupEnd = aa.ranged.swingAt
+	if got := rot.newValueAutoTimeToNext(&proto.APLValueAutoTimeToNext{AutoType: proto.APLValueAutoAttackType_RangedAuto}, nil).GetDuration(sim); got != 5*time.Second {
+		t.Errorf("Auto Time To Next RangedAuto during its windup = %v, want 5s", got)
 	}
 
 	sim.CurrentTime = 20 * time.Second

@@ -2,6 +2,7 @@ package hunter
 
 import (
 	"github.com/wowsims/forever/sim/core"
+	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
@@ -11,7 +12,7 @@ func (hunter *Hunter) registerSurvivalTalents() {
 	hunter.registerDeflection()
 
 	// Tier 2
-	// Entrapment (19184) roots the targets a trap springs on, and the sim's targets do not move.
+	// Entrapment (19184) roots on a trap the sim does not place.
 	hunter.registerSavageStrikes()
 	hunter.registerSurvivalist()
 	// Improved Wing Clip (19228) is a root chance on Wing Clip, which a boss shrugs off.
@@ -22,7 +23,7 @@ func (hunter *Hunter) registerSurvivalTalents() {
 	// Deterrence (19263) is parry and dodge the sim's targets do not test.
 
 	// Tier 4
-	hunter.registerSurvivalTactics()
+	// Survival Tactics (19376) is hit with traps and Feign Death, neither of which the sim casts.
 	hunter.registerPredatorsEdge()
 	// Counterattack (19306) needs a parry, which takes a target attacking the hunter.
 
@@ -166,7 +167,8 @@ func (hunter *Hunter) registerLaceratingStrikes() {
 		return
 	}
 
-	// The talent's dummy holds 40: the share of the bite's damage the bleed deals over its duration.
+	// TODO: In-game testing required. The talent's dummy holds 40, read as the share of the bite's
+	// damage the bleed deals over its duration.
 	share := spellData.LaceratingStrikes.FractionAt(1)
 	tick := laceratingStrikesBleed.PeriodicEffect()
 
@@ -183,10 +185,22 @@ func (hunter *Hunter) registerLaceratingStrikes() {
 		dot.Spell.CalcAndDealPeriodicDamage(sim, target, dot.SnapshotBaseDamage, laceratingStrikesBleed.TickOutcome(dot))
 	}
 
-	// The refresh Deep Wounds has: a bite while the bleed is up adds the unticked damage to the new
-	// application and spreads the sum over a full set of ticks; the ticks keep the first application's timer.
+	mode := hunter.Options.LaceratingMode
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 		dot := spell.Dot(target)
+		if mode != proto.HunterOptions_LaceratingRolling {
+			if mode == proto.HunterOptions_LaceratingStrongest && dot.IsActive() &&
+				bleedDamage/float64(dot.ExpectedTickCount()) < dot.SnapshotBaseDamage {
+				return
+			}
+			// The new bleed replaces the old one: its unticked damage is lost and the tick timer restarts.
+			dot.Apply(sim)
+			dot.SnapshotBaseDamage = bleedDamage / float64(dot.RemainingTicks())
+			return
+		}
+
+		// The refresh Deep Wounds has: a bite while the bleed is up adds the unticked damage to the new
+		// application and spreads the sum over a full set of ticks; the ticks keep the first application's timer.
 		totalDamage := dot.OutstandingDmg() + bleedDamage
 
 		if dot.IsActive() {
@@ -216,7 +230,7 @@ func (hunter *Hunter) registerLaceratingStrikes() {
 	hunter.MakeProcTriggerAura(trigger)
 }
 
-// Effect 1 lengthens Freezing and Frost Trap, which the sim does not place; effect 2 raises the
+// Effect 1 lengthens the crowd control traps, which the sim does not place; effect 2 raises the
 // Immolation and Explosive Trap damage.
 func (hunter *Hunter) registerCleverTraps() {
 	if hunter.Talents.CleverTraps == 0 {
@@ -224,14 +238,4 @@ func (hunter *Hunter) registerCleverTraps() {
 	}
 
 	spelldata.ParseStatic(&hunter.Character, spellData.CleverTraps.Rank(hunter.Talents.CleverTraps), spelldata.Effects(2))
-}
-
-// Hit with Immolation and Explosive Trap. The talent also names Freezing Trap, Frost Trap and Feign
-// Death, which the sim does not cast.
-func (hunter *Hunter) registerSurvivalTactics() {
-	if hunter.Talents.SurvivalTactics == 0 {
-		return
-	}
-
-	spelldata.ParseStatic(&hunter.Character, spellData.SurvivalTactics.Rank(hunter.Talents.SurvivalTactics))
 }

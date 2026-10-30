@@ -51,6 +51,9 @@ func (m *Meta) Options(talentPoints int32) []spelldata.ParseOpt {
 	case !m.TalentScalesDuration:
 		opts = append(opts, spelldata.ScaledBy(m.talentMod(talentPoints)))
 	}
+	if f := foreverValueScale(m); f != 1 {
+		opts = append(opts, spelldata.Count(f))
+	}
 	return opts
 }
 
@@ -67,8 +70,9 @@ func (m *Meta) Value(talentPoints int32) float64 {
 		}
 	}
 
+	// the dry run reports one count of the row, so a foreverValues amount scales it here
 	if applied := spelldata.DryRun(m.Spell, m.Options(talentPoints)...).Applied; len(applied) > 0 {
-		return applied[0].Value
+		return applied[0].Value * foreverValueScale(m)
 	}
 	return 0
 }

@@ -75,6 +75,8 @@ type Unit struct {
 	moveAura                *Aura
 	moveSpell               *Spell
 	movementAction          *MovementAction
+	arcWalk                 arcWalk
+	ArcPlay                 ArcPlay
 
 	// Environment in which this Unit exists. This will be nil until after the
 	// construction phase.
@@ -917,6 +919,7 @@ func (unit *Unit) reset(sim *Simulation, _ Agent) {
 	}
 
 	unit.resetCDs(sim)
+	unit.arcResetWalk()
 	unit.Hardcast.Expires = startingCDTime
 	unit.pickingAtCastEnd = false
 	unit.ChanneledDot = nil

@@ -13,8 +13,6 @@ import (
 	"github.com/wowsims/forever/sim/core/stats"
 )
 
-var cobraReflexesRank = spellData.CobraReflexesTriggered.Highest()
-
 // The Faster Attack and Slower Attack passives a tamed creature carries on top of the 2 s swing,
 // by the option that names them.
 var petAttackSpeeds = map[proto.HunterOptions_PetAttackSpeed]spelldata.Ladder{
@@ -89,7 +87,12 @@ func (hunter *Hunter) NewHunterPet() *HunterPet {
 	}
 
 	// Bestial Discipline's effect 1 raises every effect of the pet's focus passive: +10% a rank.
-	hp.EnableFocusBar(spellData.BestialDiscipline.EffectAt(1).MultiplierAt(hunter.Talents.BestialDiscipline))
+	focusRegen := spellData.BestialDiscipline.EffectAt(1).MultiplierAt(hunter.Talents.BestialDiscipline)
+	// Forever pets regenerate focus twice as fast.
+	if core.ForeverPetFocusDoubled {
+		focusRegen *= 2
+	}
+	hp.EnableFocusBar(focusRegen)
 
 	// Normalized in ApplyTalents to the Faster or Slower Attack passive's swing.
 	hp.EnableAutoAttacks(hp, core.AutoAttackOptions{
@@ -161,15 +164,14 @@ func (hp *HunterPet) registerStatInheritance() {
 	})
 }
 
-// The family's own damage, armor and health, and what Beast Training taught the pet that changes
-// its damage: each is a passive the pet is never without, applied as its effects read. Great
-// Stamina, Natural Armor, Pet Hardiness and Pet Resistance change nothing the sim measures.
+// The family's own damage, armor and health, and the tamed creature's attack speed: each is a
+// passive the pet is never without, applied as its effects read. Forever pets learn neither Cobra
+// Reflexes nor Pet Aggression, so a setting that carries them (a wowsims import) is not read.
 func (hp *HunterPet) ApplyTalents() {
 	opts := hp.hunterOwner.Options
 	// The family's armor share is stated on armor from items, which a pet has none of: its armor is
 	// its owner's, inherited, and the second effect is left out.
 	spelldata.ParseStatic(&hp.Character, hp.family.Passive.Highest(), spelldata.SkipEffects(2))
-	spelldata.ParseStatic(&hp.Character, spellData.PetAggression.Rank(opts.PetAggression))
 
 	// An attack speed acts through a Simulation, which a static passive has none of, so these two
 	// are auras the pet is never without.
@@ -178,11 +180,6 @@ func (hp *HunterPet) ApplyTalents() {
 	if attackSpeed != spelldata.Nil {
 		// Normalized: a faster swing deals less a swing, the damage a second unchanged.
 		hp.AutoAttacks.MHConfig().DamageMultiplier /= 1 + attackSpeed.Effect(dbcenums.A_MOD_ATTACKSPEED, 0).Percent()
-	}
-	if opts.CobraReflexes {
-		hp.applyPassiveAura(cobraReflexesRank)
-		// TODO: In-game testing required. "but reduces damage" states no number; TBC's 15% kept.
-		hp.AutoAttacks.MHConfig().DamageMultiplier *= 0.85
 	}
 }
 
@@ -250,10 +247,36 @@ func (hp *HunterPet) ExecuteCustomRotation(sim *core.Simulation) {
 	}
 }
 
-// An ability by its row's name in the game files, so the generated family table needs no hand list
-// beside it. A name not here stays unregistered: Cower, Growl, Prowl and Shell Shield change nothing
-// the sim measures, and the Boar's Charge is not modelled.
+// The option that turns each ability off, by the client's name of its row.
+var petAbilityOptions = map[string]proto.HunterOptions_PetAbility{
+	"Bite":                 proto.HunterOptions_PetAbilityBite,
+	"Claw":                 proto.HunterOptions_PetAbilityClaw,
+	"Lightning Breath":     proto.HunterOptions_PetAbilityLightningBreath,
+	"Scorpid Poison":       proto.HunterOptions_PetAbilityScorpidPoison,
+	"Savage Rend":          proto.HunterOptions_PetAbilitySavageRend,
+	"Furious Howl":         proto.HunterOptions_PetAbilityFuriousHowl,
+	"Thunderstomp":         proto.HunterOptions_PetAbilityThunderstomp,
+	"Dismember":            proto.HunterOptions_PetAbilityDismember,
+	"Pinch":                proto.HunterOptions_PetAbilityPinch,
+	"Tendon Rip":           proto.HunterOptions_PetAbilityTendonRip,
+	"Web":                  proto.HunterOptions_PetAbilityWeb,
+	"Swipe":                proto.HunterOptions_PetAbilitySwipe,
+	"Mine!":                proto.HunterOptions_PetAbilityMine,
+	"Charge":               proto.HunterOptions_PetAbilityCharge,
+	"Demoralizing Screech": proto.HunterOptions_PetAbilityDemoralizingScreech,
+	"Lava Breath":          proto.HunterOptions_PetAbilityLavaBreath,
+	"Dust Cloud":           proto.HunterOptions_PetAbilityDustCloud,
+	"Trickster's Dance":    proto.HunterOptions_PetAbilityTrickstersDance,
+	"Sonic Blast":          proto.HunterOptions_PetAbilitySonicBlast,
+}
+
+// An ability by the client's name of its row, so the generated family table needs no hand list
+// beside it. A name not here is one the sim has nothing to measure - Cower, Growl, Prowl, Shell
+// Shield - and stays unregistered.
 func (hp *HunterPet) registerAbility(rank *spelldata.Spell) {
+	if option, ok := petAbilityOptions[rank.Name]; ok && slices.Contains(hp.hunterOwner.Options.PetDisabledAbilities, option) {
+		return
+	}
 	var spell *core.Spell
 	switch rank.Name {
 	case "Bite", "Claw", "Swipe", "Dismember", "Pinch", "Mine!", "Lightning Breath", "Thunderstomp", "Lava Breath":
@@ -270,6 +293,9 @@ func (hp *HunterPet) registerAbility(rank *spelldata.Spell) {
 		spell = hp.registerFuriousHowl(rank)
 	case "Trickster's Dance":
 		spell = hp.registerSelfBuff(rank)
+	case "Charge":
+		hp.closers = append(hp.closers, hp.registerCharge(rank))
+		return
 	case "Dash", "Dive":
 		hp.closers = append(hp.closers, hp.registerSprint(rank))
 		return
@@ -465,6 +491,25 @@ func (hp *HunterPet) registerSprint(rank *spelldata.Spell) *core.Spell {
 	config := hp.spellConfig(rank)
 	config.ApplyEffects = func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) {
 		aura.Activate(sim)
+	}
+	return hp.RegisterSpell(config)
+}
+
+// The boar's charge: the pet closes to the enemy, and its next melee hit carries the row's attack
+// power. The stun is not modelled.
+func (hp *HunterPet) registerCharge(rank *spelldata.Spell) *core.Spell {
+	aura := hp.RegisterAura(spelldata.AuraConfig(rank))
+	spelldata.ParseEffects(&hp.Character, aura, rank, spelldata.Effects(2))
+	aura.OnSpellHitDealt = func(aura *core.Aura, sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {
+		if spell.ProcMask.Matches(core.ProcMaskMelee) && result.Landed() {
+			aura.Deactivate(sim)
+		}
+	}
+
+	config := hp.spellConfig(rank)
+	config.ApplyEffects = func(sim *core.Simulation, _ *core.Unit, _ *core.Spell) {
+		aura.Activate(sim)
+		hp.MoveTo(core.MaxMeleeRange-1, sim)
 	}
 	return hp.RegisterSpell(config)
 }

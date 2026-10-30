@@ -27,6 +27,10 @@ type manaBar struct {
 
 	manaCastingMetrics    *ResourceMetrics
 	manaNotCastingMetrics *ResourceMetrics
+	mp5Sources            []*MP5Source     // Named shares of the mana per 5, each in its own mana row.
+	mp5UnnamedMetrics     *ResourceMetrics // The mana per 5 no source names.
+	mp5UnnamedShare       float64
+	manaRegenMP5          float64 // The mana per 5 part of the regen rates, per second.
 	JowManaMetrics        *ResourceMetrics
 	VtManaMetrics         *ResourceMetrics
 	JowiseManaMetrics     *ResourceMetrics
@@ -79,6 +83,106 @@ func (character *Character) EnableManaBarWithModifier() {
 	character.Unit.manaBar.unit = &character.Unit
 	character.manaCastingMetrics = character.NewManaMetrics(ActionID{OtherID: proto.OtherAction_OtherActionManaRegen, Tag: 1})
 	character.manaNotCastingMetrics = character.NewManaMetrics(ActionID{OtherID: proto.OtherAction_OtherActionManaRegen, Tag: 2})
+	character.mp5UnnamedMetrics = character.NewManaMetrics(ActionID{OtherID: proto.OtherAction_OtherActionManaRegen, Tag: 3})
+}
+
+// A named share of the unit's mana per 5: the mana per 5 part of the regen is split over the sources
+// by their amounts, each in its own mana row, and what no source names goes to the unnamed row.
+type MP5Source struct {
+	metrics *ResourceMetrics
+	amount  float64 // The mana per 5 the source gives now.
+	share   float64 // Its share of the mana per 5 part at the current regen rates.
+}
+
+// The unit's named mana per 5 source for actionID, made on first use; nil for a unit with no mana bar.
+func (unit *Unit) NamedMP5(actionID ActionID) *MP5Source {
+	if !unit.HasManaBar() {
+		return nil
+	}
+	for _, src := range unit.mp5Sources {
+		if src.metrics.ActionID == actionID {
+			return src
+		}
+	}
+	src := &MP5Source{metrics: unit.NewManaMetrics(actionID)}
+	unit.mp5Sources = append(unit.mp5Sources, src)
+	return src
+}
+
+// Changes the mana per 5 the source names. Called before the stats change, so the regen up to the
+// change is credited at the old split.
+func (src *MP5Source) Add(amount float64) {
+	if src != nil {
+		src.amount += amount
+	}
+}
+
+// Names amount of the mana per 5 already in the unit's stats after actionID.
+func (unit *Unit) nameMP5(actionID ActionID, amount float64) {
+	if amount != 0 {
+		unit.NamedMP5(actionID).Add(amount)
+	}
+}
+
+// The mana per 5 part of the regen rates, and each named source's share of it until the rates next change.
+func (unit *Unit) splitManaRegenMP5() {
+	mp5 := unit.stats[stats.MP5]
+	unit.manaRegenMP5 = max(0, mp5/5) * unit.manaRegenMultiplier
+	named := 0.0
+	for _, src := range unit.mp5Sources {
+		named += max(0, src.amount)
+	}
+	scale := max(mp5, named)
+	unit.mp5UnnamedShare = 0
+	for _, src := range unit.mp5Sources {
+		src.share = 0
+		if scale > 0 {
+			src.share = max(0, src.amount) / scale
+		}
+	}
+	if scale <= 0 {
+		return
+	}
+	// sums of the same amounts in another order may differ in the last bits
+	if unnamed := mp5 - named; unnamed > 1e-6 {
+		unit.mp5UnnamedShare = unnamed / scale
+	}
+}
+
+// Credits regen as one gain, as AddMana does, with its mana per 5 part in the named sources' rows by
+// their shares (the rest of it in the unnamed row) and the remainder in metrics' row.
+func (unit *Unit) addManaRegen(sim *Simulation, amount float64, mp5 float64, metrics *ResourceMetrics) {
+	mp5 = min(mp5, amount)
+	if mp5 <= 0 {
+		unit.AddMana(sim, amount, metrics)
+		return
+	}
+
+	oldMana := unit.CurrentMana()
+	newMana := min(oldMana+amount, unit.MaxMana())
+	actual := newMana - oldMana
+	credited := 0.0
+	credit := func(gain float64, m *ResourceMetrics) {
+		if gain > 0 && m != nil {
+			m.AddEvent(gain, actual*gain/amount)
+			credited += gain
+		}
+	}
+	for _, src := range unit.mp5Sources {
+		credit(mp5*src.share, src.metrics)
+	}
+	credit(mp5*unit.mp5UnnamedShare, unit.mp5UnnamedMetrics)
+	if rest := amount - credited; rest > 1e-9 {
+		metrics.AddEvent(rest, actual*rest/amount)
+	}
+
+	if sim.Log != nil {
+		unit.Log(sim, "Gained %0.3f mana from %s (%0.3f --> %0.3f) of %0.0f total.", amount, metrics.ActionID, oldMana, newMana, unit.MaxMana())
+	}
+
+	unit.currentMana = newMana
+	unit.Metrics.ManaGained += actual
+	unit.addManaGainThreat(sim, actual, metrics)
 }
 
 // SetSpiritManaRegen sets the spirit regen to base + Spirit*perSpirit mana per second.
@@ -204,6 +308,7 @@ func (unit *Unit) UpdateManaRegenRates(sim *Simulation) {
 	}
 	unit.manaRegenWhileCasting = unit.ManaRegenPerSecondWhileCasting()
 	unit.manaRegenWhileNotCasting = unit.ManaRegenPerSecondWhileNotCasting()
+	unit.splitManaRegenMP5()
 }
 
 func (unit *Unit) MultiplyManaRegenSpeed(sim *Simulation, multiplier float64) {
@@ -229,10 +334,10 @@ func (mb *manaBar) creditManaRegen(sim *Simulation) {
 		castingUntil = max(from, min(unit.PseudoStats.FiveSecondRuleRefreshTime, sim.CurrentTime))
 	}
 	if amount := unit.manaRegenWhileCasting * (castingUntil - from).Seconds(); amount > 0 {
-		unit.AddMana(sim, amount, unit.manaCastingMetrics)
+		unit.addManaRegen(sim, amount, unit.manaRegenMP5*(castingUntil-from).Seconds(), unit.manaCastingMetrics)
 	}
 	if amount := unit.manaRegenWhileNotCasting * (sim.CurrentTime - castingUntil).Seconds(); amount > 0 {
-		unit.AddMana(sim, amount, unit.manaNotCastingMetrics)
+		unit.addManaRegen(sim, amount, unit.manaRegenMP5*(sim.CurrentTime-castingUntil).Seconds(), unit.manaNotCastingMetrics)
 	}
 }
 

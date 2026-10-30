@@ -1,32 +1,46 @@
-# WoW Forever Simulator
+# Arc's Forever Sims engine
 
-Welcome to the WoW Forever simulator! If you have questions or are thinking about contributing, [join our discord](https://discord.gg/jJMPr9JWwx) to chat!
+The simulation engine behind [Arc's Forever Sims](https://arcs-forever-sims.pages.dev), a hunter sim for WoW Forever.
+It is a fork of the [wowsims Forever](https://github.com/wowsims/forever) engine (MIT, see LICENSE):
+[compare with wowsims](https://github.com/wowsims/forever/compare/master...ArcSim:forever:master).
 
-The primary goal of this project is to provide a framework that makes it easy to build a DPS sim for any class/spec, with a polished UI and accurate results. Each community will have ownership / responsibility over their portion of the sim, to ensure accuracy and that their community is represented.
+- `sim/`: the sim itself, every class (the hunter is the one tuned for Forever)
+- `ui/specs/hunter/dps/apls` and `ui/specs/hunter/dps/gear_sets`: the rotations and gear sets
+- `ui/specs/hunter/dps/builds`: the settings behind every build number on the site
+- `assets/database`: the item database, built by `tools/database`
+- `proto/`: the settings and results formats
 
-This project is licensed with MIT license. We request that anyone using this software in their own project to make sure there is a user visible link back to the original project.
+## Check a number
 
-[Live sims can be found here.](https://wowsims.com/forever)
+```
+ARC_BUILD=../../ui/specs/hunter/dps/builds/dw_auto_weave.build.json go test --tags=with_db ./sim/hunter/ -run 'TestArcSpikeSettings$' -v
+```
 
-[Support our devs via Patreon.](https://www.patreon.com/wowsims)
+prints the DPS for that build as the site lists it: 20000 iterations on the site's seed, 20261012 (the path is relative
+to `sim/hunter`; `ARC_ITERS` sets other iterations). The build files play God Mode weaving; for Pro Player or Regular
+Player set the hunter option `weavePlay` to `WeavePerfectPlay` or `WeaveNormalPlay`. A setup exported from the site
+(Export, JSON) runs the same way.
 
-## Downloading Sim
+## Build and test
 
-Links for latest Sim build:
+Needs Go and protoc with protoc-gen-go. Generate the Go code from the protos once:
 
-- [Windows Sim](https://github.com/wowsims/forever/releases/latest/download/wowsimforever-windows.exe.zip)
-- [MacOS Sim](https://github.com/wowsims/forever/releases/latest/download/wowsimforever-amd64-darwin.zip)
-- [Linux Sim](https://github.com/wowsims/forever/releases/latest/download/wowsimforever-amd64-linux.zip)
+```
+make sim/core/proto/api.pb.go
+```
 
-Then unzip the downloaded file, then open the unzipped file to open the sim in your browser!
+Then:
 
-Alternatively, you can choose from a specific relase on the [Releases](https://github.com/wowsims/forever/releases) page and click the suitable link under "Assets"
+```
+go test --tags=with_db ./sim/hunter/ -skip 'TestHunter$|TestHunterPets$|TestStriderKickSpeedRunsOutMidWalk$|TestAutoShotWindsUpWhenTheMoveEnds$|TestAutoShotWaitsAReactionWhenTheWalkEndsOnTheMinimumRange$|TestStartAttackOnTheWayInStartsTheOffHandsHalfSwing$|TestWalkingInStartsTheAttackOnArrival$|TestAutoShotTurnsTheAttackOff$'
+```
 
-## Documentation
+`TestHunter` and `TestHunterPets` compare against stored results from before the Forever changes. The other six are
+wowsims' tests of their own walks, which the Forever walk rules replace; they pass with
+`ARC_OFF=walk,walkin,ohretry,queue,seq,gcdpoll`, which turns those rules off.
 
-- [Installation Guide](docs/installation.md)
-- [Development Commands](docs/commands.md)
-- [Adding a New Sim](docs/adding_sim.md)
-- [Consumables](docs/consumables.md)
-- [The rotation at a cast end](docs/rotation.md)
-- [Internationalization](docs/i18n_guide.md)
+The WebAssembly build the site runs:
+
+```
+GOWASM=satconv,signext GOOS=js GOARCH=wasm go build -o lib.wasm ./sim/wasm/
+```

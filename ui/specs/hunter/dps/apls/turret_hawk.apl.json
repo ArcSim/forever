@@ -2,7 +2,7 @@
 	"type": "TypeAPL",
 	"prepullActions": [
 		{ "action": { "castSpell": { "spellId": { "spellId": 14325 } } }, "doAtValue": { "const": { "val": "-22s" } } },
-		{ "action": { "castSpell": { "spellId": { "spellId": 25296 } } }, "doAtValue": { "const": { "val": "-20s" } } },
+		{ "action": { "castSpell": { "spellId": { "spellId": 14322 } } }, "doAtValue": { "const": { "val": "-20s" } } },
 		{ "action": { "move": { "rangeFromTarget": { "variableRef": { "name": "Pull range" } } } }, "doAtValue": { "const": { "val": "-19s" } } }
 	],
 	"priorityList": [
@@ -66,8 +66,8 @@
 		},
 		{
 			"action": {
-				"castSpell": { "spellId": { "spellId": 25295 } },
-				"condition": { "not": { "val": { "dotIsActive": { "spellId": { "spellId": 25295 } } } } }
+				"castSpell": { "spellId": { "spellId": 13555 } },
+				"condition": { "not": { "val": { "dotIsActive": { "spellId": { "spellId": 13555 } } } } }
 			}
 		},
 		{ "action": { "condition": { "variableRef": { "name": "Use Aimed Shot" } }, "castSpell": { "spellId": { "spellId": 20904 } } } },

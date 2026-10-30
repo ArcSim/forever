@@ -33,6 +33,8 @@ type Hunter struct {
 	rapidRecuperationAura  *core.Aura
 	rapidRecuperationShare float64 // The share of regeneration while casting the aura grants, set by what granted it.
 	rapidRecuperationSpend float64 // The share spending Rapid Killing grants.
+
+	autoShotDelayed bool // A shot has pushed this Auto Shot cycle back already (Shots delay Auto Shot).
 }
 
 func (hunter *Hunter) GetCharacter() *core.Character {
@@ -68,6 +70,7 @@ func NewHunter(character *core.Character, options *proto.Player, hunterOptions *
 	}
 
 	hunter.FillTalentsProto(hunter.Talents.ProtoReflect(), options.TalentsString, TalentTreeSizes)
+	migrateBookRanks(options.Rotation)
 
 	// The hunter casts its own mark, so a raid's permanent one would credit it before the cast.
 	if raid.Debuffs != nil {
@@ -78,9 +81,9 @@ func NewHunter(character *core.Character, options *proto.Player, hunterOptions *
 
 	hunter.EnableManaBar()
 
-	// Arrows add their damage per second to the ranged weapon, times its speed. A gun is taken to
-	// fire them too, so no bullets are kept beside them.
-	hunter.PseudoStats.BonusRangedDps += arrows[hunterOptions.Ammo.String()].DPS
+	// Arrows and bullets add their damage per second to the ranged weapon, times its speed. Every
+	// ranged weapon is taken to fire either.
+	hunter.PseudoStats.BonusRangedDps += ammoDPS(hunterOptions.Ammo.String())
 	hunter.PseudoStats.RangedSpeedMultiplier *= core.SymmetricMultiplierFromPercent(quivers[hunterOptions.QuiverBonus.String()].Haste)
 
 	hunter.EnableAutoAttacks(hunter, core.AutoAttackOptions{
@@ -101,6 +104,10 @@ func NewHunter(character *core.Character, options *proto.Player, hunterOptions *
 	rangedConfig.MissileSpeed = float64(autoShotRank.Speed)
 	rangedConfig.ClassFlags = autoShotRank.ClassFlags
 	rangedConfig.CastRequirement = autoShotRank.CastRequirement()
+
+	hunter.AutoAttacks.MeleeResetsAutoShot = hunterOptions.MeleeResetsAutoShot
+	hunter.AutoAttacks.AutoShotResetsMainHand = hunterOptions.AutoShotResetsMainHand
+	hunter.applyPlayOptions(hunterOptions)
 
 	hunter.AddStatDependency(stats.Strength, stats.AttackPower, 1)
 	hunter.AddStatDependency(stats.Agility, stats.AttackPower, 1)
@@ -127,6 +134,7 @@ func (hunter *Hunter) Initialize() {
 	hunter.registerAspects()
 	hunter.registerHuntersMark()
 	hunter.addPvpGloves()
+	hunter.applyShotsDelayAutoShot()
 }
 
 // A ranged cast shortens with ranged haste. Core's cast path applies spell haste, which the physical
@@ -162,6 +170,7 @@ func (hunter *Hunter) AddPartyBuffs(_ *proto.PartyBuffs) {
 
 func (hunter *Hunter) Reset(_ *core.Simulation) {
 	hunter.nextHawk = 0
+	hunter.autoShotDelayed = false
 }
 
 func (hunter *Hunter) OnEncounterStart(sim *core.Simulation) {

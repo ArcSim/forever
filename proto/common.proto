@@ -647,6 +647,10 @@ message Encounter {
 
 	// The zone the area set came from, for the UI only; 0 once edited by hand.
 	int32 zone_id = 12;
+
+	// The fight is not in Mount Hyjal, Hyjal Summit or the Barrow Deeps, so the Natural flasks give only
+	// their Stamina. Unset counts the fight as there.
+	bool outside_hyjal = 13;
 }
 
 message PresetTarget {

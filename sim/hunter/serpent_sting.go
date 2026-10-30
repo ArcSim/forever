@@ -5,11 +5,17 @@ import (
 	"github.com/wowsims/forever/sim/core/spelldata"
 )
 
-var serpentStingRank = spellData.SerpentSting.Highest()
+var serpentStingRank = trainerRank(spellData.SerpentSting, topTrainerRankSerpentSting)
 
-// The row states no attack power share on the tick. In game each tick adds 0.030 of ranged attack
-// power, read at each tick, and spell power adds nothing.
-const serpentStingTickAPShare = 0.030
+// TODO: In-game testing required. The row states no attack power share on the tick; the Forever
+// notes say 10% of ranged attack power over the duration, 2% a tick, read at each tick.
+const serpentStingTickAPShare = 0.02
+
+// The tick in the game: the rank's base (rank 8 83, rank 9 111) plus 3.0% of ranged attack power, read when the sting
+// lands.
+var foreverSerpentStingTickBase = serpentStingRank.PeriodicEffect().Average()
+
+const foreverSerpentStingTickAPShare = 0.030
 
 func (hunter *Hunter) registerSerpentSting() {
 	tick := serpentStingRank.PeriodicEffect()
@@ -24,8 +30,14 @@ func (hunter *Hunter) registerSerpentSting() {
 
 	config.Dot = spelldata.DotConfig(serpentStingRank, tick)
 	config.Dot.Aura.Tag = hunter.stingTag()
+	config.Dot.OnSnapshot = func(sim *core.Simulation, target *core.Unit, dot *core.Dot) {
+		dot.SnapshotBaseDamage = foreverSerpentStingTickBase + foreverSerpentStingTickAPShare*dot.Spell.RangedAttackPower(target)
+	}
 	config.Dot.OnTick = func(sim *core.Simulation, target *core.Unit, dot *core.Dot) {
 		baseDamage := tick.Average() + serpentStingTickAPShare*dot.Spell.RangedAttackPower(target)
+		if core.ForeverSerpentSting {
+			baseDamage = dot.SnapshotBaseDamage
+		}
 		dot.Spell.CalcAndDealPeriodicDamage(sim, target, baseDamage, serpentStingRank.TickOutcome(dot))
 	}
 

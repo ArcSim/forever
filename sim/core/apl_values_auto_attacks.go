@@ -63,7 +63,8 @@ func (value *APLValueAutoTimeToNext) GetDuration(sim *Simulation) time.Duration 
 	case proto.APLValueAutoAttackType_OffHandAuto:
 		return max(0, value.unit.AutoAttacks.OffhandSwingAt()-sim.CurrentTime)
 	case proto.APLValueAutoAttackType_RangedAuto:
-		return max(0, value.unit.AutoAttacks.NextRangedAttackAt()-sim.CurrentTime)
+		// a rotation times its moves to the shot itself, not to the start of its windup
+		return max(0, value.unit.AutoAttacks.NextRangedShotAt()-sim.CurrentTime)
 	case proto.APLValueAutoAttackType_WandAuto:
 		return value.unit.Wand.timeToNext(sim)
 	}

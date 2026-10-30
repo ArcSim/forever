@@ -68,6 +68,16 @@ func readAtlasLootSourceData(db *WowDatabase, expansion proto.Expansion, srcUrl 
 	}
 }
 
+// The npc name a dungeon entry's lazy match took. A name with a suffix after it
+// (AL["Kormok"].." - "..format(AL["Tier %s Sets"], "0.5")) runs the match on to the
+// last "] of the line, so the name ends at its own first one.
+func AtlasLootNpcName(matched string) string {
+	if end := strings.Index(matched, `"]`); end >= 0 {
+		return matched[:end]
+	}
+	return matched
+}
+
 func readAtlasLootDungeonData(db *WowDatabase, expansion proto.Expansion, srcUrl string) {
 	srcTxt, err := tools.ReadWeb(srcUrl)
 	if err != nil {
@@ -115,7 +125,7 @@ func readAtlasLootDungeonData(db *WowDatabase, expansion proto.Expansion, srcUrl
 				}
 				panic("No npc match: " + npcSplit)
 			}
-			npcName := npcMatch[2]
+			npcName := AtlasLootNpcName(npcMatch[2])
 			npcID := 0
 			if len(npcMatch) > 3 {
 				npcID, _ = strconv.Atoi(npcMatch[4])

@@ -272,7 +272,15 @@ message StatFilters {
 	StatSelection consumables = 5;
 }
 
-// NextIndex: 28
+// Which items and enchants the gear lists show by what WoW Forever did to them.
+enum ForeverFilter {
+	ForeverFilterAll = 0;
+	ForeverFilterNew = 1;
+	ForeverFilterChanged = 2;
+	ForeverFilterNewOrChanged = 3;
+}
+
+// NextIndex: 29
 message DatabaseFilters {
 	repeated ArmorType armor_types = 1;
 	repeated WeaponType weapon_types = 2;
@@ -302,6 +310,7 @@ message DatabaseFilters {
 	bool show_all_enchants = 25;
 	// The stats each panel shows; see StatFilters.
 	StatFilters stat_filters = 26;
+	ForeverFilter forever_filter = 28;
 
 	// Item IDs for favorited items.
 	repeated int32 favorite_items = 11;

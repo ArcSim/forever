@@ -18,6 +18,12 @@ const trapTotalAPShare = 0.10
 const trapTriggerRadius = 5
 const trapArmingDelay = 500 * time.Millisecond
 
+// In Forever logs the burn lands 0.8 to 1.6 s after the cast (65 traps, median 1.2 s).
+const foreverTrapArmingDelay = 1200 * time.Millisecond
+
+// How far from the target a trap can be dropped and still catch it, in game.
+const foreverTrapReach = 6.0
+
 var immolationTrapRank = spellData.ImmolationTrap.Highest()
 var immolationTrapEffectRank = spellData.ImmolationTrapTriggered.Highest()
 var explosiveTrapRank = spellData.ExplosiveTrap.Highest()
@@ -35,15 +41,29 @@ func (hunter *Hunter) trapConfig(rank *spelldata.Spell, trigger *core.Spell) cor
 	config := spelldata.SpellConfig(&hunter.Unit, rank, spelldata.Flags(core.SpellFlagAPL))
 	config.ProcMask = core.ProcMaskEmpty
 	config.CastRequirement.NotInCombat = false
+	// Forever: a trap lands about a yard in front of the hunter and catches the target from 6 yd, so it can only be dropped within 6 yd.
+	radius := float64(trapTriggerRadius)
+	if core.ForeverTrapReach {
+		radius = foreverTrapReach
+		prev := config.ExtraCastCondition
+		config.ExtraCastCondition = func(sim *core.Simulation, target *core.Unit) bool {
+			return (prev == nil || prev(sim, target)) && hunter.DistanceFromTarget <= radius+1e-6
+		}
+	}
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, _ *core.Spell) {
 		// A trap placed mid-walk lies where the hunter is now, not where the walk started.
 		hunter.UpdatePosition(sim, false)
-		if hunter.DistanceFromTarget > trapTriggerRadius+1e-6 {
+		if hunter.DistanceFromTarget > radius+1e-6 {
 			return
 		}
 		sim.AddPendingAction(&core.PendingAction{
-			NextActionAt: sim.CurrentTime + trapArmingDelay,
+			NextActionAt: sim.CurrentTime + core.Ternary(core.ForeverTrapArm, foreverTrapArmingDelay, trapArmingDelay),
 			OnAction: func(sim *core.Simulation) {
+				// the trap springs where it lies, wherever the hunter has walked to since
+				if core.ForeverTrapArm {
+					trigger.SkipCastAndApplyEffects(sim, target)
+					return
+				}
 				trigger.Cast(sim, target)
 			},
 		})
@@ -61,13 +81,21 @@ func (hunter *Hunter) registerImmolationTrap() {
 
 	config.Dot = spelldata.DotConfig(immolationTrapEffectRank, tick)
 	tickAPShare := trapTotalAPShare / float64(config.Dot.NumberOfTicks)
+	// the burn's attack power share is read once, as it lands: in game its base tick stays fixed for the whole burn
+	config.Dot.OnSnapshot = func(sim *core.Simulation, target *core.Unit, dot *core.Dot) {
+		dot.SnapshotBaseDamage = tick.Average() + foreverTrapAP(dot.Spell, target)*tickAPShare/trapTotalAPShare
+	}
 	config.Dot.OnTick = func(sim *core.Simulation, target *core.Unit, dot *core.Dot) {
 		baseDamage := tick.Average() + tickAPShare*dot.Spell.RangedAttackPower(target)
+		if core.ForeverTrapAP {
+			baseDamage = dot.SnapshotBaseDamage
+		}
 		dot.Spell.CalcAndDealPeriodicDamage(sim, target, baseDamage, immolationTrapEffectRank.TickOutcome(dot))
 	}
 
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
-		result := spell.CalcAndDealOutcome(sim, target, spell.OutcomeMagicHit)
+		var result *core.SpellResult
+		hunter.arcTrapHitRoll(spell, func() { result = spell.CalcAndDealOutcome(sim, target, spell.OutcomeMagicHit) })
 		if result.Landed() {
 			spell.Dot(target).Apply(sim)
 		}
@@ -88,6 +116,10 @@ func (hunter *Hunter) registerExplosiveTrap() {
 	config.DamageMultiplier = 1
 	config.ThreatMultiplier = 1
 
+	// With the burn scaling option, each target's burn takes the first hit's attack power share, read as the
+	// trap springs and spread over the ticks.
+	burnAP := map[*core.Unit]float64{}
+
 	config.Dot = core.DotConfig{
 		IsAOE: true,
 		Aura: core.Aura{
@@ -99,6 +131,9 @@ func (hunter *Hunter) registerExplosiveTrap() {
 		OnTick: func(sim *core.Simulation, _ *core.Unit, dot *core.Dot) {
 			for _, target := range sim.Encounter.ActiveTargetUnits {
 				baseDamage := area.Average() + tickAPShare*dot.Spell.RangedAttackPower(target)
+				if core.ForeverTrapAP {
+					baseDamage = area.Average() + burnAP[target]/float64(numberOfTicks)
+				}
 				dot.Spell.CalcAndDealPeriodicDamage(sim, target, baseDamage, dot.Spell.OutcomeTickMagicHitAndCrit)
 			}
 		},
@@ -106,10 +141,23 @@ func (hunter *Hunter) registerExplosiveTrap() {
 
 	config.ApplyEffects = func(sim *core.Simulation, _ *core.Unit, spell *core.Spell) {
 		for _, target := range sim.Encounter.ActiveTargetUnits {
-			spell.CalcAndDealDamage(sim, target, hit.Roll(sim)+trapTotalAPShare*spell.RangedAttackPower(target), spell.OutcomeMagicHitAndCrit)
+			apShare := trapTotalAPShare * spell.RangedAttackPower(target)
+			if core.ForeverTrapAP {
+				apShare = foreverTrapAP(spell, target)
+				if hunter.Options.ExplosiveTrapBurnAp {
+					burnAP[target] = apShare
+				}
+			}
+			hunter.arcTrapHitRoll(spell, func() { spell.CalcAndDealDamage(sim, target, hit.Roll(sim)+apShare, spell.OutcomeMagicHitAndCrit) })
 		}
 		spell.AOEDot().Apply(sim)
 	}
 
 	hunter.RegisterSpell(hunter.trapConfig(explosiveTrapRank, hunter.RegisterSpell(config)))
+}
+
+// Forever: traps take 0.132 of the higher of melee and ranged attack power (live Immolation Trap logs), on Immolation
+// Trap's whole burn and Explosive Trap's first hit; Explosive Trap's burn takes none.
+func foreverTrapAP(spell *core.Spell, target *core.Unit) float64 {
+	return 0.132 * max(spell.RangedAttackPower(target), spell.MeleeAttackPower(target))
 }

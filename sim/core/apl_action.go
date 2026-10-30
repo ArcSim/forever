@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/wowsims/forever/sim/core/proto"
 )
@@ -10,6 +11,9 @@ type APLAction struct {
 	condition APLValue
 	impl      APLActionImpl
 	spell     *Spell // The spell a cast action casts or queues, whose queue check runs before the condition.
+
+	arcSeenReady  bool          // the press reaction: seen ready on every look since arcReadySince
+	arcReadySince time.Duration
 }
 
 func (action *APLAction) Finalize(rot *APLRotation) {

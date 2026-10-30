@@ -19,6 +19,9 @@ type MovementAction struct {
 }
 
 func (action *MovementAction) GetCurrentPosition(sim *Simulation) float64 {
+	if ForeverWalkRules && ForeverYardSteps && action.moveDistance != 0 {
+		return action.arcSteppedPosition(sim)
+	}
 	return action.srcPosition + float64(sim.CurrentTime-action.startTime)*action.speed/float64(time.Second)
 }
 
@@ -31,6 +34,7 @@ func (unit *Unit) initMovement() {
 
 		OnGain: func(aura *Aura, sim *Simulation) {
 			unit.Moving = true
+			unit.arcWalk.startedAt, unit.arcWalk.startDistance = sim.CurrentTime, unit.DistanceFromTarget
 			sim.movingUnits = append(sim.movingUnits, unit)
 			unit.AutoAttacks.cancelRangedWindup(sim)
 		},
@@ -41,6 +45,9 @@ func (unit *Unit) initMovement() {
 			}
 			unit.movementAction = nil
 			unit.AutoAttacks.resumeHeldRangedSwing(sim)
+			if ForeverWalkRules {
+				unit.arcWalkEnded(sim)
+			}
 		},
 	})
 
@@ -51,7 +58,7 @@ func (unit *Unit) initMovement() {
 
 		ApplyEffects: func(sim *Simulation, target *Unit, spell *Spell) {
 			unit.moveAura.Activate(sim)
-			unit.moveAura.SetStacks(sim, max(int32(unit.DistanceFromTarget), 1))
+			unit.moveAura.SetStacks(sim, unit.arcLoggedYards())
 		},
 	})
 }
@@ -62,14 +69,31 @@ func (unit *Unit) MoveTo(moveRange float64, sim *Simulation) {
 }
 
 func (unit *Unit) moveTo(moveRange float64, sim *Simulation, byHand bool) {
+	if ForeverWalkRules {
+		unit.arcMoveTo(moveRange, sim, byHand)
+		return
+	}
+	unit.moveToNow(moveRange, sim, byHand)
+}
+
+func (unit *Unit) moveToNow(moveRange float64, sim *Simulation, byHand bool) {
 	if moveRange == unit.DistanceFromTarget {
 		return
 	}
+	unit.arcWalk.swungWhileMoving = false
 
 	unit.UpdatePosition(sim, false)
+	// Forever: a walk into melee turns the melee attack on as it starts, so the off hand's half-swing wait runs during the walk,
+	// unless the rotation starts the attack itself.
+	if ForeverWalkInStartsAttack && !(unit.Rotation != nil && unit.Rotation.manualStartAttack) && moveRange <= MaxMeleeRange && unit.DistanceFromTarget > MaxMeleeRange {
+		unit.AutoAttacks.StartMeleeAttack(sim)
+	}
 	moveDistance := moveRange - unit.DistanceFromTarget
-	timeToMove := time.Duration(math.Abs(moveDistance)/unit.GetMovementSpeed()*1000) * time.Millisecond
+	timeToMove := DurationFromSeconds(math.Abs(moveDistance) / unit.GetMovementSpeed())
 	registerMovementAction(unit, sim, unit.GetMovementSpeed()*TernaryFloat64(moveDistance < 0, -1., 1.), sim.CurrentTime+timeToMove, moveDistance, byHand)
+	if ForeverWalkRules {
+		unit.arcStopMeleeOnWalkOut(sim)
+	}
 }
 
 // A timed walk a spell or a pet's own logic causes.
@@ -121,8 +145,9 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 	unit.OnMovement(sim, unit.DistanceFromTarget, MovementUpdate)
 
 	// update auto attack state
-	if unit.AutoAttacks.mh.enabled != unit.AutoAttacks.mh.IsInRange() {
-		if unit.AutoAttacks.mh.IsInRange() {
+	meleeInRange := unit.AutoAttacks.mh.IsInRange() && !(ForeverWalkRules && unit.arcWalkingOut())
+	if unit.AutoAttacks.mh.enabled != meleeInRange {
+		if meleeInRange {
 			unit.AutoAttacks.cancelMeleeWeaveWakeup(sim)
 			unit.AutoAttacks.EnableMeleeSwing(sim)
 		} else {
@@ -133,8 +158,7 @@ func (unit *Unit) UpdatePosition(sim *Simulation, isFinal bool) {
 
 	unit.AutoAttacks.UpdateRangedRange(sim)
 
-	yards := max(int32(unit.DistanceFromTarget), 1) // never set to 0 yards as we deactivate the aura
-	if yards != unit.moveAura.GetStacks() {
+	if yards := unit.arcLoggedYards(); yards != unit.moveAura.GetStacks() {
 		unit.moveAura.SetStacks(sim, yards)
 	}
 }
@@ -167,6 +191,11 @@ func (unit *Unit) FinalizeMovement(sim *Simulation) {
 }
 
 func registerMovementAction(unit *Unit, sim *Simulation, speed float64, endTime time.Duration, moveDistance float64, byHand bool) {
+	registerMovementActionFrom(unit, sim, speed, sim.CurrentTime, endTime, moveDistance, byHand)
+}
+
+// A walk counted from startTime, which a re-paced walk sets back by the share of its yard already walked.
+func registerMovementActionFrom(unit *Unit, sim *Simulation, speed float64, startTime time.Duration, endTime time.Duration, moveDistance float64, byHand bool) {
 	if unit.movementAction != nil {
 		unit.movementAction.Cancel(sim)
 		if unit.movementAction.meleeEdge != nil {
@@ -183,7 +212,7 @@ func registerMovementAction(unit *Unit, sim *Simulation, speed float64, endTime 
 	}
 
 	movementAction := MovementAction{
-		startTime:    sim.CurrentTime,
+		startTime:    startTime,
 		speed:        speed,
 		srcPosition:  unit.DistanceFromTarget,
 		moveDistance: moveDistance,
@@ -205,7 +234,7 @@ func registerMovementAction(unit *Unit, sim *Simulation, speed float64, endTime 
 	if unit.AutoAttacks.AutoSwingMelee && speed != 0 && edge != dest && (edge-src)*(edge-dest) <= 0 {
 		movementAction.meleeEdge = &PendingAction{
 			// A hair past the line, as standing on it is still in range.
-			NextActionAt: sim.CurrentTime + DurationFromSeconds((edge-src)/speed) + time.Microsecond,
+			NextActionAt: max(sim.CurrentTime, startTime+movementAction.arcEdgeDelay(edge)+time.Microsecond),
 			OnAction:     func(sim *Simulation) {}, // advance moves the unit there
 		}
 		sim.AddPendingAction(movementAction.meleeEdge)
@@ -242,6 +271,10 @@ func (unit *Unit) MultiplyMovementSpeed(sim *Simulation, amount float64) {
 
 	// A walk under way keeps its destination and covers the rest at the new speed; a timed walk keeps its own speed.
 	if unit.movementAction != nil && unit.movementAction.speed != 0 && !unit.movementAction.keepsSpeed {
+		if ForeverWalkRules {
+			unit.arcRepace(sim)
+			return
+		}
 		dest := unit.movementAction.srcPosition + unit.movementAction.moveDistance
 		unit.MoveTo(dest, sim)
 	}
@@ -250,6 +283,9 @@ func (unit *Unit) MultiplyMovementSpeed(sim *Simulation, amount float64) {
 // Returns the units current movement speed in yards / second
 func (unit *Unit) GetMovementSpeed() float64 {
 	if unit.Type == PlayerUnit {
+		if unit.ArcPlay.BaseRunSpeed > 0 {
+			return unit.ArcPlay.BaseRunSpeed * unit.PseudoStats.MovementSpeedMultiplier
+		}
 		return 7. * unit.PseudoStats.MovementSpeedMultiplier
 	}
 

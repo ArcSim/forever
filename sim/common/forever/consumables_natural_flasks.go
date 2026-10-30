@@ -11,8 +11,8 @@ import (
 
 // Flasks of Natural Accuracy 274273, Aggression 274274, Precision 274275 and Swiftness 274276. The
 // first effect of each spell is its Stamina. The second, an A_DUMMY, is the bonus the spell's text
-// grants in Mount Hyjal, Hyjal Summit and the Barrow Deeps, where the sim takes every fight to be; the
-// auras after it name what the bonus is and state 0 themselves.
+// grants in Mount Hyjal, Hyjal Summit and the Barrow Deeps, where the sim takes a fight to be unless
+// the encounter is set outside them; the auras after it name what the bonus is and state 0 themselves.
 var NaturalFlasks = []int32{274273, 274274, 274275, 274276}
 
 func init() {
@@ -29,6 +29,9 @@ func init() {
 			aura := character.GetOrRegisterAura(config)
 
 			spelldata.ParseEffects(character, aura, row, spelldata.Effects(1))
+			if character.Env.Encounter.OutsideHyjal {
+				return
+			}
 			bonus, err := NaturalFlaskZoneBonusOf(row, row.EffectN(2).Average())
 			if err != nil {
 				panic(err)

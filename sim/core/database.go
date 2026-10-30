@@ -691,9 +691,17 @@ func ItemSwapFromJsonString(jsonString string) *proto.ItemSwap {
 func (equipment *Equipment) Stats(spec proto.Spec) stats.Stats {
 	equipStats := stats.Stats{}
 
+	// Forever: gear attack power (the client's one stat, 38) raises ranged attack power too; an item or enchant whose
+	// spells state ranged attack power on their own already lists it
+	withRanged := func(piece stats.Stats) stats.Stats {
+		if ForeverGearAPIsRanged && piece[stats.RangedAttackPower] == 0 {
+			piece[stats.RangedAttackPower] = piece[stats.AttackPower]
+		}
+		return piece
+	}
 	for _, item := range equipment {
-		equipStats = equipStats.Add(ItemEquipmentBaseStats(item))
-		equipStats = equipStats.Add(ItemEquipmentEnchantStats(item))
+		equipStats = equipStats.Add(withRanged(ItemEquipmentBaseStats(item)))
+		equipStats = equipStats.Add(withRanged(ItemEquipmentEnchantStats(item)))
 	}
 
 	return equipStats

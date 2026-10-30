@@ -72,7 +72,10 @@ message HunterOptions {
 	// this enum alone. The most speed first, which is the order the UI shows them in.
 	enum QuiverBonus {
 		QuiverNone                = 0;
-		AncientSinewWrappedLamina = 18714;
+		// the pre-raid 15% quiver (sim/hunter/arc_forever_quivers.go); Ancient Sinew Wrapped Lamina grants the same
+		HarpyHideQuiver           = 19319;
+		reserved 18714;
+		reserved "AncientSinewWrappedLamina";
 		QuickdrawQuiver           = 8217;
 		HeavyQuiver               = 7371;
 		QuiverOfTheNightWatch     = 3605;
@@ -81,17 +84,23 @@ message HunterOptions {
 	QuiverBonus quiver_bonus = 1;
 
 	// The arrows the client's items describe, named as the generated sim/hunter/ammo_auto_gen.go
-	// keys them and numbered by their item id, so the UI lists them from this enum alone. The most
-	// damage first, which is the order the UI shows them in.
+	// keys them, and the bullets sim/hunter/ammo_bullets.go lists, numbered by their item id, so the
+	// UI lists them from this enum alone. The most damage first, which is the order the UI shows them in.
 	enum Ammo {
 		AmmoNone           = 0;
 		SwiftfeatherArrow  = 274387;
+		SwiftstrikeShot    = 274388;
 		ThoriumHeadedArrow = 18042;
+		ThoriumShells      = 15997;
 		IceThreadedArrow   = 19316;
+		IceThreadedBullet  = 19317;
+		MithrilGyroShot    = 10513;
 		ExplosiveArrow     = 10579;
 		JaggedArrow        = 11285;
+		AccurateSlugs      = 11284;
 		FeatheredArrow     = 3464;
 		RazorArrow         = 3030;
+		SolidShot          = 3033;
 		SharpArrow         = 2515;
 		RoughArrow         = 2512;
 	}
@@ -145,6 +154,90 @@ message HunterOptions {
 		FasterAttackVII    = 9;
 	}
 	PetAttackSpeed pet_attack_speed = 12;
+
+	// Extra time before every step into or out of melee (turning, reaction), on top of the walk itself.
+	// Unset is 100.
+	optional int32 move_delay_ms = 13;
+
+	// Run speed in yards per second before speed effects; 0 is the game's 7.
+	double run_speed = 18;
+
+	// How humanly the weave is played. God Mode: no reactions beyond move_delay_ms, stops exactly on 11 yd.
+	// Pro Player (2.5-2.6 s weaves) and Regular Player (2.8-3.0 s): a reaction before each move (in place of
+	// move_delay_ms), 100-200 ms or 200-300 ms, and a walk out stops 2/3 yd past the minimum range. Buttons go
+	// as soon as they can (press_reaction_ms).
+	enum WeavePlay {
+		WeaveGodMode     = 0;
+		WeavePerfectPlay = 1;
+		WeaveNormalPlay  = 2;
+	}
+	WeavePlay weave_play = 24;
+
+	// How long after an ability could first be pressed (the GCD up, off its cooldown, in range) it is pressed, in
+	// every Weaving mode; 0 is spamming the button. Moves keep their own reaction.
+	int32 press_reaction_ms = 26;
+
+	// The Auto Shot spam bug, fixed in game.
+	reserved 17;
+	reserved "auto_shot_spam_bug";
+
+	// Melee swings restart the Auto Shot timer: a game bug, off as it is expected to be fixed.
+	bool melee_resets_auto_shot = 22;
+	// Auto Shot releases restart the main-hand swing timer; with melee_resets_auto_shot the timers are linked both
+	// ways. For testing what such a link would do to weaving; off.
+	bool auto_shot_resets_main_hand = 25;
+
+	// A shot or sting cast during an Auto Shot cycle pushes that cycle's Auto Shot back 0.2 s: a reported
+	// game bug, off by default.
+	bool shots_delay_auto_shot = 23;
+
+	// Mortal Shots skipping Auto Shot: the game gives Auto Shot the crit bonus, as Arcane Shot.
+	reserved 21;
+	reserved "mortal_shots_skips_auto_shot";
+
+	// How a new Mongoose Bite bleed (Lacerating Strikes) meets the one already ticking. Rolling: the
+	// unticked damage joins the new bleed, spread over a full set of ticks on the running tick timer.
+	// Refresh: the new bleed replaces the old one, its unticked damage lost and the tick timer restarted.
+	// Strongest: as Refresh, but a weaker bleed leaves a stronger one ticking.
+	enum LaceratingMode {
+		LaceratingRolling   = 0;
+		LaceratingRefresh   = 1;
+		LaceratingStrongest = 2;
+	}
+	LaceratingMode lacerating_mode = 10;
+
+	// Explosive Trap's burn also takes the attack power share of its first hit, spread over its ticks;
+	// off, the burn takes none.
+	bool explosive_trap_burn_ap = 16;
+
+	// Unused: Charged / Attuned are removed on entering a raid. Kept so saved settings that still
+	// carry it load.
+	bool skyborne_convergence = 19;
+
+	// The abilities the pet does not use; every ability its family learns is used otherwise.
+	enum PetAbility {
+		PetAbilityUnknown             = 0;
+		PetAbilityBite                = 1;
+		PetAbilityClaw                = 2;
+		PetAbilityLightningBreath     = 3;
+		PetAbilityScorpidPoison       = 4;
+		PetAbilitySavageRend          = 5;
+		PetAbilityFuriousHowl         = 6;
+		PetAbilityThunderstomp        = 7;
+		PetAbilityDismember           = 8;
+		PetAbilityPinch               = 9;
+		PetAbilityTendonRip           = 10;
+		PetAbilityWeb                 = 11;
+		PetAbilitySwipe               = 12;
+		PetAbilityMine                = 13;
+		PetAbilityCharge              = 14;
+		PetAbilityDemoralizingScreech = 15;
+		PetAbilityLavaBreath          = 16;
+		PetAbilityDustCloud           = 17;
+		PetAbilityTrickstersDance     = 18;
+		PetAbilitySonicBlast          = 19;
+	}
+	repeated PetAbility pet_disabled_abilities = 14;
 }
 
 message Hunter {

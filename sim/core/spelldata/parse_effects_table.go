@@ -3,6 +3,7 @@ package spelldata
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 
 	"github.com/wowsims/forever/sim/core"
@@ -1073,11 +1074,17 @@ func (p *parser) onAttackTables(apply func(sim *core.Simulation, v float64)) fun
 }
 
 func (p *parser) addStats(sts []stats.Stat) func(sim *core.Simulation, delta float64) {
+	// An aura's mana per 5 has a mana row under the aura.
+	var mp5 *core.MP5Source
+	if p.aura != nil && !p.dry && slices.Contains(sts, stats.MP5) {
+		mp5 = p.unit.NamedMP5(p.aura.ActionID)
+	}
 	return func(sim *core.Simulation, delta float64) {
 		bonus := stats.Stats{}
 		for _, stat := range sts {
 			bonus[stat] = delta
 		}
+		mp5.Add(delta)
 		if sim == nil {
 			p.unit.AddStats(bonus)
 		} else {

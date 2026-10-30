@@ -11,7 +11,7 @@ import (
 
 func init() {
 	core.RegisterBuffHooks(core.BuffHooks{
-		ApplyBuffs:   applyGeneratedBuffs,
+		ApplyBuffs:   applyForeverBuffs,
 		ApplyDebuffs: applyDebuffs,
 	})
 }

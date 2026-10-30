@@ -276,6 +276,30 @@ func (character *Character) applyEquipment() {
 	}
 	character.AddStats(character.EquipStats())
 	character.equipStatsApplied = true
+	character.nameEquipmentMP5()
+}
+
+// Each item's mana per 5, its enchant's included, has a mana row under the item, and a temporary
+// enchant's under its consumable. Bonus stats stay unnamed.
+func (character *Character) nameEquipmentMP5() {
+	for _, item := range character.Equipment {
+		character.nameMP5(ActionID{ItemID: item.ID}, ItemEquipmentBaseStats(item)[stats.MP5]+item.Enchant.Stats[stats.MP5])
+	}
+	consumables := character.Consumables
+	for _, imbue := range []struct {
+		itemID int32
+		slot   proto.ItemSlot
+	}{
+		{consumables.MhImbueId, proto.ItemSlot_ItemSlotMainHand},
+		{consumables.OhImbueId, proto.ItemSlot_ItemSlotOffHand},
+		{consumables.MhWeaponImbueId, proto.ItemSlot_ItemSlotMainHand},
+		{consumables.OhWeaponImbueId, proto.ItemSlot_ItemSlotOffHand},
+	} {
+		enchant := GetConsumableByID(imbue.itemID).TemporaryEnchant
+		if enchant != nil && character.Equipment[imbue.slot].HasTempEnchant(enchant.EffectID) {
+			character.nameMP5(ActionID{ItemID: imbue.itemID}, enchant.Stats[stats.MP5])
+		}
+	}
 }
 
 func (character *Character) addUniversalStatDependencies() {

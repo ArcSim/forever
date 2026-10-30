@@ -23,6 +23,9 @@ type Encounter struct {
 	// Every kind of area the fight is in, deduplicated.
 	AreaTypes []proto.AreaType
 
+	// The fight is not in Mount Hyjal, Hyjal Summit or the Barrow Deeps.
+	OutsideHyjal bool
+
 	EndFightAtHealth float64
 	// DamageTaken is used to track health fights instead of duration fights.
 	//  Once primary target has taken its health worth of damage, fight ends.
@@ -58,6 +61,7 @@ func NewEncounter(options *proto.Encounter) Encounter {
 		ExecuteProportion_20: max(options.ExecuteProportion_20, 0),
 		ExecuteProportion_35: max(options.ExecuteProportion_35, 0),
 		AreaTypes:            areaTypeSet(options.AreaTypes),
+		OutsideHyjal:         options.OutsideHyjal,
 		AllTargets:           make([]*Target, 0, totalTargetCount),
 		ActiveTargets:        make([]*Target, 0, totalTargetCount),
 		AllTargetUnits:       make([]*Unit, 0, totalTargetCount),
@@ -407,7 +411,8 @@ func NewAttackTable(attacker *Unit, defender *Unit) *AttackTable {
 
 		table.BaseSpellMissChance = spellMissChance(levelDiff)
 		// Era logs show no aura crit suppression against targets 1 or 2 levels above.
-		if levelDiff >= 3 {
+		// Forever: only the weapon skill gap suppresses crit.
+		if levelDiff >= 3 && !ForeverNoAuraCritSuppression {
 			table.AuraCritSuppression = 0.018
 		}
 

@@ -347,6 +347,9 @@ func (action *APLActionMove) recheck(sim *Simulation) {
 	}
 }
 func (action *APLActionMove) IsReady(sim *Simulation) bool {
+	if ForeverWalkRules {
+		return action.arcIsReady(sim)
+	}
 	isPrepull := sim.CurrentTime < 0
 	return !action.unit.Moving && (action.moveRange.GetFloat(sim) != action.unit.DistanceFromTarget || isPrepull) && action.unit.Hardcast.Expires < sim.CurrentTime
 }
@@ -356,7 +359,13 @@ func (action *APLActionMove) Execute(sim *Simulation) {
 		action.unit.Log(sim, "[DEBUG] Moving to %.1f yards", moveRange)
 	}
 
-	action.unit.moveTo(moveRange, sim, true)
+	unit := action.unit
+	walkBefore, pendingBefore, queuedBefore := unit.movementAction, unit.arcWalk.pending, unit.arcWalk.queued
+	unit.moveTo(moveRange, sim, true)
+	// one press per walk decided: started now, or waiting on the move reaction or on arrival
+	if (unit.movementAction != nil && unit.movementAction != walkBefore) || (unit.arcWalk.pending && !pendingBefore) || (unit.arcWalk.queued && !queuedBefore) {
+		unit.countPress(sim)
+	}
 	if action.recheckWhileMoving && action.unit.Moving {
 		action.walk = action.unit.movementAction
 	}
@@ -396,7 +405,8 @@ func (action *APLActionPetAttack) String() string {
 
 type APLActionStartAttack struct {
 	defaultAPLActionImpl
-	aa *AutoAttacks
+	unit *Unit
+	aa   *AutoAttacks
 }
 
 func (rot *APLRotation) newActionStartAttack(_ *proto.APLActionStartAttack) APLActionImpl {
@@ -404,12 +414,13 @@ func (rot *APLRotation) newActionStartAttack(_ *proto.APLActionStartAttack) APLA
 		rot.ValidationMessage(proto.LogLevel_Warning, "No melee attack to start.")
 		return nil
 	}
-	return &APLActionStartAttack{aa: &rot.unit.AutoAttacks}
+	return &APLActionStartAttack{unit: rot.unit, aa: &rot.unit.AutoAttacks}
 }
 func (action *APLActionStartAttack) IsReady(_ *Simulation) bool {
 	return !action.aa.meleeAttackOn
 }
 func (action *APLActionStartAttack) Execute(sim *Simulation) {
+	action.unit.countPress(sim)
 	action.aa.StartMeleeAttack(sim)
 }
 func (action *APLActionStartAttack) String() string {

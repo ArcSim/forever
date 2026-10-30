@@ -152,6 +152,24 @@ func (rot *APLRotation) newAPLValueWithContext(config *proto.APLValue, groupVari
 		value = rot.newValueUnitDistance(config.GetUnitDistance(), config.Uuid)
 	case *proto.APLValue_UnitMovementSpeed:
 		value = rot.newValueUnitMovementSpeed(config.GetUnitMovementSpeed(), config.Uuid)
+	case *proto.APLValue_WeavePlay:
+		value = rot.newValueWeavePlay(config.GetWeavePlay(), config.Uuid)
+	case *proto.APLValue_HawkTimeLeft:
+		value = rot.newValueHawkTimeLeft(config.GetHawkTimeLeft(), config.Uuid)
+	case *proto.APLValue_SwingLink:
+		value = rot.newValueSwingLink(config.GetSwingLink(), config.Uuid)
+	case *proto.APLValue_MeleeAttackOn:
+		value = rot.newValueMeleeAttackOn(config.GetMeleeAttackOn(), config.Uuid)
+	case *proto.APLValue_SwingWaiting:
+		value = rot.newValueSwingWaiting(config.GetSwingWaiting(), config.Uuid)
+	case *proto.APLValue_WalkTarget:
+		value = rot.newValueWalkTarget(config.GetWalkTarget(), config.Uuid)
+	case *proto.APLValue_WalkPending:
+		value = rot.newValueWalkPending(config.GetWalkPending(), config.Uuid)
+	case *proto.APLValue_ManaTimeToTarget:
+		value = rot.newValueManaTimeToTarget(config.GetManaTimeToTarget(), config.Uuid)
+	case *proto.APLValue_SpellTimeSinceLastCast:
+		value = rot.newValueSpellTimeSinceLastCast(config.GetSpellTimeSinceLastCast(), config.Uuid)
 
 	// GCD
 	case *proto.APLValue_GcdIsReady:

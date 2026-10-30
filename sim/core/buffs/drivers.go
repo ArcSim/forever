@@ -269,6 +269,10 @@ func NewWindfuryTotemProcTrigger(char *core.Character) *core.Aura {
 	trigger.Duration = core.NeverExpires
 	trigger.Callback = core.CallbackOnCastResult
 	trigger.ProcMask &= core.ProcMaskMeleeMH
+	// Arc's engine: 100 ms between procs, so the extra attack right after a proc cannot proc it again
+	if core.ForeverWindfuryICD {
+		trigger.ICD = 100 * time.Millisecond
+	}
 	// TODO: verify in game whether a landed hit that deals no damage, such as Sunder Armor, rolls the totem, and if it does, clear RequireDamageDealt.
 	onInit := char.ExtraAttackProc(&trigger, windfuryTotemSpell.ID, 1)
 	return char.MakeProcTriggerAura(trigger).ApplyOnInit(onInit)

@@ -67,7 +67,23 @@ func (hunter *Hunter) registerEfficiency() {
 		return
 	}
 
-	spelldata.ParseStatic(&hunter.Character, spellData.Efficiency.Rank(hunter.Talents.Efficiency))
+	rank := spellData.Efficiency.Rank(hunter.Talents.Efficiency)
+	parsed := spelldata.ParseStatic(&hunter.Character, rank)
+
+	// The launch realms' Efficiency (hotfix of 28 October) names Strider Kick too; until the store's row does, Strider
+	// Kick takes the same cost cut here.
+	if rank.EffectN(1).ClassFlags.Mask[2]&striderKickRank.ClassFlags.Mask[2] != 0 {
+		return
+	}
+	for _, applied := range parsed.Applied {
+		if applied.Kind == "SpellMod_PowerCost_Pct" {
+			hunter.AddStaticMod(core.SpellModConfig{
+				Kind:       core.SpellMod_PowerCost_Pct,
+				ClassFlags: striderKickRank.ClassFlags,
+				FloatValue: applied.Value,
+			})
+		}
+	}
 }
 
 // The two effects are auras the parse table has no row for, each stating a share of Intellect - 20%

@@ -103,6 +103,11 @@ func (unit *Unit) SetGCDTimer(sim *Simulation, gcdReadyAt time.Duration) {
 		unit.Rotation.HasBlockingControllingAction() {
 		return
 	}
+	// A rotation that moves keeps looking through the GCD from the spell that starts it: a spell off the GCD, such
+	// as Raptor Strike's queue, goes once it is ready, not at the GCD's end.
+	if ForeverWalkRules && ForeverGCDPoll && unit.Type == PlayerUnit && unit.Rotation != nil && unit.Rotation.hasMove() {
+		gcdReadyAt = min(gcdReadyAt, sim.CurrentTime+ForeverRotationPoll)
+	}
 	unit.SetRotationTimer(sim, gcdReadyAt)
 }
 

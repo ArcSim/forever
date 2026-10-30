@@ -210,6 +210,7 @@ func main() {
 	}
 
 	db.MergeItems(database.ItemOverrides)
+	db.AddArcClassicData(false)
 	database.ApplyItemSetClasses(db)
 	db.MergeEnchants(database.EnchantOverrides)
 	ApplyGlobalFilters(db)

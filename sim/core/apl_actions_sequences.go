@@ -166,6 +166,10 @@ func (action *APLActionStrictSequence) Reset(*Simulation) {
 func (action *APLActionStrictSequence) IsReady(sim *Simulation) bool {
 	action.unit.Rotation.inSequence = true
 
+	if ForeverStrictSequenceNow && len(action.subactionSpells) > 0 && !action.arcReadyNow(sim) {
+		action.unit.Rotation.inSequence = false
+		return false
+	}
 	if (action.unit.GCD.TimeToReady(sim) > MaxSpellQueueWindow) && (len(action.subactionSpells) > 0) {
 		action.unit.Rotation.inSequence = false
 		return false

@@ -156,6 +156,7 @@ type Spell struct {
 	SpellMetrics      []SpellMetrics
 	splitSpellMetrics [][]SpellMetrics // Used to split metrics by some condition.
 	casts             int              // Sum of casts on all targets, for efficient CPM calculation
+	lastCastAt        time.Duration    // When its effects last went out, for Time Since Last Cast; read once casts > 0
 
 	// Performs the actions of this spell.
 	ApplyEffects ApplySpellResults
@@ -773,7 +774,7 @@ func (spell *Spell) CanCast(sim *Simulation, target *Unit) bool {
 func (spell *Spell) canStart(sim *Simulation, target *Unit) bool {
 	return spell != nil && spell.CanCompleteCast(sim, target, false) &&
 		!spell.Flags.Matches(SpellFlagSwapped) &&
-		(spell.Flags&SpellFlagCanCastWhileMoving != 0 || spell.DefaultCast.CastTime == 0 || !spell.Unit.Moving) &&
+		(spell.Flags&SpellFlagCanCastWhileMoving != 0 || spell.DefaultCast.CastTime == 0 || !(spell.Unit.Moving || spell.Unit.arcCastBlockedByWalk())) &&
 		(spell.MaxCharges == 0 || spell.charges > 0)
 }
 
@@ -855,7 +856,14 @@ func (spell *Spell) Cast(sim *Simulation, target *Unit) bool {
 	if target == nil {
 		target = spell.Unit.CurrentTarget
 	}
-	return spell.castFn(sim, target)
+	if !spell.castFn(sim, target) {
+		return false
+	}
+	// spells a rotation can use are the ones a player presses; procs and auto attacks are not
+	if spell.Flags.Matches(SpellFlagAPL) {
+		spell.Unit.countPress(sim)
+	}
+	return true
 }
 
 func (spell *Spell) CastOnAllOtherTargets(sim *Simulation, mainTarget *Unit) {
@@ -879,6 +887,7 @@ func (spell *Spell) SkipCastAndApplyEffects(sim *Simulation, target *Unit) {
 func (spell *Spell) applyEffects(sim *Simulation, target *Unit) {
 	spell.SpellMetrics[target.UnitIndex].Casts++
 	spell.casts++
+	spell.lastCastAt = sim.CurrentTime
 
 	// Not sure if we want to split this flag into its own?
 	// Both are used to optimize away unneccesery calls and 99%

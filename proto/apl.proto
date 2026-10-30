@@ -24,6 +24,7 @@ message APLRotation {
 	repeated APLListItem priority_list = 2;
 	repeated APLGroup groups = 5; // Action groups that can be referenced
 	repeated APLValueVariable value_variables = 6; // Named reusable variables
+	bool manual_start_attack = 7; // Walking in does not turn the melee attack on: Start Attack does, or reaching melee.
 }
 
 message SimpleRotation {
@@ -35,12 +36,42 @@ message APLPrepullAction {
     APLAction action = 1;
     APLValue do_at_value = 4; // When to perform this prepull action. Should be a negative value.
     bool hide = 3; // Causes this item to be ignored.
+    APLSimpleView simple = 5; // How the line reads as a card.
 }
 
 message APLListItem {
     bool hide = 1; // Causes this item to be ignored.
     string notes = 2; // Comments for the reader.
     APLAction action = 3; // The action to be performed.
+    APLSimpleView simple = 4; // How the line reads as a card.
+}
+
+// A line in plain words, written by the rotation's author. The text takes **bold** and {name} for a box or a value.
+message APLSimpleView {
+    bool shown = 1; // The line shows its card instead of the normal editor.
+    string text = 2;
+    string title = 3; // Shown before the row of boxes.
+    repeated APLSimpleBox boxes = 4;
+    repeated APLSimpleValue values = 5;
+    repeated APLSimpleText texts = 6; // Other wordings: the first whose condition holds replaces text.
+}
+
+// A wording for one case, picked by a condition on the boxes, values and gear ("Main hand swing - Auto Shot swing >= 0.5").
+message APLSimpleText {
+    string when = 1;
+    string text = 2;
+}
+
+message APLSimpleBox {
+    string label = 1;
+    repeated string numbers = 2; // Paths of the Const values in the line that this box changes.
+    string unit = 3;
+}
+
+// A number worked out for the text from boxes, other values and the gear (main hand swing, ...).
+message APLSimpleValue {
+    string name = 1;
+    string expr = 2;
 }
 
 message APLGroup {
@@ -100,7 +131,7 @@ message APLAction {
 }
 
 
-// NextIndex: 143
+// NextIndex: 144
 message APLValue {
 	UUID uuid = 85;
 
@@ -152,6 +183,16 @@ message APLValue {
 		APLValueUnitIsMoving unit_is_moving = 72;
 		APLValueUnitDistance unit_distance = 105;
 		APLValueUnitMovementSpeed unit_movement_speed = 136;
+		APLValueWeavePlay weave_play = 143;
+		// Our own values from 1001 up, clear of the numbers upstream adds next.
+		APLValueHawkTimeLeft hawk_time_left = 1001;
+		APLValueSwingLink swing_link = 1002;
+		APLValueMeleeAttackOn melee_attack_on = 1003;
+		APLValueSwingWaiting swing_waiting = 1004;
+		APLValueWalkTarget walk_target = 1005;
+		APLValueWalkPending walk_pending = 1006;
+		APLValueManaTimeToTarget mana_time_to_target = 1007;
+		APLValueSpellTimeSinceLastCast spell_time_since_last_cast = 1008;
 
         // GCD values
         APLValueGCDIsReady gcd_is_ready = 17;
@@ -523,6 +564,41 @@ message APLValueUnitDistance {
 // The unit's run speed in yards per second, with its speed auras.
 message APLValueUnitMovementSpeed {
     UnitReference source_unit = 1;
+}
+// The player's Weaving setting: 0 God Mode, 1 Pro Player, 2 Regular Player.
+message APLValueWeavePlay {}
+// Which hawk Hawk Time Left reads: the next to leave, the last to leave, or the hawk in slot 1 or 2 (a new hawk takes
+// the first free slot).
+enum HawkPick {
+	HawkPickNext = 0;
+	HawkPickLast = 1;
+	HawkPickSlot1 = 2;
+	HawkPickSlot2 = 3;
+}
+// How long a hawk out has left; 0 with no such hawk out.
+message APLValueHawkTimeLeft {
+	HawkPick hawk = 1;
+}
+// How the swing timers are linked: 0 not linked, 1 melee swings restart Auto Shot, 2 both ways.
+message APLValueSwingLink {}
+// The melee attack is switched on; starting an Auto Shot switches it off, walking in or Start Attack back on.
+message APLValueMeleeAttackOn {}
+// How long the swing has been ready without going: out of range, walking, in a windup. 0 while its timer runs.
+message APLValueSwingWaiting {
+	APLValueAutoAttackType auto_type = 1;
+}
+// Where the walk under way or decided is headed, in yards; with no walk, where the unit stands.
+message APLValueWalkTarget {}
+// A walk is decided but not under way: its move reaction is running, or it waits for the walk in progress to end.
+message APLValueWalkPending {}
+// How long the regen takes to reach the given mana, spending none meanwhile (the five-second rule and the ticks
+// counted).
+message APLValueManaTimeToTarget {
+	APLValue target_mana = 1;
+}
+// How long ago the spell last went out; never cast this fight, longer than any fight.
+message APLValueSpellTimeSinceLastCast {
+	ActionID spell_id = 1;
 }
 message APLValueCurrentHealth {
     UnitReference source_unit = 1;

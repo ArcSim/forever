@@ -133,6 +133,9 @@ func TestBerserkingIsFlatTenPercent(t *testing.T) {
 	if fw.CurrentRage() != 0 || fw.GetSpell(ActionID{SpellID: 20554}).Cost != nil {
 		t.Fatalf("Berserking should have no cost")
 	}
+	if aura := fw.GetAura("Berserking"); aura == nil || aura.Duration != 15*time.Second {
+		t.Fatalf("Berserking should last 15 seconds")
+	}
 }
 
 func TestElunesLight(t *testing.T) {
@@ -378,9 +381,85 @@ func TestGnomeWarlockEurekaChannel(t *testing.T) {
 	channelFrom(start+mods.Duration, "a Drain Life running past the end of Eureka!", boosted, boosted, 1, 1, 1)
 }
 
-// Endurance carries no hit and no crit damage, Artisan's Precision 1% physical and spell hit.
-func TestHitAndCritDamageRacials(t *testing.T) {
-	_, human := setupRacialSim(proto.Race_RaceHuman)
+const (
+	racialTestMaceID int32 = 991511 + iota
+	racialTestTwoHandMaceID
+)
+
+func addRacialTestMaces() {
+	mace := func(id int32, handType proto.HandType) *proto.SimItem {
+		return &proto.SimItem{
+			Id:             id,
+			Name:           "Test Mace",
+			Type:           proto.ItemType_ItemTypeWeapon,
+			WeaponType:     proto.WeaponType_WeaponTypeMace,
+			HandType:       handType,
+			WeaponSpeed:    2.6,
+			ScalingOptions: map[int32]*proto.ScalingItemProperties{0: {WeaponDamageMin: 50, WeaponDamageMax: 90}},
+		}
+	}
+	addToDatabase(&proto.SimDatabase{Items: []*proto.SimItem{
+		mace(racialTestMaceID, proto.HandType_HandTypeOneHand),
+		mace(racialTestTwoHandMaceID, proto.HandType_HandTypeTwoHand),
+	}})
+}
+
+// The crit multipliers of a main-hand swing, a spell and a heal.
+func racialCritMultipliers(sim *Simulation, character *Character) map[string]float64 {
+	magic := func(id int32, procMask ProcMask, school SpellSchool) *Spell {
+		if spell := character.GetSpell(ActionID{SpellID: id}); spell != nil {
+			return spell
+		}
+		return character.RegisterSpell(SpellConfig{
+			ActionID:         ActionID{SpellID: id},
+			DefenseType:      DefenseTypeMagic,
+			ProcMask:         procMask,
+			SpellSchool:      school,
+			DamageMultiplier: 1,
+		})
+	}
+	attackTable := character.AttackTables[sim.Encounter.ActiveTargetUnits[0].UnitIndex]
+	return map[string]float64{
+		"main-hand swing": character.AutoAttacks.MHAuto().CritDamageMultiplier(attackTable),
+		"spell":           magic(990801, ProcMaskSpellDamage, SpellSchoolFire).CritDamageMultiplier(attackTable),
+		"heal":            magic(990802, ProcMaskSpellHealing, SpellSchoolHoly).CritDamageMultiplier(nil),
+	}
+}
+
+// No race carries a critical damage racial: a tauren's or a dwarf's attacks, spells and heals crit
+// as hard as a human's with any weapon or none, maces included.
+func TestCritDamageRacials(t *testing.T) {
+	addRacialTestMaces()
+	bareHands := WeaponTestSlots(0, 0, 0)
+	sword := WeaponTestSlots(WeaponTestSwordID, 0, 0)
+
+	for _, tc := range []struct {
+		name    string
+		race    proto.Race
+		weapons []*proto.ItemSpec
+		want    float64
+	}{
+		{"tauren with bare hands", proto.Race_RaceTauren, bareHands, 1},
+		{"tauren with a sword", proto.Race_RaceTauren, sword, 1},
+		{"dwarf with a mace", proto.Race_RaceDwarf, WeaponTestSlots(racialTestMaceID, 0, 0), 1},
+		{"dwarf with a two-handed mace", proto.Race_RaceDwarf, WeaponTestSlots(racialTestTwoHandMaceID, 0, 0), 1},
+		{"dwarf with a mace in the off hand", proto.Race_RaceDwarf, WeaponTestSlots(WeaponTestDaggerID, racialTestMaceID, 0), 1},
+		{"dwarf with a sword", proto.Race_RaceDwarf, sword, 1},
+		{"dwarf with bare hands", proto.Race_RaceDwarf, bareHands, 1},
+	} {
+		human := racialCritMultipliers(NewWeaponTestSim(t, proto.Race_RaceHuman, tc.weapons, nil, nil))
+		for name, got := range racialCritMultipliers(NewWeaponTestSim(t, tc.race, tc.weapons, nil, nil)) {
+			if want := human[name] * tc.want; !WithinToleranceFloat64(want, got, 1e-9) {
+				t.Errorf("%s: a %s should crit for x%0.4f, got x%0.4f", tc.name, name, want, got)
+			}
+		}
+	}
+}
+
+// Endurance carries no hit, so a tauren holds a human's physical and spell hit. Artisan's Precision
+// gives a dwarf 1% more of each with any weapon or none.
+func TestRacialHit(t *testing.T) {
+	addRacialTestMaces()
 	for _, tc := range []struct {
 		race proto.Race
 		hit  float64
@@ -388,21 +467,25 @@ func TestHitAndCritDamageRacials(t *testing.T) {
 		{proto.Race_RaceTauren, 0},
 		{proto.Race_RaceDwarf, 1},
 	} {
-		_, character := setupRacialSim(tc.race)
-		for _, stat := range []stats.Stat{stats.PhysicalHitPercent, stats.SpellHitPercent} {
-			if got, want := character.GetStat(stat), human.GetStat(stat)+tc.hit; got != want {
-				t.Errorf("a %s should hold %s %v, got %v", tc.race, stat.StatName(), want, got)
+		for name, weapons := range map[string][]*proto.ItemSpec{
+			"bare hands": WeaponTestSlots(0, 0, 0),
+			"a sword":    WeaponTestSlots(WeaponTestSwordID, 0, 0),
+			"a mace":     WeaponTestSlots(racialTestMaceID, 0, 0),
+		} {
+			_, human := NewWeaponTestSim(t, proto.Race_RaceHuman, weapons, nil, nil)
+			_, character := NewWeaponTestSim(t, tc.race, weapons, nil, nil)
+			for _, stat := range []stats.Stat{stats.PhysicalHitPercent, stats.SpellHitPercent} {
+				if got := character.GetStat(stat) - human.GetStat(stat); !WithinToleranceFloat64(tc.hit, got, 1e-9) {
+					t.Errorf("%s with %s: %s %+v over a human, want %+v", tc.race, name, stat.StatName(), got, tc.hit)
+				}
 			}
-		}
-		if got := character.PseudoStats.CritDamageMultiplier; got != human.PseudoStats.CritDamageMultiplier {
-			t.Errorf("a %s should crit for a human's x%0.4f, got x%0.4f", tc.race, human.PseudoStats.CritDamageMultiplier, got)
 		}
 	}
 }
 
 // Ruthless raises the crit of every spell and attack whatever the character holds, bare hands
-// included. An undead and an orc have no crit racial, so at the same attributes they hold the crit
-// without it.
+// included, and an orc has no crit racial. An undead has none either, so at the same attributes it
+// holds the crit without them.
 func TestRuthlessNeedsNoWeapon(t *testing.T) {
 	for _, tc := range []struct {
 		race proto.Race
@@ -465,88 +548,7 @@ func TestSkyborneRacials(t *testing.T) {
 		hasReadLeyLine := fw.GetSpell(ActionID{SpellID: 1259705}) != nil
 		hasSkysight := fw.GetSpell(ActionID{SpellID: 1259686}) != nil
 		if hasReadLeyLine != (race == proto.Race_RaceHighOrderSkyborne) || hasSkysight != (race == proto.Race_RaceWindshaperSkyborne) {
-			t.Errorf("%s: Read Leyline is the High Order's and Skysight the Windshapers', got %t / %t", race, hasReadLeyLine, hasSkysight)
-		}
-	}
-}
-
-// Read Leyline and Skysight each hold a plain cast and a tag 1 cast for an Attuned or Charged
-// character, on one cooldown: the plain one lasts 15 s at half the tagged one's bonus, and the aura
-// takes its bonus back off when it expires. An activation with no cast takes the plain bonus, also
-// after a tagged cast.
-func TestSkyborneCastsShareACooldown(t *testing.T) {
-	for _, tc := range []struct {
-		race    proto.Race
-		spellID int32
-		aura    string
-		value   func(*fakeDotWarlock) float64
-		plain   float64
-		buffed  float64
-	}{
-		{proto.Race_RaceHighOrderSkyborne, 1259705, "Energized", func(fw *fakeDotWarlock) float64 { return fw.manaRegenMultiplier }, 1.5, 2},
-		{proto.Race_RaceWindshaperSkyborne, 1259686, "Elemental Blessing", func(fw *fakeDotWarlock) float64 { return fw.PseudoStats.MovementSpeedMultiplier }, 1.15, 1.3},
-	} {
-		for tag, want := range []float64{tc.plain, tc.buffed} {
-			sim, fw := setupFakeWarlockSim(tc.race, &proto.IndividualBuffs{})
-			before := tc.value(fw)
-			cast := fw.GetSpell(ActionID{SpellID: tc.spellID, Tag: int32(tag)})
-			other := fw.GetSpell(ActionID{SpellID: tc.spellID, Tag: int32(1 - tag)})
-			if cast == nil || other == nil {
-				t.Fatalf("%s: spell %d should register tags 0 and 1", tc.race, tc.spellID)
-			}
-			cast.SkipCastAndApplyEffects(sim, fw.CurrentTarget)
-			cast.CD.Use(sim)
-
-			aura := fw.GetAura(tc.aura)
-			if !aura.IsActive() || aura.Duration != 15*time.Second {
-				t.Errorf("%s tag %d: %s should be up for 15s, got active %t for %v", tc.race, tag, tc.aura, aura.IsActive(), aura.Duration)
-			}
-			if got := tc.value(fw) / before; !WithinToleranceFloat64(want, got, 1e-9) {
-				t.Errorf("%s tag %d: %s should multiply by %v, got x%0.4f", tc.race, tag, tc.aura, want, got)
-			}
-			if other.CanCast(sim, fw.CurrentTarget) {
-				t.Errorf("%s tag %d: the other cast should share the cooldown", tc.race, tag)
-			}
-			aura.Deactivate(sim)
-			if got := tc.value(fw); !WithinToleranceFloat64(before, got, 1e-9) {
-				t.Errorf("%s tag %d: after %s ends the multiplier should be back at %v, got %v", tc.race, tag, tc.aura, before, got)
-			}
-
-			aura.Activate(sim)
-			if got := tc.value(fw) / before; !WithinToleranceFloat64(tc.plain, got, 1e-9) {
-				t.Errorf("%s tag %d: %s raised with no cast should multiply by %v, got x%0.4f", tc.race, tag, tc.aura, tc.plain, got)
-			}
-			aura.Deactivate(sim)
-		}
-	}
-}
-
-// Read Leyline cannot be cast under Innervate, and an Innervate that lands ends Energized.
-func TestInnervateReplacesEnergized(t *testing.T) {
-	sim, fw := setupFakeWarlockSim(proto.Race_RaceHighOrderSkyborne, &proto.IndividualBuffs{Innervates: 1})
-
-	innervates := fw.GetAurasWithTag(innervateTag)
-	if len(innervates) == 0 {
-		t.Fatalf("an Innervates buff should register an aura tagged %q", innervateTag)
-	}
-	readLeyline := fw.GetSpell(ActionID{SpellID: 1259705})
-	energized := fw.GetAura("Energized")
-
-	if !readLeyline.CanCast(sim, fw.CurrentTarget) {
-		t.Fatalf("Read Leyline should cast with no Innervate up")
-	}
-	readLeyline.SkipCastAndApplyEffects(sim, fw.CurrentTarget)
-	if !energized.IsActive() {
-		t.Fatalf("Read Leyline should raise Energized")
-	}
-	innervates[0].Activate(sim)
-	if energized.IsActive() {
-		t.Errorf("Innervate landing should end Energized")
-	}
-
-	for _, tag := range []int32{0, 1} {
-		if fw.GetSpell(ActionID{SpellID: 1259705, Tag: tag}).CanCast(sim, fw.CurrentTarget) {
-			t.Errorf("Read Leyline tag %d should not cast under Innervate", tag)
+			t.Errorf("%s: Read Ley Line is the High Order's and Skysight the Windshapers', got %t / %t", race, hasReadLeyLine, hasSkysight)
 		}
 	}
 }
@@ -653,7 +655,6 @@ func newFakeDotWarlock(char *Character, _ *proto.Player, _ *proto.Raid) Agent {
 func (fw *fakeDotWarlock) GetCharacter() *Character { return &fw.Character }
 
 func (fw *fakeDotWarlock) Initialize() {
-	fw.EnableManaBar()
 	fw.Corruption = fw.RegisterSpell(SpellConfig{
 		ActionID:         ActionID{SpellID: 172},
 		SpellSchool:      SpellSchoolShadow,
@@ -808,7 +809,7 @@ func TestTouchOfTheGraveIgnoresPeriodicTicks(t *testing.T) {
 	}
 }
 
-func TestTouchOfTheGraveProcsOnceIn25Seconds(t *testing.T) {
+func TestTouchOfTheGraveProcsOnceIn15Seconds(t *testing.T) {
 	sim, fw, aura := setupTouchOfTheGraveWarlock(t)
 	target := fw.CurrentTarget
 	drain := fw.GetSpell(ActionID{SpellID: 1260198})

@@ -108,8 +108,12 @@ func selectedConsumableIDs(consumables *proto.ConsumesSpec) []int32 {
 		consumables.OhImbueId, consumables.OhWeaponImbueId, consumables.MhImbueId, consumables.MhWeaponImbueId,
 		consumables.SwapOhImbueId, consumables.SwapOhWeaponImbueId, consumables.SwapMhImbueId, consumables.SwapMhWeaponImbueId)
 	ids = append(ids, consumables.ExtraIds...)
-	ids = append(ids, consumables.Potions...)
-	ids = append(ids, consumables.ConjuredItems...)
+	// ForeverChosenConsumablesOnly: the page also sends every potion and conjured item the class could use, which made a
+	// rotation line for an unchosen potion fire; only what the build names is carried
+	if !ForeverChosenConsumablesOnly {
+		ids = append(ids, consumables.Potions...)
+		ids = append(ids, consumables.ConjuredItems...)
+	}
 
 	var selected []int32
 	var groups []string

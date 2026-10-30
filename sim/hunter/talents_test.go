@@ -50,7 +50,8 @@ func TestAspectOfTheCheetahSpeedWithPathfindingAndDazed(t *testing.T) {
 	}
 }
 
-// Survival Tactics' 10% hit on the two damage traps, on the effect spells that roll the hit.
+// Survival Tactics' 10% hit on the two damage traps, on the effect spells that roll the hit, counted once: it joins
+// the trap's hit roll and is gone after it.
 func TestSurvivalTacticsRaisesTrapHit(t *testing.T) {
 	for _, tc := range []struct {
 		talents string
@@ -65,8 +66,13 @@ func TestSurvivalTacticsRaisesTrapHit(t *testing.T) {
 			if spell == nil {
 				t.Fatalf("the hunter has no trap effect %d", rank)
 			}
-			if spell.BonusHitPercent != tc.hit {
-				t.Errorf("trap effect %d with talents %q has %v%% bonus hit, want %v%%", rank, tc.talents, spell.BonusHitPercent, tc.hit)
+			if spell.BonusHitPercent != 0 {
+				t.Errorf("trap effect %d with talents %q holds %v%% bonus hit outside its roll, want 0%%", rank, tc.talents, spell.BonusHitPercent)
+			}
+			var rolled float64
+			hunter.arcTrapHitRoll(spell, func() { rolled = spell.BonusHitPercent })
+			if rolled != tc.hit {
+				t.Errorf("trap effect %d with talents %q rolls with %v%% bonus hit, want %v%%", rank, tc.talents, rolled, tc.hit)
 			}
 		}
 	}

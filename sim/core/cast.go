@@ -181,7 +181,7 @@ func (spell *Spell) makeCastFunc(config CastConfig) CastSuccessFunc {
 			return spell.castFailureHelper(sim, "casting/channeling %v for %s, curTime = %s", hc.ActionID, hc.Expires-sim.CurrentTime, sim.CurrentTime)
 		}
 
-		if (spell.Flags&SpellFlagCanCastWhileMoving == 0) && (spell.CurCast.CastTime > 0) && spell.Unit.Moving {
+		if (spell.Flags&SpellFlagCanCastWhileMoving == 0) && (spell.CurCast.CastTime > 0) && (spell.Unit.Moving || spell.Unit.arcCastBlockedByWalk()) {
 			return spell.castFailureHelper(sim, "casting/channeling while moving not allowed!")
 		}
 
@@ -263,6 +263,10 @@ func (spell *Spell) makeCastFunc(config CastConfig) CastSuccessFunc {
 					// A hardcast shorter than the GCD leaves a weaver free to move
 					// before the GCD frees; wake the rotation to land a pending swing.
 					spell.Unit.AutoAttacks.weaveWakeupAfterCast(sim)
+					// a cast's end is a decision point: a walk can start as it lands
+					if ForeverWalkRules && spell.Unit.Rotation != nil && !sim.Options.Interactive {
+						spell.Unit.arcReactNow(sim)
+					}
 				},
 				Target:      target,
 				CanMove:     spell.Flags&SpellFlagCanCastWhileMoving > 0,

@@ -137,8 +137,8 @@ func TestPetFamiliesMatchTheOptions(t *testing.T) {
 	}
 }
 
-// The generated arrow table and the options enum name the same arrows, and every value is its
-// arrow's item id, which is what the UI lists them by.
+// The generated arrow table and the options enum name the same arrows, the rest of the enum being
+// the listed bullets, and every value is its arrow's item id, which is what the UI lists them by.
 func TestArrowsMatchTheOptions(t *testing.T) {
 	for name, arrow := range arrows {
 		if value, ok := proto.HunterOptions_Ammo_value[name]; !ok {
@@ -151,8 +151,10 @@ func TestArrowsMatchTheOptions(t *testing.T) {
 		if value == 0 {
 			continue
 		}
-		if _, ok := arrows[name]; !ok {
-			t.Errorf("HunterOptions.Ammo %s names no generated arrow", name)
+		_, arrow := arrows[name]
+		_, bullet := bullets[name]
+		if !arrow && !bullet {
+			t.Errorf("HunterOptions.Ammo %s names no generated arrow or listed bullet", name)
 		}
 	}
 }
