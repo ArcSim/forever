@@ -8,6 +8,8 @@ import (
 )
 
 func TestSelectedConsumableIDs(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverChosenConsumablesOnly)
 	const (
 		pot int32 = 990411 + iota
 		potion

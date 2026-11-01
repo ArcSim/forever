@@ -11,6 +11,8 @@ import (
 // Each walk lands in its own action row, tag 0 for one the unit starts by hand and tag 1 for one a spell
 // causes, and counts one cast, for the owner and for its pet.
 func TestWalksSplitByHandFromSpellCaused(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, owner := setupPetOwnerSim(&proto.RaidBuffs{}, &proto.PartyBuffs{})
 	pet := &owner.pet.Unit
 

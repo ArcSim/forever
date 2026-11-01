@@ -194,6 +194,8 @@ func (cb *hardcastTest) nukeNotingLandings(at time.Duration, landed *[]int) APLA
 }
 
 func TestRotationPicksAtCastEndBeforeLanding(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules, &ForeverStrictSequenceNow)
 	const castEnd = 2 * time.Second
 
 	t.Run("the rotation picks at the cast end before the cast lands and its pick goes off as the cast ends", func(t *testing.T) {
@@ -555,6 +557,8 @@ func readAtPick(unit *Unit, read func(sim *Simulation) bool, reads *[]bool) APLA
 }
 
 func TestRotationReadsOwnCastAsLanded(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	const castEnd = 2 * time.Second
 	const beforeEnd = 10 * time.Millisecond
 	lateInCast := castEnd - beforeEnd
@@ -740,6 +744,8 @@ func TestRotationReadsOwnCastAsLanded(t *testing.T) {
 // GCD of the instant cast at the pull (as an Auto Shot, a swing or a proc would), a walk whose condition turns true
 // at 0.9 s starts then rather than at the GCD's end.
 func TestMoveConditionTurningTrueDuringTheGcdStartsTheWalk(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	cb := newHardcastTest()
 	fromNinth := cb.rot.newAPLValue(&proto.APLValue{Value: &proto.APLValue_Cmp{Cmp: &proto.APLValueCompare{
 		Op:  proto.APLValueCompare_OpGe,

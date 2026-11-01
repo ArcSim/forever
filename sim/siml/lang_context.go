@@ -168,10 +168,10 @@ func lineIndentEnd(text string, offset int) int {
 	return i
 }
 
-// Whether the cursor is in a `//` comment or a `///` note.
+// Whether the cursor is in a `//` comment, a `///` note or a `//@` card line.
 func insideTrivia(text string, offset int) bool {
 	_, triv, _ := lex(text[lineStartOf(text, offset):offset])
-	return slices.ContainsFunc(triv, func(t trivia) bool { return t.kind == triviaComment || t.kind == triviaNote })
+	return slices.ContainsFunc(triv, func(t trivia) bool { return t.kind == triviaComment || t.kind == triviaNote || t.kind == triviaCard })
 }
 
 // The statement the cursor is in: one it lies inside, or the last one before it that it continues, on its last line

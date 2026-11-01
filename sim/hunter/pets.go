@@ -92,7 +92,8 @@ func (hunter *Hunter) NewHunterPet() *HunterPet {
 	if core.ForeverPetFocusDoubled {
 		focusRegen *= 2
 	}
-	hp.EnableFocusBar(focusRegen)
+	// A pet's 100 focus, plus the 50 that Hunter Pet Scaling (415429) effect 15 adds (A_MOD_MAX_POWER, focus).
+	hp.EnableFocusBar(100+50, focusRegen)
 
 	// Normalized in ApplyTalents to the Faster or Slower Attack passive's swing.
 	hp.EnableAutoAttacks(hp, core.AutoAttackOptions{
@@ -453,7 +454,8 @@ func (hp *HunterPet) registerDustCloud(rank *spelldata.Spell) *core.Spell {
 	return hp.RegisterSpell(config)
 }
 
-// The pet's and the hunter's attack power. TODO: the row's target is the raid within 15 yd.
+// The pet's and the hunter's attack power, at the row's full value: the logs show the pet buffing itself and a
+// party member, +32 to +33 attack power from rank 2's 34. TODO: the row's target is the raid within 15 yd.
 func (hp *HunterPet) registerFuriousHowl(rank *spelldata.Spell) *core.Spell {
 	var auras []*core.Aura
 	for _, character := range []*core.Character{&hp.Character, &hp.hunterOwner.Character} {

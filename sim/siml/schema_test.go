@@ -176,8 +176,8 @@ func TestHandWrittenMessagesHoldOnlyWhatTheirSyntaxWrites(t *testing.T) {
 		syntax  string
 		fields  []protoreflect.Name
 	}{
-		{"proto.APLListItem", "a row", []protoreflect.Name{"hide", "notes", "action"}},
-		{"proto.APLPrepullAction", "a prepull row", []protoreflect.Name{"action", "do_at_value", "hide"}},
+		{"proto.APLListItem", "a row", []protoreflect.Name{"hide", "notes", "action", "simple"}},
+		{"proto.APLPrepullAction", "a prepull row", []protoreflect.Name{"action", "do_at_value", "hide", "simple"}},
 		{"proto.APLAction", "a row", []protoreflect.Name{"condition"}},
 		{"proto.APLGroup", "a group header", []protoreflect.Name{"name", "actions", "variables"}},
 		{"proto.APLValueVariable", "a var line and a group reference's with", []protoreflect.Name{"name", "value"}},

@@ -547,7 +547,7 @@ func (unit *Unit) OnChannelEnd(handler func(sim *Simulation, dot *Dot)) {
 }
 
 func (unit *Unit) SpellGCD() time.Duration {
-	return max(GCDMin, unit.ApplyCastSpeed(GCDDefault))
+	return max(GCDMin, min(GCDDefault, unit.ApplyCastSpeed(GCDDefault)))
 }
 
 func (unit *Unit) hasteRatingMultiplier() float64 {

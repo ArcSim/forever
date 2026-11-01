@@ -125,6 +125,8 @@ func TestSapperDamagesEveryEnemyAndTheThrower(t *testing.T) {
 // An explosive whose damage lands on an area around the thrower and whose row states no range reaches
 // as far as the area's radius: 13241 is usable from its 10 yd and not a yard past it.
 func TestAnExplosiveAroundTheThrowerReachesOnlyItsRadius(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverAreaReach)
 	row := spelldata.MustFind(13241)
 	effect := row.DamageEffect()
 	if !effect.HitsAroundTheCaster() || row.MaxRange != 0 {

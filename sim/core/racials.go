@@ -207,21 +207,24 @@ func applyRaceEffects(agent Agent) {
 	case proto.Race_RaceHighOrderSkyborne:
 		applySkyborneSharedRacials(character)
 
-		// Each cast regenerates 50% faster for 15 s. The server's racial notes set this; the client's
-		// 1270842 still states 100% for 30 s. Attuned (a cast at a leyline) is removed on entering a raid.
-		regen := 1.5
+		// Each cast raises spirit regeneration 50% for 15 s: 1270842's A_MOD_POWER_REGEN_PERCENT reaches the
+		// spirit part, not mana per 5. The server's hotfix sets 50% for 15 s; the client row states 100% for 30 s.
+		// Attuned (a cast at a leyline) is removed on entering a raid.
+		regen := 0.5
 		energizedAura := character.RegisterAura(Aura{
 			Label:    "Energized",
 			ActionID: ActionID{SpellID: 1270842},
 			Duration: time.Second * 15,
 			OnGain: func(aura *Aura, sim *Simulation) {
 				if aura.Unit.HasManaBar() {
-					aura.Unit.MultiplyManaRegenSpeed(sim, regen)
+					aura.Unit.PseudoStats.SpiritRegenMultiplier += regen
+					aura.Unit.UpdateManaRegenRates(sim)
 				}
 			},
 			OnExpire: func(aura *Aura, sim *Simulation) {
 				if aura.Unit.HasManaBar() {
-					aura.Unit.MultiplyManaRegenSpeed(sim, 1/regen)
+					aura.Unit.PseudoStats.SpiritRegenMultiplier -= regen
+					aura.Unit.UpdateManaRegenRates(sim)
 				}
 			},
 		})
@@ -248,21 +251,15 @@ func applyRaceEffects(agent Agent) {
 	case proto.Race_RaceWindshaperSkyborne:
 		applySkyborneSharedRacials(character)
 
-		// Each cast runs 15% faster for 15 s. The server's racial notes set this; the client's 1259688
-		// still states 10% for 30 s. Charged (a cast at an elemental convergence) is removed on entering a
-		// raid.
-		speed := 1.15
+		// Each cast runs 15% faster for 15 s. The server's hotfix sets this; the client's 1259688 still states 10%
+		// for 30 s. It is A_MOD_INCREASE_SPEED, as Strider Kick and Cheetah are, so only the highest of them
+		// counts. Charged (a cast at an elemental convergence) is removed on entering a raid.
 		elementalBlessingAura := character.RegisterAura(Aura{
 			Label:    "Elemental Blessing",
 			ActionID: ActionID{SpellID: 1259688},
 			Duration: time.Second * 15,
-			OnGain: func(aura *Aura, sim *Simulation) {
-				aura.Unit.MultiplyMovementSpeed(sim, speed)
-			},
-			OnExpire: func(aura *Aura, sim *Simulation) {
-				aura.Unit.MultiplyMovementSpeed(sim, 1/speed)
-			},
 		})
+		elementalBlessingAura.NewActiveMovementSpeedEffect(0.15)
 
 		character.RegisterSpell(SpellConfig{
 			ActionID: ActionID{SpellID: 1259686},

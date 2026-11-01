@@ -513,6 +513,8 @@ func TestMonocatInstantExplosivesStayInCatForm(t *testing.T) {
 }
 
 func TestJVMESTeaRuneSelection(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	for _, selected := range []int32{0, 7676, 12662} {
 		t.Run(strconv.Itoa(int(selected)), func(t *testing.T) {
 			rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "adaptive").Rotation
@@ -639,6 +641,8 @@ func TestAdaptiveClawsWhenShredCannotLand(t *testing.T) {
 }
 
 func TestAdaptiveBleedsRespectExpiryReaction(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, id := range []int32{9904, 9896} {
 		t.Run(strconv.Itoa(int(id)), func(t *testing.T) {
 			rotation := core.GetAplRotation("../../../ui/specs/druid/feralcat/apls", "adaptive").Rotation

@@ -312,6 +312,8 @@ func TestHeartseekingCrossbowStrikesWithAShadowbolt(t *testing.T) {
 // entry. Focus makes the next spell with a cast time instant, on its whole global cooldown, and that
 // cast spends it; an instant leaves it up, and unspent it fades after the row's duration.
 func TestHandOfEdwardTheOddMakesTheNextCastInstant(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	if core.GetItemByID(2243) == nil {
 		t.Skip("item 2243 is not in the live game files; this runs again once they hold it")
 	}

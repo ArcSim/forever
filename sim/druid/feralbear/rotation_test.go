@@ -75,6 +75,8 @@ func bearCastsOf(actions []*proto.ActionMetrics, spellID int32) int32 {
 }
 
 func TestBearFormRecastGrantsFuror(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, rank := range []int{0, 5} {
 		for _, at := range []time.Duration{-10 * time.Second, 0, 2 * time.Second} {
 			for _, id := range []int32{5487, spellDireBear} {

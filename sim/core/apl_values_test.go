@@ -1010,15 +1010,24 @@ func TestValueSpellGCDHastedDuration(t *testing.T) {
 		t.Errorf("GCD without haste = %s, want %s", value.GetDuration(sim), GCDDefault)
 	}
 
+	// Forever: casting speed shortens the GCD of a spell that ignores haste for its cast time too, and a slow never
+	// lengthens one.
 	spell.DefaultCast.GCD = 3 * time.Second
 	spell.IgnoreHaste = true
 	fw.MultiplyCastSpeed(sim, 2)
-	if value.GetDuration(sim) != 3*time.Second {
-		t.Errorf("GCD of a haste-ignoring spell = %s, want 3s", value.GetDuration(sim))
+	if value.GetDuration(sim) != 1500*time.Millisecond {
+		t.Errorf("GCD of a haste-ignoring spell at double cast speed = %s, want 1.5s", value.GetDuration(sim))
 	}
 	spell.IgnoreHaste = false
 	if value.GetDuration(sim) != 1500*time.Millisecond {
 		t.Errorf("GCD at double cast speed = %s, want 1.5s", value.GetDuration(sim))
+	}
+	fw.MultiplyCastSpeed(sim, 0.5/1.6)
+	for _, ignore := range []bool{false, true} {
+		spell.IgnoreHaste = ignore
+		if value.GetDuration(sim) != 3*time.Second {
+			t.Errorf("GCD under a 60%% cast speed slow (ignores haste: %v) = %s, want 3s", ignore, value.GetDuration(sim))
+		}
 	}
 }
 

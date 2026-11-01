@@ -451,6 +451,8 @@ func TestSpellConfigNoThreatRow(t *testing.T) {
 // Area damage drops the row's range to the target: around the caster it reaches its radius, as a
 // cast and not as a proc, and around the point the triggering spell chose it reaches anywhere.
 func TestSpellConfigAreaAroundACasterOrPointReachesItsRadiusOrAnywhere(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverAreaReach)
 	for _, tc := range []struct {
 		centre       dbcenums.ImplicitTarget
 		cast, asProc float64
@@ -478,6 +480,8 @@ func TestSpellConfigAreaAroundACasterOrPointReachesItsRadiusOrAnywhere(t *testin
 // its periodic trigger aura fires. A proc of one has no range, and a DEST_DEST area, a cone on a row
 // with a range of its own and a spell with no area keep what they had.
 func TestSpellConfigReachOfTheGameFilesAreas(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverAreaReach)
 	withGeneratedStore(t)
 
 	for _, tc := range []struct {

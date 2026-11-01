@@ -99,6 +99,8 @@ func TestFeralCostTalentsLowerEnergyAndRageInTheirOwnUnits(t *testing.T) {
 }
 
 func TestFurorRestoresEnergyAfterLeavingCat(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	if !cat.InForm(druid.Cat) {
 		t.Fatal("the cat did not start in cat form")
@@ -118,6 +120,8 @@ func TestFurorRestoresEnergyAfterLeavingCat(t *testing.T) {
 }
 
 func TestFurorPreservesEnergyInABearForm(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	fillResource(sim, cat)
 	cat.SpendEnergy(sim, 60, cat.NewEnergyMetrics(core.ActionID{SpellID: 1}))
@@ -138,6 +142,8 @@ func TestFurorPreservesEnergyInABearForm(t *testing.T) {
 }
 
 func TestWithoutFurorCatFormComesBackEmpty(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, "", nil)
 	fillResource(sim, cat)
 	if !cat.DireBearForm.Cast(sim, cat.CurrentTarget) {
@@ -154,6 +160,8 @@ func TestWithoutFurorCatFormComesBackEmpty(t *testing.T) {
 }
 
 func TestProwlHoldsAutoAttacksUntilTheOpener(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	sim.CurrentTime = -time.Second
 	if !cat.Prowl.Cast(sim, cat.CurrentTarget) {
@@ -180,6 +188,8 @@ func TestProwlHoldsAutoAttacksUntilTheOpener(t *testing.T) {
 }
 
 func TestCatQueuesMaulOntoTheBearSwing(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	fillResource(sim, cat)
 	if !cat.DireBearForm.Cast(sim, cat.CurrentTarget) {
@@ -200,6 +210,8 @@ func TestCatQueuesMaulOntoTheBearSwing(t *testing.T) {
 }
 
 func TestCatSwingDoesNotRequestAMaulQueueCheck(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	cat.ReactionTime = 250 * time.Millisecond
 	cat.SetRotationTimer(sim, 5*time.Second)
@@ -226,6 +238,8 @@ func TestCatSwingDoesNotRequestAMaulQueueCheck(t *testing.T) {
 }
 
 func TestCatSwingClearcastingStillReachesTheRotation(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	rotation := core.APLRotationFromJsonString(`{"type":"TypeAPL","priorityList":[{"action":{"condition":{"auraIsActive":{"auraId":{"spellId":16870}}},"castSpell":{"spellId":{"spellId":9830}}}}]}`)
 	request := catPowershiftRequest(furorTalents, rotation, false)
 	request.Raid.Parties[0].Players[0].ReactionTimeMs = 250
@@ -308,6 +322,8 @@ func TestMaulQueueEndsWhenLeavingBear(t *testing.T) {
 }
 
 func TestCowerAndFaerieFireEndProwl(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, spell := range []struct {
 		name string
 		cast func(*core.Simulation, *FeralDruid) bool
@@ -341,6 +357,8 @@ func TestCowerAndFaerieFireEndProwl(t *testing.T) {
 }
 
 func TestFaerieFireFormCooldown(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, form := range []string{"Cat", "Bear"} {
 		t.Run(form, func(t *testing.T) {
 			sim, cat := newCat(t, furorTalents, nil)
@@ -421,6 +439,8 @@ func emptyEnergy(sim *core.Simulation, cat *FeralDruid) {
 }
 
 func TestShiftingPowerTradesManaForEnergy(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, shiftingPowerTalents, nil)
 	fillResource(sim, cat)
 	emptyEnergy(sim, cat)
@@ -441,6 +461,8 @@ func TestShiftingPowerTradesManaForEnergy(t *testing.T) {
 }
 
 func TestShiftingPowerNeedsTheTalentAndCatForm(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, "", nil)
 	fillResource(sim, cat)
 	emptyEnergy(sim, cat)
@@ -460,6 +482,8 @@ func TestShiftingPowerNeedsTheTalentAndCatForm(t *testing.T) {
 }
 
 func TestImprovedShiftingPowerTakesTheCooldownToEightSeconds(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, improvedShiftingPowerTalents, nil)
 	fillResource(sim, cat)
 	emptyEnergy(sim, cat)
@@ -482,6 +506,8 @@ func TestNaturalShapeshifterCheapensShiftingPower(t *testing.T) {
 }
 
 func TestWolfsheadAddsShiftingPowerEnergyAndEnrageRage(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCatWearing(t, shiftingPowerTalents, nil, map[proto.ItemSlot]int32{proto.ItemSlot_ItemSlotHead: 8345})
 	fillResource(sim, cat)
 	emptyEnergy(sim, cat)
@@ -506,6 +532,8 @@ func TestWolfsheadAddsShiftingPowerEnergyAndEnrageRage(t *testing.T) {
 }
 
 func TestHowlingIdolShortensShiftingPower(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCatWearing(t, shiftingPowerTalents, nil, map[proto.ItemSlot]int32{proto.ItemSlot_ItemSlotRanged: 272427})
 	fillResource(sim, cat)
 	emptyEnergy(sim, cat)
@@ -521,6 +549,8 @@ func TestHowlingIdolShortensShiftingPower(t *testing.T) {
 
 // The October 8 hotfixes: "Shifting Power can no longer be used while already at Full Energy."
 func TestShiftingPowerIsRefusedAtFullEnergy(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, shiftingPowerTalents, nil)
 	fillResource(sim, cat)
 	if cat.ShiftingPower.Cast(sim, cat.CurrentTarget) {
@@ -577,6 +607,8 @@ func TestClawAwardsComboPointsAndRipSpendsThem(t *testing.T) {
 }
 
 func TestShredRequiresATargetThatCanBeShredded(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	fillResource(sim, cat)
 	cat.PseudoStats.InFrontOfTarget = true
@@ -590,6 +622,8 @@ func TestShredRequiresATargetThatCanBeShredded(t *testing.T) {
 }
 
 func TestConsumablesFollowTheNotShapeshiftedRow(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	interesting := map[proto.ConsumableType]bool{
 		proto.ConsumableType_ConsumableTypePotion:    true,
 		proto.ConsumableType_ConsumableTypeExplosive: true,
@@ -731,6 +765,8 @@ func resetCooldown(spell *core.Spell) {
 }
 
 func TestProwlAttacksRejectShadowmeld(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, ability := range []struct {
 		name  string
 		spell func(*FeralDruid) *druid.DruidSpell
@@ -989,6 +1025,8 @@ func TestIdolOfTheDreamExtendsRipWithoutChangingItsTicks(t *testing.T) {
 }
 
 func TestCatChargeRunIn(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, withFeralDigit(powershiftTalents, 8, '1'), nil)
 	for i := 0; i < 2; i++ {
 		if i > 0 {

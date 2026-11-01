@@ -13,6 +13,9 @@ type APLAction struct {
 	spell     *Spell // The spell a cast action casts or queues, whose queue check runs before the condition.
 	entryPath string // The path of the config entry the action runs for; empty outside APL rotations.
 	rot       *APLRotation
+
+	arcSeenReady  bool // the press reaction: seen ready on every look since arcReadySince
+	arcReadySince time.Duration
 }
 
 func (action *APLAction) Finalize(rot *APLRotation) {

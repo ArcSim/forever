@@ -87,8 +87,10 @@ func (cast *Cast) GCDTime() time.Duration {
 	return gcd
 }
 
+// Forever: casting speed shortens every GCD, a haste-ignoring physical ability's too, and a slow never lengthens one
+// (forever-bugs #389 and #284, dev replies). The 1 s floor is GCDTime's.
 func (spell *Spell) hastedGCD(gcd time.Duration) time.Duration {
-	return max(0, spell.Unit.ApplyCastSpeed(gcd)).Round(time.Millisecond)
+	return min(max(0, gcd), max(0, spell.Unit.ApplyCastSpeed(gcd)).Round(time.Millisecond))
 }
 
 func (cast *Cast) EffectiveTime() time.Duration {
@@ -152,8 +154,8 @@ func (spell *Spell) makeCastFunc(config CastConfig) CastSuccessFunc {
 			return spell.castFailureHelper(sim, "not enough charges")
 		}
 
+		spell.CurCast.GCD = spell.hastedGCD(spell.CurCast.GCD)
 		if !config.IgnoreHaste {
-			spell.CurCast.GCD = spell.hastedGCD(spell.CurCast.GCD)
 			spell.CurCast.CastTime = spell.Unit.ApplyCastSpeedForSpell(spell.CurCast.CastTime, spell).Round(time.Millisecond)
 		}
 

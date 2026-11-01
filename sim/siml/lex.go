@@ -46,6 +46,7 @@ const (
 	triviaComment triviaKind = iota // `//` and the rest of the line; text is everything after the `//`.
 	triviaNote                      // `///` and the rest of the line; text drops one space after the `///` and the blanks that end it.
 	triviaBlank                     // A line holding only spaces and tabs.
+	triviaCard                      // `//@` and the rest of the line: a line of the row's card (arc_card.go); text is everything after the `//@`.
 )
 
 type trivia struct {
@@ -235,6 +236,9 @@ func lex(src string) ([]token, []trivia, *lineMap) {
 			if strings.HasPrefix(src[pos:], "///") {
 				t.kind = triviaNote
 				t.text = strings.TrimPrefix(strings.TrimRight(src[pos+3:end], " \t"), " ")
+			} else if strings.HasPrefix(src[pos:], "//@") {
+				t.kind = triviaCard
+				t.text = src[pos+3 : end]
 			}
 			triv = append(triv, t)
 			pos = end

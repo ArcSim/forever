@@ -101,18 +101,13 @@ func (spell *Spell) CanQueue(sim *Simulation, target *Unit) bool {
 		return false
 	}
 
-	queueWindow := MaxSpellQueueWindow
-	if ForeverNoSpellQueue {
-		queueWindow = 0
-	}
-
 	// Apply SQW leniency to GCD timer
-	if spell.DefaultCast.GCD > 0 && spell.Unit.GCD.TimeToReady(sim) > queueWindow {
+	if spell.DefaultCast.GCD > 0 && spell.Unit.GCD.TimeToReady(sim) > MaxSpellQueueWindow {
 		return false
 	}
 
 	// Spells that are within one SQW of coming off cooldown can also be queued
-	if spell.rotationTimeToReady(sim) > queueWindow {
+	if spell.rotationTimeToReady(sim) > MaxSpellQueueWindow {
 		return false
 	}
 

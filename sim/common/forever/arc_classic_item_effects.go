@@ -81,14 +81,16 @@ func RegisterArcClassicItemEffects() {
 	registerArcGrandCrusader(7940, "Grand Crusader", 1231124, 120)
 	registerArcGrandCrusader(7943, "Grand Inquisitor", 1232169, 200)
 
-	// Blackhand's Breadth, Forever version: +1% crit (in the item override) and an on-use +5% crit for
-	// 20 s, 5 min cooldown.
+	// Blackhand's Breadth, Forever version: +1% crit with melee and ranged attacks (equip aura 52) and an on-use +5%
+	// crit for 20 s, 5 min cooldown, locking the trinket category 1141 for 20 s.
 	core.NewItemEffect(13965, func(agent core.Agent) {
 		character := agent.GetCharacter()
+		// The item list carries the 1% as crit rating, which reaches spells too.
+		character.AddStat(stats.SpellCritPercent, -1)
 		effect := &proto.ItemEffect{
 			BuffName:         "Blackhand's Breadth",
 			EffectDurationMs: 20000,
-			Effect:           &proto.ItemEffect_OnUse{OnUse: &proto.OnUseEffect{CooldownMs: 300000}},
+			Effect:           &proto.ItemEffect_OnUse{OnUse: &proto.OnUseEffect{CooldownMs: 300000, CategoryId: 1141, CategoryCooldownMs: 20000}},
 		}
 		core.RegisterTemporaryStatsOnUseCD(character, effect.BuffName, stats.Stats{stats.CritRating: 5 * core.CritRatingPerCritPercent},
 			time.Second*20, core.SpellConfig{

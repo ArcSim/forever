@@ -56,6 +56,8 @@ func TestReviewProwlAndFeralSwiftnessSpeed(t *testing.T) {
 }
 
 func TestReviewCatChargeBreaksProwlWithoutDebuff(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, "0000000000000000-00000000100000000000-0000000000000000", nil)
 	reviewProwl(t, sim, cat)
 	cat.DistanceFromTarget = 10

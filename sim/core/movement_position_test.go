@@ -9,6 +9,8 @@ import (
 // An event during a walk reads where the unit is at that moment, with the rotation parked so nothing
 // else asks for the position.
 func TestWalkPositionIsCurrentAtEveryEvent(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	sim, fc := setupSwingResetSim(t) // at 0 yd, one second in
 	fc.MoveTo(12, sim)
 	fc.WaitUntil(sim, NeverExpires)
@@ -60,6 +62,8 @@ func TestTimedWalk(t *testing.T) {
 // A walk across melee range stops or starts the melee swings on the line. The rotation is parked, as
 // under a GCD, so nothing else asks for the position on the way.
 func TestWalkAcrossMeleeRange(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	speed := 7.0 // a player's run speed, yards per second
 	toLine := func(yards float64) time.Duration { return DurationFromSeconds(yards / speed) }
 

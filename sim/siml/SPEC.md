@@ -458,6 +458,7 @@ no type is written with `type unknown`.
 
 ```
 [/// note lines]
+[//@ card lines]
 [# ][<do_at> ]<step>[ if <expr>]
 ```
 
@@ -1347,6 +1348,20 @@ use "default.apl.siml" with $use_summon_hawk = true
   between, are that row's `notes`, in a `when` body too. One optional space after `///` is not part of the text, and
   neither are the spaces and tabs that end the line. A `///` anywhere else is `misplaced-note`, including above a
   prepull row, a `var` line, a `def` line, a `when` line, a header or an entry.
+- **`//@` card lines.** One or more `//@` lines directly above a row of any rotation section, prepull included,
+  with no blank line between, are that row's `simple` (its card); the printer writes them after the row's notes.
+  Each line is one of these, its strings JSON strings:
+
+    | Line                                          | `APLSimpleView`                               |
+    | --------------------------------------------- | --------------------------------------------- |
+    | `//@card [shown] "<text>"`                    | `text`, and `shown: true` with `shown`        |
+    | `//@title "<title>"`                          | `title`                                       |
+    | `//@box "<label>" [at "<path>", …] [unit "<unit>"]` | one more of `boxes`: `label`, `numbers`, `unit` |
+    | `//@value "<name>" = "<expr>"`                | one more of `values`                          |
+    | `//@when "<condition>" "<text>"`              | one more of `texts`: `when`, `text`           |
+
+  A row takes one `card` and one `title` line. A line none of these reads, or a second `card` or `title`, is
+  `bad-card`; a `//@` line anywhere else is `misplaced-card`.
 - **Hidden rows.** `#` before a row hides it, and the row stays in the proto with `"hide": true`.
 
 ---
@@ -1612,6 +1627,7 @@ are errors.
 | `misplaced-statement`                                                                                         | error    | §3.3, and a group file's line before its first header (§1)                                 |
 | `indented-header`, `unknown-section`, `section-not-allowed`, `duplicate-section`                              | error    | §3.2                                                                                       |
 | `misplaced-note`, `misplaced-var`, `bad-hidden-row`                                                           | error    | §10, §6.1, §6.3                                                                            |
+| `misplaced-card`, `bad-card`                                                                                  | error    | §10                                                                                        |
 | `misplaced-when`, `misplaced-def`                                                                             | error    | §6.9, §6.10                                                                                |
 | `empty-when`                                                                                                  | warning  | §6.9                                                                                       |
 | `missing-time`, `unexpected-time`                                                                             | error    | a prepull row without a time, or another row with one                                      |

@@ -208,3 +208,30 @@ func TestLoneWolfCutsThePetsDamage(t *testing.T) {
 		t.Errorf("Lone Wolf without a pet multiplies the hunter's damage by %v, want 1.2", got)
 	}
 }
+
+// A pet starts the fight with a full 150 focus, its 100 plus Hunter Pet Scaling's (415429) 50: with 100 spent a Claw
+// is still affordable, and with all 150 spent it is not.
+func TestPetStartsWithHunterPetScalingsFocus(t *testing.T) {
+	sim, pet, _ := newPetSim(proto.HunterOptions_Cat, nil)
+	// The cat's Claw: its one ability with a focus cost and no cooldown.
+	var claw *core.Spell
+	for _, s := range pet.abilities {
+		if s.Cost != nil && s.CD.Duration == 0 {
+			claw = s
+		}
+	}
+	if claw == nil {
+		t.Fatal("the cat has no Claw")
+	}
+	metrics := pet.NewFocusMetrics(core.ActionID{OtherID: proto.OtherAction_OtherActionFocusRegen})
+	affordable := func() bool { return claw.Cost.ResourceCostImpl.MeetsRequirement(sim, claw) }
+
+	pet.SpendFocus(sim, 100, metrics)
+	if !affordable() {
+		t.Error("with 100 focus spent the pet cannot pay for a Claw, want 50 focus left")
+	}
+	pet.SpendFocus(sim, 50, metrics)
+	if affordable() {
+		t.Error("with 150 focus spent the pet still pays for a Claw, want its focus empty")
+	}
+}

@@ -13,6 +13,8 @@ import (
 // turns to the move's range when that changes. A move that does not re-check walks on to the range it set
 // out for.
 func TestMoveRecheckWhileMoving(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	currentTime := &proto.APLValue{Value: &proto.APLValue_CurrentTime{CurrentTime: &proto.APLValueCurrentTime{}}}
 	firstSecond := &proto.APLValue{Value: &proto.APLValue_Cmp{Cmp: &proto.APLValueCompare{
 		Op: proto.APLValueCompare_OpLt, Lhs: currentTime, Rhs: constValue("1s"),

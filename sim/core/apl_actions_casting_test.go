@@ -212,6 +212,8 @@ func TestManualCastsCountOnlyWhatTheRotationPresses(t *testing.T) {
 // A walk the rotation sets off from standing is one press of the move. A walk a spell starts, such as Charge,
 // and a turn of a walk under way add none, though the first walk and the spell's own are both casts.
 func TestManualCastsCountTheMovesTheRotationStarts(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	ct := newShootTest()
 	move := ct.rot.newActionMove(&proto.APLActionMove{RangeFromTarget: constValue("20")})
 	moveFor := ct.rot.newActionMoveDuration(&proto.APLActionMoveDuration{Duration: constValue("2s")})

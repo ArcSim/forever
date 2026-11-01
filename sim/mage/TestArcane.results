@@ -62,11 +62,27 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Alcor'sSunrazor-14555"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-AnkhofLife-1713"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ArcanistRegalia"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-ArcaniteChampion-12790"
  value: {}
 }
 dps_results: {
  key: "TestArcane-AllItems-ArenaGrandMaster-19024"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ArgentAvenger-13246"
  value: {}
 }
 dps_results: {
@@ -78,11 +94,63 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-BarmanShanker-12791"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BarovianFamilySword-14541"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BlackMenace-6831"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BlackbladeofShahram-12592"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Blackhand'sBreadth-13965"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BladeofEternalDarkness-17780"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BladeofHanna-2801"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BladeoftheWretched-10803"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-BlazefuryMedallion-17111"
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-BlazingEmblem-2802"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-BlazingRapier-12777"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BloodletterScalpel-9511"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Bloodrazor-809"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Bonereaver'sEdge-17076"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-BracersofUndeadCleansing-23091"
  value: {}
 }
 dps_results: {
@@ -94,11 +162,27 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-ChainedEssenceofEranikus-10455"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-CloakofFire-14134"
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-CloakofFlames-3475"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-ColdBasiliskEye-5079"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ColdrageDagger-10761"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Dal'Rend'sArms"
  value: {}
 }
 dps_results: {
@@ -111,6 +195,14 @@ dps_results: {
 }
 dps_results: {
  key: "TestArcane-AllItems-DarkmoonCard:Maelstrom-19289"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Darrowspike-13984"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Deathblow-10628"
  value: {}
 }
 dps_results: {
@@ -130,7 +222,27 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Demonshear-13348"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Destiny-647"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Doombringer-13053"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-DormantHeartoftheMountain-249473"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-DraconicInfusedEmblem-22268"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-DrakefangButcher-12463"
  value: {}
 }
 dps_results: {
@@ -146,11 +258,19 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-EbonHiltofMarduk-14576"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-ElectrifiedDagger-19100"
  value: {}
 }
 dps_results: {
  key: "TestArcane-AllItems-Enchant2HWeapon-GrandArcanist-7941"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Enchant2HWeapon-GrandInquisitor-7943"
  value: {}
 }
 dps_results: {
@@ -183,6 +303,10 @@ dps_results: {
 }
 dps_results: {
  key: "TestArcane-AllItems-EnchantWeapon-Crusader-1900"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-EnchantWeapon-GrandCrusader-7940"
  value: {}
 }
 dps_results: {
@@ -230,11 +354,23 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Felstriker-12590"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-FetishofChitinousSpikes-21488"
  value: {}
 }
 dps_results: {
  key: "TestArcane-AllItems-FetishoftheSandReaver-21647"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-FiendishMachete-18310"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Firebreather-10797"
  value: {}
 }
 dps_results: {
@@ -274,11 +410,35 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-GutRipper-2164"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Gutwrencher-5616"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Halycon'sSpikedCollar-13212"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-Hameya'sSlayer-15814"
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-HandofJustice-11815"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-HanzoSword-8190"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-Hazza'rah'sCharmofMagic-19959"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-HeartofWyrmthalak-22321"
  value: {}
 }
 dps_results: {
@@ -290,6 +450,10 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-HookfangShanker-11635"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-Illusionist'sAttire"
  value: {}
 }
@@ -298,7 +462,23 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Joonho'sMercy-17054"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Julie'sDagger-6660"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-KerisofZul'Serak-12582"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-KissoftheSpider-22954"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-LapidisTankardofTidesippe-4696"
  value: {}
 }
 dps_results: {
@@ -306,7 +486,19 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Linken'sSwordofMastery-11902"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-Loatheb'sReflection-23042"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-LordGeneral'sSword-11817"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-LordSakrasis'Scepter-5028"
  value: {}
 }
 dps_results: {
@@ -330,11 +522,31 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-MarkoftheRedFlight-282778"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-MindQuickeningGem-19339"
  value: {}
 }
 dps_results: {
  key: "TestArcane-AllItems-MoltenHeartoftheMountain-249470"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Mutilator-12469"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-NecropileRaiment"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-NetherwindRegalia"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Nightblade-1982"
  value: {}
 }
 dps_results: {
@@ -350,7 +562,47 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Pip'sSkinner-12709"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Ramstein'sLightningBolts-13515"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-RegaliaofUndeadCleansing"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-RingofSaviors-1447"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-RobeofUndeadCleansing-23085"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-RobeoftheArchmage-14152"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-RunebladeofBaronRivendare-13505"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-RuneoftheDawn-19812"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Satyr'sLash-17752"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-SealoftheDawn-13209"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-SearingNeedle-12531"
  value: {}
 }
 dps_results: {
@@ -358,7 +610,23 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-SerpentSlicer-13035"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Shadowblade-2163"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-ShardoftheFallenStar-21891"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ShortswordofVengeance-754"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-SkullforgeReaver-13361"
  value: {}
 }
 dps_results: {
@@ -366,7 +634,39 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Smokey'sLighter-13171"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-SmokingHeartoftheMountain-11811"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Smolderweb'sEye-13213"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Sorcerer'sRegalia"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Specter'sBlade-18758"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Sprinter'sSword-18410"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Stoneslayer-9418"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Sul'thrazetheLasher-9372"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-SwordofZeal-6622"
  value: {}
 }
 dps_results: {
@@ -386,6 +686,10 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Teebu'sBlazingLongsword-1728"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-TheBurrower'sShell-23558"
  value: {}
 }
@@ -394,7 +698,19 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-ThePostmaster"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-TheRestrainedEssenceofSapphiron-23046"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ThrashBlade-17705"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-ThreadbareTrousers-18346"
  value: {}
 }
 dps_results: {
@@ -410,7 +726,15 @@ dps_results: {
  value: {}
 }
 dps_results: {
+ key: "TestArcane-AllItems-Uther'sStrength-11302"
+ value: {}
+}
+dps_results: {
  key: "TestArcane-AllItems-VestmentsoftheDevout"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Vis'kagtheBloodletter-17075"
  value: {}
 }
 dps_results: {
@@ -419,6 +743,10 @@ dps_results: {
 }
 dps_results: {
  key: "TestArcane-AllItems-WeaknessAnalyzer-272438"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Witchfury-13051"
  value: {}
 }
 dps_results: {
@@ -435,6 +763,10 @@ dps_results: {
 }
 dps_results: {
  key: "TestArcane-AllItems-ZandalarianHeroMedallion-19949"
+ value: {}
+}
+dps_results: {
+ key: "TestArcane-AllItems-Zanzil'sConcentration"
  value: {}
 }
 dps_results: {

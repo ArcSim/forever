@@ -1,0 +1,30 @@
+siml 1
+spec hunter
+//@card "above a header"
+priority:
+  //@card "apart"
+
+  cast x //@card "trailing"
+  cast x
+    //@card "inside"
+    if true
+  //@card shown
+  cast x
+  //@card "a"
+  //@card "b"
+  //@title "t"
+  //@title "u"
+  cast x
+  //@box "a" at "x", unit "yd"
+  //@when "a"
+  //@value "a" "b"
+  //@card "open
+  //@colour "red"
+  cast x
+prepull:
+  //@card "fine"
+  -1s cast x
+apl:
+  //@card "var"
+  var $v = 1
+//@card "end"

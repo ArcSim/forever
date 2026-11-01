@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/wowsims/forever/sim/core/proto"
@@ -461,6 +462,11 @@ func (rot *APLRotation) allPrepullActions() []*APLAction {
 func (rot *APLRotation) reset(sim *Simulation) {
 	rot.controllingActions = rot.controllingActions[:0]
 	rot.inLoop = false
+	rot.lastFreeGcdNote = ""
+	rot.arcReactionEnds = NeverExpires
+	for _, action := range rot.priorityList {
+		action.arcSeenReady = false
+	}
 	rot.runningEntryPath = ""
 	rot.interruptChannelIf = nil
 	rot.allowChannelRecastOnInterrupt = false

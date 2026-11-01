@@ -196,6 +196,8 @@ func nukeConfig(castAt *[]time.Duration) SpellConfig {
 }
 
 func TestWandShootScheduler(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules, &ForeverStrictSequenceNow)
 	t.Run("a cast fires one shot", func(t *testing.T) {
 		ct := newShootTest()
 		ct.start(&timedStubAction{readyAt: time.Minute})
@@ -783,6 +785,8 @@ func TestWandShootScheduler(t *testing.T) {
 }
 
 func TestStartingAChannelEndsTheRunningOne(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	ForeverRulesOffForTest(t, &ForeverWalkRules)
 	t.Run("Shoot in the instant a channel starts", func(t *testing.T) {
 		var drainTicks []time.Duration
 		ct, drain := newSpellShootTest(drainConfig(&drainTicks, CastConfig{DefaultCast: Cast{GCD: GCDDefault}}))

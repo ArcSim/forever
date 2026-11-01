@@ -151,7 +151,7 @@ func (f *typedFile) typeRotation() rotationTyping {
 // The row's raw JSON when the row is that alone, which is the whole row's JSON (SPEC.md §6.3).
 func rawRow(s *rowStmt) *rawNode {
 	r, ok := s.action.step.(*rawNode)
-	if !ok || s.action.condition != nil || s.hide || s.doAt != nil || len(s.notes) > 0 {
+	if !ok || s.action.condition != nil || s.hide || s.doAt != nil || len(s.notes) > 0 || len(s.cards) > 0 {
 		return nil
 	}
 	return r
@@ -180,7 +180,7 @@ func (t *typer) listItem(s *rowStmt) *proto.APLListItem {
 	for w := s.when; w != nil; w = w.parent {
 		hide = hide || w.hide
 	}
-	return &proto.APLListItem{Action: action, Hide: hide, Notes: strings.Join(notes, "\n")}
+	return &proto.APLListItem{Action: action, Hide: hide, Notes: strings.Join(notes, "\n"), Simple: t.card(s)}
 }
 
 // The condition a row reads with (SPEC.md §6.9): the conjuncts of each when block's condition around it, the
@@ -251,7 +251,7 @@ func (t *typer) prepullAction(s *rowStmt) *proto.APLPrepullAction {
 	if action == nil || s.doAt != nil && doAt == nil {
 		return nil
 	}
-	return &proto.APLPrepullAction{Action: action, DoAtValue: doAt, Hide: s.hide}
+	return &proto.APLPrepullAction{Action: action, DoAtValue: doAt, Hide: s.hide, Simple: t.card(s)}
 }
 
 // The JSON names of a path of fields.

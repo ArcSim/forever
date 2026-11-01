@@ -97,6 +97,8 @@ func applyConsumables(t *testing.T, consumables *proto.ConsumesSpec) appliedCons
 // consumable the preset selects applies there as it does with every consumable
 // loaded.
 func TestRequestCarriesEveryConsumableThePresetSelects(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	registerAllEffects()
 	none := applyConsumables(t, &proto.ConsumesSpec{})
 	whole := applyConsumables(t, requestPreset)

@@ -239,6 +239,7 @@ type varStmt struct {
 type rowStmt struct {
 	stmtBase
 	notes  []trivia
+	cards  []trivia // Its //@ card lines (arc_card.go).
 	hide   bool
 	doAt   node
 	action *actionNode
@@ -565,6 +566,9 @@ func (f *fileParser) run() (*syntaxTree, []diag) {
 			if t.kind == triviaNote {
 				f.misplacedNote(t)
 			}
+			if t.kind == triviaCard {
+				f.misplacedCard(t)
+			}
 		}
 	}
 	return f.tree, f.diags
@@ -627,6 +631,7 @@ func (f *fileParser) physical(toks []token, first bool) {
 	}
 	if block == nil || !block.skip {
 		f.attachNotes(statement, row)
+		f.attachCards(statement, row)
 	}
 	f.tree.statements = append(f.tree.statements, statement)
 	for k, t := range toks {

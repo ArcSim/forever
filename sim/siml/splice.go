@@ -559,6 +559,7 @@ func unitOf(s stmt, header *headerStmt, lines *lineMap) *spliceUnit {
 	above := slices.Clone(b.leading)
 	if r, ok := s.(*rowStmt); ok {
 		above = append(above, r.notes...)
+		above = append(above, r.cards...)
 	}
 	slices.SortStableFunc(above, func(a, b trivia) int { return a.start - b.start })
 	first := line

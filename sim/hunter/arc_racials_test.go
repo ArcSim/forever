@@ -3,6 +3,7 @@ package hunter
 import (
 	"math"
 	"testing"
+	"time"
 
 	"github.com/wowsims/forever/sim/core"
 	"github.com/wowsims/forever/sim/core/proto"
@@ -106,6 +107,57 @@ func TestArcWindBlessed(t *testing.T) {
 		cast := sky.PseudoStats.CastSpeedMultiplier / nelf.PseudoStats.CastSpeedMultiplier
 		if math.Abs(attack-1.02) > 1e-9 || math.Abs(cast-1.02) > 1e-9 {
 			t.Errorf("%v: attack speed x%.4f, cast speed x%.4f over a Night Elf; want x1.02 each", race, attack, cast)
+		}
+	}
+}
+
+// Wind Blessed's casting speed shortens the GCD of a melee ability too (forever-bugs #389: "Spell haste lowers GCD.
+// Floor 1.0, ceiling 1.5"): Wing Clip, a physical ability that ignores haste for its cast, spends 1.5 s / 1.02 for
+// either Skyborne and 1.5 s for a Night Elf, 1 s at double cast speed and still 1.5 s under a slow (#284).
+func TestArcWindBlessedShortensMeleeGCD(t *testing.T) {
+	gcd := func(race proto.Race, castSpeed float64) time.Duration {
+		// Wing Clip needs a melee weapon: the page's p1 gear.
+		player := &proto.Player{
+			Name:      "Wind Blessed",
+			Race:      race,
+			Class:     proto.Class_ClassHunter,
+			Equipment: core.GetGearSet("../../ui/specs/hunter/dps/gear_sets", "p1").GearSet,
+			Spec: &proto.Player_Hunter{Hunter: &proto.Hunter{Options: &proto.Hunter_Options{
+				ClassOptions: &proto.HunterOptions{PetType: proto.HunterOptions_Cat, PetUptime: 1},
+			}}},
+			Rotation: &proto.APLRotation{},
+		}
+		sim := core.NewSim(&proto.RaidSimRequest{
+			Raid:       core.SinglePlayerRaidProto(player, &proto.PartyBuffs{}, &proto.RaidBuffs{}, &proto.Debuffs{}),
+			Encounter:  core.MakeSingleTargetEncounter(0),
+			SimOptions: &proto.SimOptions{RandomSeed: 1},
+		}, simsignals.CreateSignals())
+		sim.Reset()
+		hunter := sim.Raid.Parties[0].Players[0].(*Hunter)
+		if castSpeed != 1 {
+			hunter.MultiplyCastSpeed(sim, castSpeed)
+		}
+		hunter.DistanceFromTarget = 0
+		clip := hunter.GetSpell(core.ActionID{SpellID: wingClipRank.ID})
+		if clip == nil || !clip.Cast(sim, hunter.CurrentTarget) {
+			t.Fatalf("%v: Wing Clip did not cast", race)
+		}
+		return hunter.GCD.TimeToReady(sim)
+	}
+	for _, c := range []struct {
+		name      string
+		race      proto.Race
+		castSpeed float64
+		want      time.Duration
+	}{
+		{"Night Elf", proto.Race_RaceNightElf, 1, 1500 * time.Millisecond},
+		{"High Order Skyborne", proto.Race_RaceHighOrderSkyborne, 1, 1471 * time.Millisecond},
+		{"Windshaper Skyborne", proto.Race_RaceWindshaperSkyborne, 1, 1471 * time.Millisecond},
+		{"double cast speed", proto.Race_RaceNightElf, 2, time.Second},
+		{"cast speed slow", proto.Race_RaceNightElf, 1 / 1.6, 1500 * time.Millisecond},
+	} {
+		if got := gcd(c.race, c.castSpeed); got != c.want {
+			t.Errorf("%s: Wing Clip GCD %v, want %v", c.name, got, c.want)
 		}
 	}
 }

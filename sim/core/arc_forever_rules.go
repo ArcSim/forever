@@ -27,8 +27,6 @@ var (
 	// Arc's walk rules (arc_forever_movement.go): a move reaction before each walk, a walk out decided on the way in,
 	// Auto Shot 0.6 s after a walk ends.
 	ForeverWalkRules = true
-	// The rotation picks the next spell when it can go, at the GCD's end, not up to 0.4 s before it.
-	ForeverNoSpellQueue = true
 	// A Strict Sequence starts only with the GCD free and its spells ready now.
 	ForeverStrictSequenceNow = true
 	// The off hand takes the swing retry too, like the main hand.
@@ -49,6 +47,16 @@ var (
 	ForeverTrainerRanks = true
 )
 
+// Turns Forever rules off until the test ends, for a wowsims test of the rule the switch replaces: that path stays
+// for comparisons (ARC_OFF) and merges, and each Forever rule has tests of its own.
+func ForeverRulesOffForTest(t interface{ Cleanup(func()) }, rules ...*bool) {
+	for _, rule := range rules {
+		was := *rule
+		*rule = false
+		t.Cleanup(func() { *rule = was })
+	}
+}
+
 // Distances run centre to centre, and the 11 yd ranged spot is 8 yd between hitbox edges, so an area around the
 // caster reaches 3 yd past its radius.
 func ForeverAreaReachBonus() float64 {
@@ -62,7 +70,7 @@ const MeleeAutoRetryInterval = time.Millisecond * 500
 // How long after a unit gets in melee range the server sees it there.
 const MeleeArrivalDelay = time.Millisecond * 50
 
-// ARC_OFF lists rules to turn back to this engine's behaviour for a comparison: aura, walkin, trap, gearap, marktsa, petfocus, trapap, sting, walk, seq, ohretry, wficd, traparm, traphit, area, gcdpoll, consumes, queue, ranks.
+// ARC_OFF lists rules to turn back to this engine's behaviour for a comparison: aura, walkin, trap, gearap, marktsa, petfocus, trapap, sting, walk, seq, ohretry, wficd, traparm, traphit, area, gcdpoll, consumes, ranks.
 func init() {
 	// ARC_ON=steps turns whole-yard walks back on for a comparison
 	if strings.Contains(os.Getenv("ARC_ON"), "steps") {
@@ -88,8 +96,6 @@ func init() {
 			ForeverSerpentSting = false
 		case "walk":
 			ForeverWalkRules = false
-		case "queue":
-			ForeverNoSpellQueue = false
 		case "seq":
 			ForeverStrictSequenceNow = false
 		case "ohretry":

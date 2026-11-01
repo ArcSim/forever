@@ -168,7 +168,7 @@
 			"name": "apl",
 			"category": "r",
 			"body": ["entries", "var"],
-			"sources": [{ "path": "player.rotation", "fields": ["type", "value_variables"] }]
+			"sources": [{ "path": "player.rotation", "fields": ["type", "value_variables", "manual_start_attack"] }]
 		},
 		{
 			"name": "simple",

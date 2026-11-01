@@ -377,6 +377,7 @@ func (value *APLValueSpellGCDHastedDuration) Type() proto.APLValueType {
 func (value *APLValueSpellGCDHastedDuration) GetDuration(_ *Simulation) time.Duration {
 	defaultCast := value.spell.DefaultCast
 	if value.spell.IgnoreHaste {
+		defaultCast.GCD = value.spell.hastedGCD(defaultCast.GCD)
 		return defaultCast.GCDTime()
 	}
 	gcdMin := TernaryDuration(defaultCast.GCDMin != 0, defaultCast.GCDMin, GCDMin)
@@ -480,8 +481,8 @@ func (value *APLValueSpellExpectedDpet) GetFloat(sim *Simulation) float64 {
 	target := value.targetRef.Get()
 
 	cast := spell.DefaultCast
+	cast.GCD = spell.hastedGCD(cast.GCD)
 	if !spell.IgnoreHaste {
-		cast.GCD = spell.hastedGCD(cast.GCD)
 		cast.CastTime = spell.CastTime().Round(time.Millisecond)
 	}
 

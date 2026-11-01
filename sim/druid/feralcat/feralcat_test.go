@@ -166,6 +166,8 @@ func fillFormScenarioResources(sim *core.Simulation, cat *FeralDruid) {
 }
 
 func TestFeralFormsUseFeralSkillAndRestoreEquippedSkill(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newFormScenario(t)
 	cat.ClearForm(sim)
 	cat.PseudoStats.WeaponSkills[proto.WeaponSkill_WeaponSkillStaves] = -20
@@ -200,6 +202,8 @@ func TestFeralFormsUseFeralSkillAndRestoreEquippedSkill(t *testing.T) {
 }
 
 func TestFeralAttackPowerConvertsOneForOneOnlyInFeralForms(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	// Given a cat with 77 Feral Attack Power added after initialization.
 	sim, cat := newFormScenario(t)
 	catAP := cat.GetStat(stats.AttackPower)

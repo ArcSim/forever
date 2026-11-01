@@ -140,13 +140,20 @@ func TestLaceratingModeOption(t *testing.T) {
 
 	t.Run("Rolling", func(t *testing.T) {
 		apps, tics := fight(proto.HunterOptions_LaceratingRolling)
+		// A bite on the instant of a tick shows no timer: kept or restarted, the next tick is a period away. With
+		// the spell queue, bites land on GCD ends, often on a tick.
+		onTick := func(at float64) bool {
+			return slices.ContainsFunc(tics, func(tk bleedTick) bool { return math.Abs(tk.at-at) <= logStamp })
+		}
 		expires, rolled, timerKept := math.Inf(-1), 0, 0
 		for i, a := range apps {
 			after := ticksAfter(apps, i, tics)
-			if a.at < expires-1e-6 && len(after) > 0 {
+			if a.at < expires-1e-6 && len(after) > 0 && !onTick(a.at) {
 				rolled++
 				if after[0].at < a.at+period-logStamp {
 					timerKept++
+				} else {
+					t.Errorf("a bite into a ticking bleed at %.2f s restarted its timer: next tick at %.2f s", a.at, after[0].at)
 				}
 				for _, tk := range after {
 					if !tk.crit && tk.amount <= a.fresh+0.002 {
@@ -161,8 +168,8 @@ func TestLaceratingModeOption(t *testing.T) {
 				expires = a.at + duration
 			}
 		}
-		if rolled < 5 || timerKept*2 < rolled {
-			t.Errorf("%d bites into a ticking bleed, %d of them on its running timer; want a fight's worth, most on it", rolled, timerKept)
+		if rolled < 3 {
+			t.Errorf("%d bites into a ticking bleed between its ticks; want a fight's worth", rolled)
 		}
 	})
 }
@@ -192,8 +199,8 @@ func TestExplosiveTrapBurnAPOption(t *testing.T) {
 	}
 }
 
-// Skysight's Elemental Blessing runs 15% faster and Read Leyline's Energized regenerates mana 50% faster, each
-// for 15 s from its cast. Charged and Attuned are removed on entering a raid, so the saved convergence option
+// Skysight's Elemental Blessing runs 15% faster and Read Leyline's Energized raises spirit regeneration 50% (mana
+// per 5 stays), each for 15 s from its cast. Charged and Attuned are removed on entering a raid, so the saved convergence option
 // changes nothing: nothing is up before the cast either way.
 func TestSkyborneCastIgnoresTheConvergenceOption(t *testing.T) {
 	for _, c := range []struct {
@@ -222,13 +229,16 @@ func TestSkyborneCastIgnoresTheConvergenceOption(t *testing.T) {
 				continue
 			}
 			before := bonus()
-			hunter.GetSpell(core.ActionID{SpellID: c.spell}).SkipCastAndApplyEffects(sim, hunter.CurrentTarget)
 			want := c.want
+			if c.race == proto.Race_RaceHighOrderSkyborne {
+				want = 1 + (c.want-1)*hunter.SpiritManaRegenPerSecond()*hunter.PseudoStats.SpiritRegenMultiplier/before
+			}
+			hunter.GetSpell(core.ActionID{SpellID: c.spell}).SkipCastAndApplyEffects(sim, hunter.CurrentTarget)
 			if !aura.IsActive() || aura.ActionID.SpellID != c.buff || aura.Duration != 15*time.Second {
 				t.Errorf("%v convergence %v: %s up %v as %d for %v; want up as %d for 15s", c.race, on, c.label, aura.IsActive(), aura.ActionID.SpellID, aura.Duration, c.buff)
 			}
 			if got := bonus() / before; math.Abs(got-want) > 1e-9 {
-				t.Errorf("%v convergence %v: %s x%.4f, want x%.2f", c.race, on, c.label, got, want)
+				t.Errorf("%v convergence %v: %s x%.4f, want x%.4f", c.race, on, c.label, got, want)
 			}
 		}
 	}

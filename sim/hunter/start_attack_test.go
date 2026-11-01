@@ -61,6 +61,8 @@ func walk(sim *core.Simulation, hunter *Hunter, stepTo func(time.Duration), to f
 // at 7 yd, the off hand swings half a swing after that, before half a swing has passed since the
 // arrival.
 func TestStartAttackOnTheWayInStartsTheOffHandsHalfSwing(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules, &core.ForeverWalkInStartsAttack)
 	rotation := &proto.APLRotation{PriorityList: []*proto.APLListItem{{Action: &proto.APLAction{
 		Action: &proto.APLAction_StartAttack{StartAttack: &proto.APLActionStartAttack{}},
 		Condition: &proto.APLValue{Value: &proto.APLValue_Cmp{Cmp: &proto.APLValueCompare{
@@ -85,6 +87,8 @@ func TestStartAttackOnTheWayInStartsTheOffHandsHalfSwing(t *testing.T) {
 
 // Walking in without starting the attack starts it on arrival, half a swing before the off hand.
 func TestWalkingInStartsTheAttackOnArrival(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules, &core.ForeverWalkInStartsAttack)
 	sim, hunter, stepTo := newStartAttackSim(t, &proto.APLRotation{})
 	aa := &hunter.AutoAttacks
 
@@ -97,6 +101,8 @@ func TestWalkingInStartsTheAttackOnArrival(t *testing.T) {
 // Starting Auto Shot turns the attack off, so the next trip in starts it again with a fresh half
 // swing. A trip out and back with no shot keeps it on: the off hand swings on arrival once ready.
 func TestAutoShotTurnsTheAttackOff(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules, &core.ForeverWalkInStartsAttack, &core.ForeverOffHandRetry)
 	t.Run("a shot between two trips", func(t *testing.T) {
 		sim, hunter, stepTo := newStartAttackSim(t, &proto.APLRotation{})
 		aa := &hunter.AutoAttacks

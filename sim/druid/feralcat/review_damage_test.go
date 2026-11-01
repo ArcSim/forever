@@ -103,6 +103,8 @@ func TestRakeIgnoresArmor(t *testing.T) {
 }
 
 func TestFurorLeavingAtZeroTimeWithZeroEnergy(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, cat := newCat(t, furorTalents, nil)
 	cat.SpendEnergy(sim, cat.CurrentEnergy(), cat.NewEnergyMetrics(core.ActionID{SpellID: 1}))
 	if !cat.DireBearForm.Cast(sim, cat.CurrentTarget) {
@@ -173,6 +175,8 @@ func TestCatStealthOpenersRun(t *testing.T) {
 // Rend and Tear raises Shred on a bleeding target, by the same amount under each of the cat's own
 // bleeds. With the bleed assumed, a target with no bleed of the cat's own takes the same raised Shred.
 func TestAssumedBleedRaisesShredLikeOwnBleed(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	const rendAndTear5 = "0000000000000000-00000000000000000050-0000000000000000"
 	shred := func(assume bool, bleed func(*FeralDruid) *druid.DruidSpell) float64 {
 		sim, cat := newCat(t, rendAndTear5, nil)

@@ -142,6 +142,8 @@ func gainedBy(caster *testCaster, itemID int32) float64 {
 // potion category 4 for 120 s. The spec's resource potion is a major cooldown the manager holds until
 // the whole gain fits; another potion the spec lists is only a spell, on the same category.
 func TestPotionRestoresManaOnThePotionCategory(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	const resourceID, otherID int32 = 992001, 992002
 	sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{ResourcePotId: resourceID, Potions: []int32{otherID}}, 0,
 		testConsumable{resourceID, potion, testOnUse(17531, 0, 4, 120000)},
@@ -215,6 +217,8 @@ func TestPotionGivesRageAndItsStrength(t *testing.T) {
 // spread; the test's on-use runs on conjured category 1153 for 120 s. The conjured item is a major
 // cooldown only while it is the spec's chosen one.
 func TestConjuredRuneRestoresManaAtTheCostOfLife(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	const runeID, otherID int32 = 992004, 992005
 	sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{ConjuredId: otherID, ConjuredItems: []int32{runeID, otherID}}, 0,
 		testConsumable{runeID, conjured, testOnUse(16666, -1, 1153, 120000)},
@@ -297,6 +301,8 @@ func TestConjuredTeaRestoresAFlatAmountOfEnergy(t *testing.T) {
 // Razorlash Root 17747 casts 21955: A_PERIODIC_HEAL and A_PERIODIC_ENERGIZE mana every period for the
 // row's duration.
 func TestConjuredRootHealsAndRestoresManaOverTime(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	const rootID int32 = 992007
 	sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{ConjuredItems: []int32{rootID}}, 0,
 		testConsumable{rootID, conjured, testOnUse(21955, 0, 1153, 120000)})
@@ -325,6 +331,8 @@ func TestConjuredRootHealsAndRestoresManaOverTime(t *testing.T) {
 
 // Restored Mana Potion 282013 casts 1312702, E_ENERGIZE_PCT: a share of the maximum.
 func TestPotionRestoresAShareOfTheBar(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	const potionID int32 = 992008
 	sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{Potions: []int32{potionID}}, 0,
 		testConsumable{potionID, potion, testOnUse(1312702, 0, 4, 120000)})
@@ -341,6 +349,8 @@ func TestPotionRestoresAShareOfTheBar(t *testing.T) {
 // Spellblasting Potion 250932's does, runs on its spell's category: a copy of 1251919 states potion
 // category 4 for 120 s.
 func TestPotionDefersToItsSpellsCategory(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	const blastingID, manaID int32 = 992009, 992010
 	editRow(t, 1251919, func(s *spelldata.Spell) { s.Category, s.CategoryCooldownMs = 4, 120000 })
 	sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{Potions: []int32{blastingID, manaID}}, 0,
@@ -365,6 +375,8 @@ func TestPotionDefersToItsSpellsCategory(t *testing.T) {
 // Alchemists' Stone 13503's 17619 raises the healing and mana potions give by its effect's share:
 // Major Healing Potion 13446's 17534 and Major Mana Potion's 17531, not a healthstone's heal.
 func TestAlchemistsStoneRaisesHealingAndManaPotions(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	stone := spelldata.MustFind(alchemistsStoneSpellID).FirstAura(dbcenums.A_DUMMY).BasePoints / 100
 	if stone <= 0 {
 		t.Fatalf("17619 states %v, want a share that raises potions", stone)
@@ -565,6 +577,8 @@ func TestADamageCloudNamesWhatStopsIt(t *testing.T) {
 // A damage potion is an offensive potion: a potion of category 4, never an explosive, and a DPS major
 // cooldown only as the spec's offensive potion pick.
 func TestADamagePotionIsAnOffensivePotion(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	for i, row := range []int32{1252525, 1252554} {
 		pickedID, otherID := 993001+2*int32(i), 993002+2*int32(i)
 		sim, drinker := newConsumableSim(t, manaUser(), &proto.ConsumesSpec{OffensivePotId: pickedID, Potions: []int32{otherID}}, 0,
@@ -595,6 +609,8 @@ func TestADamagePotionIsAnOffensivePotion(t *testing.T) {
 // it lands on each enemy even for a drinker who cannot hit anything, and every tick rolls its own
 // amount. The potion shares category 4 with a mana potion.
 func TestCausticSmogPotionPoisonsEveryEnemyInTheCloud(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverChosenConsumablesOnly)
 	row := spelldata.MustFind(1252525)
 	cloud, damage := DamageCloudOf(row)
 	tick := damage.PeriodicDamageEffect()
@@ -667,6 +683,8 @@ func TestCausticSmogPotionPoisonsEveryEnemyInTheCloud(t *testing.T) {
 // reaches as far as the cone's radius. The row states Fixed Travel Time, so the fire lands its Speed
 // in seconds after use, 1 sec, from any distance.
 func TestDragonfirePotionBurnsEveryEnemyInItsCone(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverAreaReach)
 	row := spelldata.MustFind(1252554)
 	if !row.FixedTravelTime() {
 		t.Fatalf("%d states no Fixed Travel Time, nothing to check", row.ID)

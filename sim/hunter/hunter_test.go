@@ -378,6 +378,8 @@ func TestLaceratingStrikesRollsItsUntickedDamageIntoTheNextBite(t *testing.T) {
 // Strider Kick's 30% speed lasts the row's 3 seconds, and a walk that outlasts it ends where it was
 // going: a walk out to range started 2.5 seconds after the kick runs its first half second at 130%.
 func TestStriderKickSpeedRunsOutMidWalk(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	player := &proto.Player{
 		Name:               "Kick",
 		Race:               proto.Race_RaceOrc,
@@ -493,6 +495,8 @@ func TestSurvivalistsDisciplineShortensTheTrapCooldown(t *testing.T) {
 // An Auto Shot that comes due while the hunter moves winds up a reaction time after the move ends,
 // as the player starts it again by hand, not at the hidden retry timer's next check.
 func TestAutoShotWindsUpWhenTheMoveEnds(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	player := &proto.Player{
 		Name:               "Shot",
 		Race:               proto.Race_RaceOrc,
@@ -531,6 +535,8 @@ func TestAutoShotWindsUpWhenTheMoveEnds(t *testing.T) {
 // A hunter walking out of the deadzone who stops right on the minimum range is back in range only as
 // the walk ends; a shot that came due on the way still waits a reaction time before it winds up.
 func TestAutoShotWaitsAReactionWhenTheWalkEndsOnTheMinimumRange(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	player := &proto.Player{
 		Name:               "Line",
 		Race:               proto.Race_RaceOrc,

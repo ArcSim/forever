@@ -117,6 +117,7 @@ const (
 type printedStmt struct {
 	indent   int
 	notes    []string // Its /// lines.
+	cards    []string // Its //@ card lines, after the notes (arc_card.go).
 	parts    []text
 	trailing string    // A comment after its last line.
 	role     stmtRole  // A statement that is read back and checked.
@@ -1057,15 +1058,16 @@ func (p *printer) row(item protoreflect.Message, prepull bool, sc scope, indent 
 	if !item.IsValid() {
 		return raw
 	}
-	allowed := []string{"hide", "notes", "action"}
+	allowed := []string{"hide", "notes", "action", "simple"}
 	if prepull {
-		allowed = []string{"action", "do_at_value", "hide"}
+		allowed = []string{"action", "do_at_value", "hide", "simple"}
 	}
 	action, hasAction := p.get(item, "action")
 	notes, hasNotes := p.get(item, "notes")
 	_, hide := p.get(item, "hide")
 	doAt, hasDoAt := p.get(item, "do_at_value")
-	if !p.only(item, allowed...) || !hasAction || prepull && !hasDoAt || hasNotes && unprintable.MatchString(notes.String()) {
+	cards, cardsOK := cardLinesOf(p, item)
+	if !p.only(item, allowed...) || !hasAction || prepull && !hasDoAt || hasNotes && unprintable.MatchString(notes.String()) || !cardsOK {
 		return raw
 	}
 	condition, hasCondition := p.get(action.Message(), "condition")
@@ -1087,7 +1089,7 @@ func (p *printer) row(item protoreflect.Message, prepull bool, sc scope, indent 
 	if hasCondition {
 		parts = append(parts, p.conditionParts(condition.Message(), sc)...)
 	}
-	s := &printedStmt{indent: indent, parts: parts, role: roleRow, expect: exp}
+	s := &printedStmt{indent: indent, parts: parts, role: roleRow, expect: exp, cards: cards}
 	if hasNotes {
 		s.notes = strings.Split(notes.String(), "\n")
 	}
@@ -1204,13 +1206,16 @@ func statementLines(s *printedStmt) []string {
 	if s.trailing != "" {
 		body[len(body)-1] += " " + s.trailing
 	}
-	lines := make([]string, 0, len(s.notes)+len(body))
+	lines := make([]string, 0, len(s.notes)+len(s.cards)+len(body))
 	for _, note := range s.notes {
 		if note == "" {
 			lines = append(lines, pad+"///")
 		} else {
 			lines = append(lines, pad+"/// "+note)
 		}
+	}
+	for _, card := range s.cards {
+		lines = append(lines, pad+"//@"+card)
 	}
 	return append(lines, body...)
 }
@@ -1545,6 +1550,16 @@ func printFile(ix *schemaIndex, names *Names, kind Kind, spec *SpecInfo, s *prot
 				typeField := fields[slices.IndexFunc(fields, func(pl *placed) bool { return pl.Name == "type" })]
 				typeValue, _ := fieldValue(rotation.ProtoReflect(), typeField.desc)
 				for _, e := range p.entries([]write{{placed: typeField, values: []protoreflect.Value{typeValue}, indices: []int{-1}}}, indent(def)) {
+					out.body = append(out.body, &item{stmt: e})
+				}
+			}
+			// The section's other fields (the rotation's manual start attack) print when set.
+			for _, field := range ix.sectionFields(def, spec) {
+				if !hasRotation || field.Name == "type" || field.Name == "value_variables" || !rotation.ProtoReflect().Has(field.desc) {
+					continue
+				}
+				value, _ := fieldValue(rotation.ProtoReflect(), field.desc)
+				for _, e := range p.entries([]write{{placed: field, values: []protoreflect.Value{value}, indices: []int{-1}}}, indent(def)) {
 					out.body = append(out.body, &item{stmt: e})
 				}
 			}

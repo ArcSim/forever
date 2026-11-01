@@ -159,3 +159,25 @@ func TestSpellTimeSinceLastCastValue(t *testing.T) {
 		t.Errorf("2 s after the cast reads %v; want %v", got, sim.CurrentTime-castAt)
 	}
 }
+
+// The rotation's own reads follow the Forever GCD (forever-bugs #389, #284): a haste-ignoring spell's expected damage per
+// execute time counts its hasted GCD, and the spell GCD never grows under a cast speed slow.
+func TestRotationReadsTheForeverGCD(t *testing.T) {
+	sim, fw, rot := setupFakeRageRotation()
+	rend := fw.GetSpell(fakeRendActionID)
+	rend.expectedInitialDamageInternal = func(_ *Simulation, _ *Unit, _ *Spell, _ bool) *SpellResult {
+		return &SpellResult{Damage: 600}
+	}
+	dpet := rot.newValueSpellExpectedDpet(&proto.APLValueSpellExpectedDpet{SpellId: fakeRendActionID.ToProto()}, nil)
+	rend.IgnoreHaste = true
+	rend.DefaultCast.GCD = 3 * time.Second
+	rend.DefaultCast.CastTime = 0
+	fw.MultiplyCastSpeed(sim, 2)
+	if got := dpet.GetFloat(sim); got != 400 {
+		t.Errorf("a 600 hit on a haste-ignoring 3s GCD at double cast speed = %f, want 400 (a 1.5s GCD)", got)
+	}
+	fw.MultiplyCastSpeed(sim, 0.5/1.6)
+	if got := fw.SpellGCD(); got != GCDDefault {
+		t.Errorf("spell GCD under a 60%% cast speed slow = %s, want %s", got, GCDDefault)
+	}
+}

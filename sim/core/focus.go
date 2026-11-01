@@ -23,12 +23,12 @@ type focusBar struct {
 	focusRefundMetrics *ResourceMetrics
 }
 
-func (unit *Unit) EnableFocusBar(focusRegenMultiplier float64) {
+func (unit *Unit) EnableFocusBar(maxFocus float64, focusRegenMultiplier float64) {
 	unit.SetCurrentPowerBar(FocusBar)
 
 	unit.focusBar = focusBar{
 		unit:               unit,
-		maxFocus:           100.0,
+		maxFocus:           maxFocus,
 		focusRegenPerTick:  25.0 * focusRegenMultiplier,
 		focusTickInterval:  5,
 		focusTickDuration:  time.Second * 5,

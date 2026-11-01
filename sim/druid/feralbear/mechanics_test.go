@@ -59,6 +59,8 @@ func newBearAgainst(t *testing.T, talents string, numTargets int) (*core.Simulat
 }
 
 func TestDemoralizingRoarReachesEveryTarget(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBearAgainst(t, "0000000000000000-00000000000000000000-0000000000000000", 3)
 	targets := sim.Encounter.ActiveTargetUnits
 	for range 20 {
@@ -79,6 +81,8 @@ func TestDemoralizingRoarReachesEveryTarget(t *testing.T) {
 }
 
 func TestDemoralizingRoarIgnoresDodge(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	target := sim.Encounter.ActiveTargetUnits[0]
 	target.PseudoStats.BaseDodgeChance = 1
@@ -97,6 +101,8 @@ func TestDemoralizingRoarIgnoresDodge(t *testing.T) {
 }
 
 func TestBerserkPrimalBiteStrikesThreeTargets(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBearAgainst(t, "0000000000000000-00000000000100000001-0000000000000000", 5)
 	metrics := bear.NewRageMetrics(core.ActionID{SpellID: 1})
 	bear.BerserkAura.Activate(sim)
@@ -139,6 +145,8 @@ func TestDodgedBashStunsNothingAndRefunds(t *testing.T) {
 
 // Berserk effect 2 is -100% on Primal Bite's 6 s cooldown, while Berserk is up.
 func TestBerserkLiftsPrimalBiteCooldownOnlyWhileUp(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBearWithTalents(t, "0000000000000000-00000000000100000001-0000000000000000")
 	metrics := bear.NewRageMetrics(core.ActionID{SpellID: 1})
 	cast := func(when string) {
@@ -165,6 +173,8 @@ func TestBerserkLiftsPrimalBiteCooldownOnlyWhileUp(t *testing.T) {
 // Berserk's tooltip "removes its cooldown": a Primal Bite cooldown already running when Berserk starts
 // ends with it.
 func TestBerserkClearsARunningPrimalBiteCooldown(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBearWithTalents(t, "0000000000000000-00000000000100000001-0000000000000000")
 	bear.AddRage(sim, 100, bear.NewRageMetrics(core.ActionID{SpellID: 1}))
 	if !bear.PrimalBite.Cast(sim, bear.CurrentTarget) {
@@ -181,6 +191,8 @@ func TestBerserkClearsARunningPrimalBiteCooldown(t *testing.T) {
 }
 
 func TestBearBerserkCastLeavesTheAttackGlobalUnchanged(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBearWithTalents(t, "0000000000000000-00000000000100000001-0000000000000000")
 	bear.AddRage(sim, 100, bear.NewRageMetrics(core.ActionID{SpellID: 1}))
 	if !bear.PrimalBite.Cast(sim, bear.CurrentTarget) {
@@ -225,6 +237,8 @@ func TestBearBarkskinReducesPhysicalDamageWithoutLeavingForm(t *testing.T) {
 }
 
 func TestFrenziedRegenerationSpendsRageForHealth(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	bear.AddRage(sim, 100, bear.NewRageMetrics(core.ActionID{SpellID: 1}))
 	before := bear.CurrentRage()
@@ -267,6 +281,8 @@ func TestFurorPreservesEnergyWhenStartingInABearForm(t *testing.T) {
 }
 
 func TestFirstLacerateHitsForNothing(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	target := bear.CurrentTarget
 	metrics := bear.NewRageMetrics(core.ActionID{SpellID: 1})
@@ -287,6 +303,8 @@ func TestFirstLacerateHitsForNothing(t *testing.T) {
 }
 
 func TestLacerateStacksToFive(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	if !bear.InForm(druid.Bear) {
 		t.Fatal("the bear did not start in bear form")
@@ -341,6 +359,8 @@ func TestFeralChargeCastsOutsideMelee(t *testing.T) {
 }
 
 func TestSwipeDoesNotScaleWithAttackPower(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	target := bear.CurrentTarget
 	metrics := bear.NewRageMetrics(core.ActionID{SpellID: 1})
@@ -421,6 +441,8 @@ func TestNaturalReactionGivesRageOnDodges(t *testing.T) {
 
 // Swipe 9908 adds 3% of attack power to each hit, an override on the row.
 func TestSwipeGainsThreePercentOfAttackPower(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	bear.AddStatDynamic(sim, stats.PhysicalCritPercent, -100)
 	bear.AddStatDynamic(sim, stats.PhysicalHitPercent, 100)
@@ -527,6 +549,8 @@ func TestMaulFallsBackWhenTheQueuedSwingIsUnaffordable(t *testing.T) {
 }
 
 func TestLacerateApplicationRestartsTheTickClock(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	sim, bear := newBear(t)
 	target := bear.CurrentTarget
 	dot := bear.Lacerate.Dot(target)
@@ -547,6 +571,8 @@ func TestLacerateApplicationRestartsTheTickClock(t *testing.T) {
 }
 
 func TestSapperPreservesFormsAndResources(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, form := range []druid.DruidForm{druid.Cat, druid.Bear, druid.DireBear} {
 		t.Run(fmt.Sprint(form), func(t *testing.T) {
 			req := bearNakedRequest()
@@ -582,6 +608,8 @@ func TestSapperPreservesFormsAndResources(t *testing.T) {
 }
 
 func TestBearChargeMovement(t *testing.T) {
+	// Their rule; the Forever switch is off here and has tests of its own.
+	core.ForeverRulesOffForTest(t, &core.ForeverWalkRules)
 	for _, distance := range []float64{8, 25} {
 		t.Run(fmt.Sprintf("distance_%g", distance), func(t *testing.T) {
 			req := bearNakedRequest()
