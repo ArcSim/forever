@@ -107,7 +107,7 @@
 					"petUptime": 1,
 					"petAttackSpeed": "FasterAttackVII",
 					"moveDelayMs": 100,
-					"laceratingMode": "LaceratingRolling"
+					"laceratingMode": "LaceratingRefresh"
 				}
 			}
 		},

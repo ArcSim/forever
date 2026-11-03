@@ -107,7 +107,7 @@
 					"petUptime": 1,
 					"petAttackSpeed": "FasterAttackVII",
 					"moveDelayMs": 100,
-					"laceratingMode": "LaceratingRolling"
+					"laceratingMode": "LaceratingRefresh"
 				}
 			}
 		},
@@ -136,7 +136,7 @@
 					"action": {
 						"castSpell": {
 							"spellId": {
-								"spellId": 1299447
+								"spellId": 14322
 							}
 						}
 					},
@@ -146,7 +146,7 @@
 						}
 					},
 					"simple": {
-						"text": "**Aspect of the Beast** 10 s before the pull."
+						"text": "**Aspect of the Hawk** 10 s before the pull."
 					}
 				},
 				{
@@ -2121,10 +2121,10 @@
 	},
 	"epWeightsStats": {
 		"stats": [
-			0.22,
+			0.2,
 			1,
 			0,
-			0.47,
+			0.45,
 			0,
 			0,
 			0,
@@ -2135,14 +2135,14 @@
 			0,
 			0,
 			0,
+			0.18,
 			0.2,
-			0.19,
 			0,
 			0.11,
-			0.84,
-			0.05,
-			0.15,
-			0.67,
+			0.83,
+			0.35,
+			0.14,
+			0.57,
 			0,
 			0,
 			0,
@@ -2158,14 +2158,12 @@
 			0,
 			0,
 			0,
-			1.58
+			1.45
 		],
 		"pseudoStats": [
-			2.74,
+			2.47,
 			0,
-			2.06,
-			0,
-			0,
+			1.92,
 			0,
 			0,
 			0,
@@ -2186,7 +2184,9 @@
 			0,
 			0,
 			0,
-			5.69
+			0,
+			0,
+			6.39
 		]
 	}
 }

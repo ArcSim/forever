@@ -9,6 +9,7 @@ import (
 	"github.com/wowsims/forever/sim/core/buffs"
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/simsignals"
+	"github.com/wowsims/forever/sim/core/stats"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -35,21 +36,21 @@ func dataPassHunter(t *testing.T, talents string, rotation *proto.APLRotation) (
 	return sim, sim.Raid.Parties[0].Players[0].(*Hunter)
 }
 
-// Trueshot Aura gives its top rank's 50 ranged attack power (the ranks are 15 / 22 / 30 / 40 / 50).
-func TestTrueshotAuraGivesItsTopRanksFifty(t *testing.T) {
-	if got := buffs.TrueshotAuraValue(0); got != 50 {
-		t.Errorf("Trueshot Aura gives %v ranged attack power, want 50", got)
+// Trueshot Aura gives its top rank's 100 ranged attack power (the ranks are 20 / 35 / 50 / 75 / 100).
+func TestTrueshotAuraGivesItsTopRanksHundred(t *testing.T) {
+	if got := buffs.TrueshotAuraValue(0); got != 100 {
+		t.Errorf("Trueshot Aura gives %v ranged attack power, want 100", got)
 	}
 }
 
 // Aspect of the Hawk rank 7 and Serpent Sting rank 9 come only from Ruins of Ahn'Qiraj books: the hunter knows the
-// trainer's rank 6 (+55) and rank 8 (83 a tick).
+// trainer's rank 6 (+110) and rank 8 (100 a tick).
 func TestTrainerRanks(t *testing.T) {
-	if aspectOfTheHawkRank.ID != 14322 || aspectOfTheHawkRank.EffectN(1).Average() != 55 {
-		t.Errorf("Aspect of the Hawk is %d (+%v), want rank 6 (14322, +55)", aspectOfTheHawkRank.ID, aspectOfTheHawkRank.EffectN(1).Average())
+	if aspectOfTheHawkRank.ID != 14322 || aspectOfTheHawkRank.EffectN(1).Average() != 110 {
+		t.Errorf("Aspect of the Hawk is %d (+%v), want rank 6 (14322, +110)", aspectOfTheHawkRank.ID, aspectOfTheHawkRank.EffectN(1).Average())
 	}
-	if serpentStingRank.ID != 13555 || foreverSerpentStingTickBase != 83 {
-		t.Errorf("Serpent Sting is %d (%v a tick), want rank 8 (13555, 83)", serpentStingRank.ID, foreverSerpentStingTickBase)
+	if serpentStingRank.ID != 13555 || foreverSerpentStingTickBase != 100 {
+		t.Errorf("Serpent Sting is %d (%v a tick), want rank 8 (13555, 100)", serpentStingRank.ID, foreverSerpentStingTickBase)
 	}
 	_, hunter := dataPassHunter(t, "", &proto.APLRotation{})
 	for _, id := range []int32{25295, 25296} {
@@ -94,5 +95,27 @@ func TestEfficiencyCoversStriderKick(t *testing.T) {
 	none, five := cost("-00530500101-500230230250222151"), cost("-00535500101-500230230250222151")
 	if math.Abs(five/none-0.85) > 1e-9 {
 		t.Errorf("Efficiency 5/5 leaves Strider Kick %.4f of its cost, want 0.85", five/none)
+	}
+}
+
+// A Serpent Sting tick is the rank's base plus 5% of ranged attack power, read when the sting lands.
+func TestSerpentStingTickTakesFivePercentOfRangedAttackPower(t *testing.T) {
+	sim, hunter := dataPassHunter(t, "", &proto.APLRotation{})
+	dot := hunter.GetSpell(core.ActionID{SpellID: serpentStingRank.ID}).Dot(hunter.CurrentTarget)
+	tick := func() float64 {
+		dot.TakeSnapshot(sim)
+		return dot.SnapshotBaseDamage
+	}
+	before := tick()
+	hunter.AddStatDynamic(sim, stats.RangedAttackPower, 1000)
+	if got := tick() - before; math.Abs(got-50) > 1e-9 {
+		t.Errorf("1000 more ranged attack power adds %v to a tick, want 50", got)
+	}
+}
+
+// The rows state no attack power share for Arcane Shot; the Forever notes set 15% of ranged attack power.
+func TestArcaneShotTakesFifteenPercentOfRangedAttackPower(t *testing.T) {
+	if arcaneShotAPShare != 0.15 {
+		t.Errorf("Arcane Shot takes %v of ranged attack power, want 0.15", arcaneShotAPShare)
 	}
 }

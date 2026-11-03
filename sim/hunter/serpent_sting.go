@@ -11,11 +11,11 @@ var serpentStingRank = trainerRank(spellData.SerpentSting, topTrainerRankSerpent
 // notes say 10% of ranged attack power over the duration, 2% a tick, read at each tick.
 const serpentStingTickAPShare = 0.02
 
-// The tick in the game: the rank's base (rank 8 83, rank 9 111) plus 3.0% of ranged attack power, read when the sting
-// lands.
+// The tick in the game: the rank's base (rank 8 100, rank 9 135) plus 5% of ranged attack power, read when the sting
+// lands. The row states no attack power share; the Forever notes raised it from the 3% the logs showed.
 var foreverSerpentStingTickBase = serpentStingRank.PeriodicEffect().Average()
 
-const foreverSerpentStingTickAPShare = 0.030
+const foreverSerpentStingTickAPShare = 0.05
 
 func (hunter *Hunter) registerSerpentSting() {
 	tick := serpentStingRank.PeriodicEffect()
