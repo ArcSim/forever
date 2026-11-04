@@ -16,6 +16,7 @@ var ExtraSpells = []Extra{
 	{SpellID: 1293697, Reason: "Demonic Brand's Shadow damage when a demon consumes the brand; nothing links it to the talent", Source: "Spell 1293697 description"},
 	{SpellID: 1293698, Reason: "Demonic Brand's Fire damage when a demon consumes the brand; nothing links it to the talent", Source: "Spell 1293698 description"},
 	{SpellID: 1249755, Reason: "Summoning Disorientation, a 6 sec stun; no skill line row reaches it and no summon row triggers it", Source: "Spell 1249755"},
+	{SpellID: 1328826, Reason: "Poised, the rogue's next-ability Energy discount; the passive 1328825 grants it out of combat at full Energy and no row triggers it", Source: "Spell 1328825 description"},
 	// Enchant Weapon - Revelation 8217: its proc spell 1248806 names no trigger, and each class with
 	// spells to crit has a buff of its own, which the sim picks by the wearer's class.
 	{SpellID: 1248808, Reason: "Revelation, the mage buff of enchant 8217", Source: "owner decision"},

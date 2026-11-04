@@ -20,7 +20,7 @@ func init() {
 
 // A wearer of the items against targets of one mob type: the hunter stand-in, which has a pet, the warrior
 // stand-in, which swings its weapons, or the rogue stand-in, which shoots its ranged weapon.
-func arcWearer(t *testing.T, class proto.Class, items map[proto.ItemSlot]int32, mobType proto.MobType, targets int) (*core.Simulation, *core.Character) {
+func arcWearer(t *testing.T, class proto.Class, items map[proto.ItemSlot]int32, mobType proto.MobType, targets int, debuffs ...*proto.Debuffs) (*core.Simulation, *core.Character) {
 	t.Helper()
 	specs := make([]*proto.ItemSpec, proto.ItemSlot_ItemSlotRanged+1)
 	for i := range specs {
@@ -48,9 +48,13 @@ func arcWearer(t *testing.T, class proto.Class, items map[proto.ItemSlot]int32, 
 	for range targets {
 		encounter.Targets = append(encounter.Targets, &proto.Target{Name: "target", Level: 60, MobType: mobType})
 	}
+	raid := &proto.Raid{Parties: []*proto.Party{{Players: []*proto.Player{player}, Buffs: &proto.PartyBuffs{}}}}
+	if len(debuffs) > 0 {
+		raid.Debuffs = debuffs[0]
+	}
 	sim := core.NewSim(&proto.RaidSimRequest{
 		SimOptions: &proto.SimOptions{RandomSeed: 1},
-		Raid:       &proto.Raid{Parties: []*proto.Party{{Players: []*proto.Player{player}, Buffs: &proto.PartyBuffs{}}}},
+		Raid:       raid,
 		Encounter:  encounter,
 	}, simsignals.CreateSignals())
 	sim.Reset()
@@ -380,7 +384,8 @@ func TestArcClassicRunSpeed(t *testing.T) {
 	}
 }
 
-// The armor procs: Rivenspike's Puncture Armor stacks three deep, Digmaster 5000's does not stack, and
+// The armor procs: Rivenspike's Puncture Armor stacks three deep at Forever's 100 a stack (spell 17315), Digmaster
+// 5000's does not stack, and
 // Mutilator's Lacerations adds 5 physical damage taken a stack, five deep.
 func TestArcClassicDebuffProcs(t *testing.T) {
 	for _, c := range []struct {
@@ -392,7 +397,7 @@ func TestArcClassicDebuffProcs(t *testing.T) {
 		each   float64
 		max    int
 	}{
-		{13286, "Rivenspike", 2, "Puncture Armor", func(target *core.Unit) float64 { return -target.GetStat(stats.Armor) }, 200, 3},
+		{13286, "Rivenspike", 2, "Puncture Armor (Player)", func(target *core.Unit) float64 { return -target.GetStat(stats.Armor) }, 100, 3},
 		{9465, "Digmaster 5000", 2, "Puncture Armor (Digmaster 5000)", func(target *core.Unit) float64 { return -target.GetStat(stats.Armor) }, 100, 1},
 		{12469, "Mutilator", 1, "Lacerations", func(target *core.Unit) float64 { return target.PseudoStats.BonusPhysicalDamageTaken }, 5, 5},
 	} {
@@ -416,6 +421,47 @@ func TestArcClassicDebuffProcs(t *testing.T) {
 			stepTo(t, sim, sim.CurrentTime+target.GetAura(c.label).Duration+time.Millisecond)
 			if got := c.read(target); math.Abs(got-base) > 1e-9 {
 				t.Errorf("after the debuff fell off it is worth %v, want none", got-base)
+			}
+		})
+	}
+}
+
+// A tank's Rivenspike, the raid debuff, holds all three stacks of Puncture Armor the whole fight, and a player's own
+// Rivenspike lands the same debuff, so it adds nothing to it.
+func TestArcPunctureArmorRaidDebuff(t *testing.T) {
+	humanoid := proto.MobType_MobTypeHumanoid
+	armor := func(character *core.Character) float64 {
+		return character.CurrentTarget.GetStat(stats.Armor)
+	}
+	_, bare := arcWearer(t, proto.Class_ClassWarrior, nil, humanoid, 1)
+	base := armor(bare)
+	for _, wears := range []bool{false, true} {
+		t.Run(map[bool]string{false: "tank only", true: "tank and own Rivenspike"}[wears], func(t *testing.T) {
+			items := map[proto.ItemSlot]int32{}
+			if wears {
+				items[proto.ItemSlot_ItemSlotMainHand] = 13286
+			}
+			sim, character := arcWearer(t, proto.Class_ClassWarrior, items, humanoid, 1, &proto.Debuffs{PunctureArmor: true})
+			character.AutoAttacks.CancelAutoSwing(sim)
+			if got := base - armor(character); math.Abs(got-300) > 1e-9 {
+				t.Fatalf("at the pull the tank's Puncture Armor takes %v armor, want 300", got)
+			}
+			if wears {
+				arcForcedProc(t, sim, character, "Rivenspike", 13286, 2, core.ProcMaskMeleeMHAuto, core.ProcMaskMelee)
+				arcSureHits(sim, character)
+				for range 5 {
+					dealHit(t, sim, character, meleeSwing(&character.Unit))
+				}
+				if own := character.CurrentTarget.GetAura("Puncture Armor (Player)"); own == nil || own.GetStacks() != 3 {
+					t.Fatalf("the player's own Puncture Armor did not reach three stacks")
+				}
+				if got := base - armor(character); math.Abs(got-300) > 1e-9 {
+					t.Fatalf("with both copies at three stacks Puncture Armor takes %v armor, want 300", got)
+				}
+			}
+			stepTo(t, sim, sim.CurrentTime+time.Minute)
+			if got := base - armor(character); math.Abs(got-300) > 1e-9 {
+				t.Errorf("a minute in Puncture Armor takes %v armor, want 300", got)
 			}
 		})
 	}

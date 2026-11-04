@@ -6,6 +6,7 @@ import (
 	"github.com/wowsims/forever/sim/common/itemhelpers"
 	"github.com/wowsims/forever/sim/common/shared"
 	"github.com/wowsims/forever/sim/core"
+	"github.com/wowsims/forever/sim/core/buffs"
 	"github.com/wowsims/forever/sim/core/proto"
 	"github.com/wowsims/forever/sim/core/stats"
 )
@@ -437,11 +438,10 @@ func arcClassicStackingDebuff(target *core.Unit, label string, spellID int32, du
 }
 
 func registerArcClassicDebuffProcs() {
-	// The same Puncture Armor from either weapon is one debuff, three stacks deep.
+	// Puncture Armor as the spell data states it (100 armor a stack in Forever's, Classic's took 200), three stacks deep.
+	// It bids in the raid debuff's category, so a tank's copy holding all three leaves this one nothing to add.
 	arcClassicDebuffProc(13286, "Rivenspike", 2, 17315, core.DefenseTypeMelee, func(target *core.Unit) *core.Aura {
-		return arcClassicStackingDebuff(target, "Puncture Armor", 17315, time.Second*30, 3, func(sim *core.Simulation, unit *core.Unit, stacks int32) {
-			unit.AddStatDynamic(sim, stats.Armor, -200*float64(stacks))
-		})
+		return buffs.NewSpellDataPunctureArmorAura(target, true, 0)
 	})
 	// A Puncture Armor of its own that does not stack, at Rivenspike's rate.
 	arcClassicDebuffProc(9465, "Digmaster 5000", 2, 11791, core.DefenseTypeMelee, func(target *core.Unit) *core.Aura {

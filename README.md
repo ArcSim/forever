@@ -1,12 +1,12 @@
 # Arc's Forever Sims engine
 
-The simulation engine behind [Arc's Forever Sims](https://arcs-forever-sims.pages.dev), a hunter sim for WoW Forever.
+The simulation engine behind [Arc's Forever Sims](https://arcs-forever-sims.pages.dev), a hunter and rogue sim for WoW Forever.
 It is a fork of the [wowsims Forever](https://github.com/wowsims/forever) engine (MIT, see LICENSE):
 [compare with wowsims](https://github.com/wowsims/forever/compare/master...ArcSim:forever:master).
 
-- `sim/`: the sim itself, every class (the hunter is the one tuned for Forever)
-- `ui/specs/hunter/dps/apls` and `ui/specs/hunter/dps/gear_sets`: the rotations and gear sets
-- `ui/specs/hunter/dps/builds`: the settings behind every build number on the site
+- `sim/`: the sim itself, every class (the hunter and the rogue are the ones tuned for Forever)
+- `ui/specs/hunter/dps` and `ui/specs/rogue/dps`: `apls` and `gear_sets` hold the rotations and gear sets, `builds`
+  the settings behind every build number on the site
 - `assets/database`: the item database, built by `tools/database`
 - `proto/`: the settings and results formats
 
@@ -38,6 +38,12 @@ go test --tags=with_db ./sim/hunter/ -skip 'TestHunter$|TestHunterPets$|TestStri
 `TestHunter` and `TestHunterPets` compare against stored results from before the Forever changes. The other six are
 wowsims' tests of their own walks, which the Forever walk rules replace; they pass with
 `ARC_OFF=walk,walkin,ohretry,queue,seq,gcdpoll`, which turns those rules off.
+
+The rogue's tests all run:
+
+```
+go test --tags=with_db ./sim/rogue/
+```
 
 The WebAssembly build the site runs:
 

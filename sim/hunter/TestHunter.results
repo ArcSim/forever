@@ -1748,8 +1748,8 @@ dps_results: {
 dps_results: {
  key: "TestHunter-AllItems-Rivenspike-13286"
  value: {
-  dps: 928.13616
-  tps: 675.81062
+  dps: 922.38864
+  tps: 671.78735
   dtps: 8.56708
   hps: 21.5025
  }

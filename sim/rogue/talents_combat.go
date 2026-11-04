@@ -9,42 +9,44 @@ import (
 
 func (rogue *Rogue) registerCombatTalents() {
 	// Tier 1
-	rogue.registerImprovedEviscerate()
-	rogue.registerImprovedSinisterStrike()
+	rogue.registerCoupDeGrace()
+	rogue.registerEfficientStrikes()
 	// Lightning Reflexes NYI
 
 	// Tier 2
 	rogue.registerPuncturingWounds()
 	// Deflection NYI
 	rogue.registerPrecision()
+	// Improved Sprint NYI
 
 	// Tier 3
-	// None in this tier implemented
+	// Composure modeled in Poised
 
 	// Tier 4
 	// Improved Kick NYI
 	rogue.registerFlawlessExecution()
-	rogue.registerDualWieldSpecialization()
+	rogue.registerWeaponExpertise()
+	rogue.registerAggression()
 
 	// Tier 5
+	rogue.registerDualWieldSpecialization()
 	rogue.registerBladeFlurry()
 	rogue.registerHackAndSlash()
 
 	// Tier 6
-	rogue.registerWeaponExpertise()
-	rogue.registerAggression()
+	// Flash of Steel modeled in Shank
 
 	// Tier 7
 	rogue.registerAdrenalineRush()
 }
 
-func (rogue *Rogue) registerImprovedSinisterStrike() {
-	if rogue.Talents.ImprovedSinisterStrike == 0 {
+func (rogue *Rogue) registerEfficientStrikes() {
+	if rogue.Talents.EfficientStrikes == 0 {
 		return
 	}
 
 	spelldata.ParseStatic(&rogue.Character,
-		spellData.ImprovedSinisterStrike.Rank(rogue.Talents.ImprovedSinisterStrike))
+		spellData.EfficientStrikes.Rank(rogue.Talents.EfficientStrikes))
 }
 
 func (rogue *Rogue) registerPuncturingWounds() {

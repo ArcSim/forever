@@ -95,12 +95,18 @@ func (rogue *Rogue) registerPoisonProc(consumable core.Consumable, chance float6
 	})
 }
 
+// The poisons' attack power shares are set on the server: no row carries them, Blizzard's class notes state them.
+const (
+	deadlyPoisonAPShare  = 0.009
+	instantPoisonAPShare = 0.01
+)
+
 func (rogue *Rogue) registerDeadlyPoisonSpell(deadlyPoisonRank *spelldata.Spell) {
 	config := spelldata.SpellConfig(&rogue.Unit, deadlyPoisonRank, spelldata.Magic(core.ProcMaskSpellDamageProc))
 	config.ClassSpellMask = RogueSpellDeadlyPoison
 	tick := deadlyPoisonRank.PeriodicEffect()
 	numTicks := deadlyPoisonRank.Duration().Seconds() / tick.Period().Seconds()
-	apScaling := 0.0045 / numTicks // Confirmed by Zirene
+	apScaling := deadlyPoisonAPShare / numTicks
 
 	config.Dot = spelldata.DotConfig(deadlyPoisonRank, tick)
 	config.Dot.OnTick = func(sim *core.Simulation, target *core.Unit, dot *core.Dot) {
@@ -133,7 +139,7 @@ func (rogue *Rogue) registerInstantPoisonSpell(instantPoisonRank *spelldata.Spel
 	ipBaseDamage := instantPoisonRank.DamageEffect().Average()
 	config := spelldata.SpellConfig(&rogue.Unit, instantPoisonRank, spelldata.Magic(core.ProcMaskSpellDamageProc))
 	config.ClassSpellMask = RogueSpellInstantPoison
-	apScaling := 0.005 // Confirmed by Zirene
+	apScaling := instantPoisonAPShare
 
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 		spell.CalcAndDealDamage(sim, target, ipBaseDamage+apScaling*spell.MeleeAttackPower(target), spell.OutcomeMagicHitAndCrit)

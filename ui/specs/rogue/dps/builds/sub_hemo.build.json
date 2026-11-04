@@ -1,0 +1,732 @@
+{
+	"player": {
+		"name": "Player",
+		"race": "RaceUndead",
+		"class": "ClassRogue",
+		"consumables": {
+			"foodId": 250072,
+			"conjuredId": 7676,
+			"mhImbueId": 12404,
+			"ohImbueId": 12404,
+			"elixirIds": [
+				13452,
+				250335,
+				250350,
+				12460
+			],
+			"mhWeaponImbueId": 8928,
+			"ohWeaponImbueId": 20844,
+			"offensivePotId": 250943,
+			"explosiveId": 11566,
+			"extraIds": [
+				8412,
+				10646,
+				12217
+			]
+		},
+		"buffs": {
+			"greaterBlessingOfKings": true,
+			"greaterBlessingOfMight": true,
+			"greaterBlessingOfSalvation": true
+		},
+		"rogue": {
+			"options": {
+				"classOptions": {}
+			}
+		},
+		"profession1": "Engineering",
+		"cooldowns": {},
+		"reactionTimeMs": 100,
+		"distanceFromTarget": 5,
+		"healingModel": {},
+		"equipment": {
+			"items": [
+				{
+					"id": 16707,
+					"enchant": 1508
+				},
+				{
+					"id": 15411,
+					"enchant": 904
+				},
+				{
+					"id": 16708
+				},
+				{
+					"id": 13340,
+					"enchant": 7667
+				},
+				{
+					"id": 252483,
+					"enchant": 1891
+				},
+				{
+					"id": 16710,
+					"enchant": 7656
+				},
+				{
+					"id": 15063,
+					"enchant": 8206
+				},
+				{
+					"id": 16713
+				},
+				{
+					"id": 15062,
+					"enchant": 1508
+				},
+				{
+					"id": 16711,
+					"enchant": 1887
+				},
+				{
+					"id": 18500
+				},
+				{
+					"id": 18500
+				},
+				{
+					"id": 272437
+				},
+				{
+					"id": 18465
+				},
+				{
+					"id": 12590,
+					"enchant": 1900
+				},
+				{
+					"id": 12590,
+					"enchant": 1900
+				},
+				{
+					"id": 18323
+				}
+			]
+		},
+		"talentsString": "00530321-320001-015203031321021151",
+		"rotation": {
+			"type": "TypeAPL",
+			"prepullActions": [
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1787
+							}
+						}
+					},
+					"doAtValue": {
+						"const": {
+							"val": "-1s"
+						}
+					}
+				}
+			],
+			"priorityList": [
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14183
+							}
+						},
+						"condition": {
+							"cmp": {
+								"lhs": {
+									"currentComboPoints": {}
+								},
+								"op": "OpLt",
+								"rhs": {
+									"const": {
+										"val": "4"
+									}
+								}
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 11290
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"not": {
+											"val": {
+												"dotIsActive": {
+													"spellId": {
+														"spellId": 11290
+													}
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"op": "OpLt",
+											"rhs": {
+												"const": {
+													"val": "5"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 11269
+							}
+						},
+						"condition": {
+							"cmp": {
+								"lhs": {
+									"currentComboPoints": {}
+								},
+								"op": "OpLt",
+								"rhs": {
+									"const": {
+										"val": "5"
+									}
+								}
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1329549
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"cmp": {
+											"lhs": {
+												"currentEnergy": {}
+											},
+											"op": "OpLt",
+											"rhs": {
+												"const": {
+													"val": "80"
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"op": "OpLt",
+											"rhs": {
+												"const": {
+													"val": "5"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 11275
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"and": {
+											"vals": [
+												{
+													"not": {
+														"val": {
+															"dotIsActive": {
+																"spellId": {
+																	"spellId": 11275
+																}
+															}
+														}
+													}
+												},
+												{
+													"cmp": {
+														"lhs": {
+															"remainingTime": {}
+														},
+														"op": "OpGt",
+														"rhs": {
+															"const": {
+																"val": "8"
+															}
+														}
+													}
+												}
+											]
+										}
+									},
+									{
+										"cmp": {
+											"op": "OpGe",
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"rhs": {
+												"const": {
+													"val": "3"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"rank": 2,
+								"spellId": 6774
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"not": {
+											"val": {
+												"auraIsActive": {
+													"auraId": {
+														"rank": 2,
+														"spellId": 6774
+													}
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"lhs": {
+												"remainingTime": {}
+											},
+											"op": "OpGe",
+											"rhs": {
+												"const": {
+													"val": "6"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1325758
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"cmp": {
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"op": "OpGe",
+											"rhs": {
+												"const": {
+													"val": "4"
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"lhs": {
+												"remainingTime": {}
+											},
+											"op": "OpGt",
+											"rhs": {
+												"const": {
+													"val": "6s"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 11300
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"cmp": {
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"op": "OpGe",
+											"rhs": {
+												"const": {
+													"val": "5"
+												}
+											}
+										}
+									},
+									{
+										"or": {
+											"vals": [
+												{
+													"cmp": {
+														"lhs": {
+															"remainingTime": {}
+														},
+														"op": "OpLt",
+														"rhs": {
+															"const": {
+																"val": "8s"
+															}
+														}
+													}
+												},
+												{
+													"cmp": {
+														"lhs": {
+															"currentEnergy": {}
+														},
+														"op": "OpGe",
+														"rhs": {
+															"const": {
+																"val": "80"
+															}
+														}
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1857
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"not": {
+											"val": {
+												"auraIsActive": {
+													"auraId": {
+														"spellId": 1787
+													}
+												}
+											}
+										}
+									},
+									{
+										"and": {
+											"vals": [
+												{
+													"cmp": {
+														"lhs": {
+															"currentEnergy": {}
+														},
+														"op": "OpGe",
+														"rhs": {
+															"const": {
+																"val": "60"
+															}
+														}
+													}
+												},
+												{
+													"cmp": {
+														"lhs": {
+															"currentComboPoints": {}
+														},
+														"op": "OpLe",
+														"rhs": {
+															"const": {
+																"val": "1"
+															}
+														}
+													}
+												},
+												{
+													"auraIsActive": {
+														"auraId": {
+															"rank": 2,
+															"spellId": 6774
+														}
+													}
+												},
+												{
+													"cmp": {
+														"lhs": {
+															"remainingTime": {}
+														},
+														"op": "OpGt",
+														"rhs": {
+															"const": {
+																"val": "10"
+															}
+														}
+													}
+												}
+											]
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"autocastOtherCooldowns": {},
+						"condition": {
+							"auraIsActive": {
+								"auraId": {
+									"rank": 2,
+									"spellId": 6774
+								}
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14278
+							}
+						},
+						"condition": {
+							"or": {
+								"vals": [
+									{
+										"cmp": {
+											"op": "OpLt",
+											"lhs": {
+												"dotRemainingTime": {
+													"spellId": {
+														"spellId": 11290
+													}
+												}
+											},
+											"rhs": {
+												"const": {
+													"val": "3s"
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"op": "OpGt",
+											"lhs": {
+												"dotRemainingTime": {
+													"spellId": {
+														"spellId": 11290
+													}
+												}
+											},
+											"rhs": {
+												"const": {
+													"val": "20s"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 16511
+							}
+						},
+						"condition": {
+							"and": {
+								"vals": [
+									{
+										"cmp": {
+											"op": "OpGe",
+											"lhs": {
+												"currentEnergy": {}
+											},
+											"rhs": {
+												"const": {
+													"val": "45"
+												}
+											}
+										}
+									},
+									{
+										"cmp": {
+											"op": "OpLt",
+											"lhs": {
+												"currentComboPoints": {}
+											},
+											"rhs": {
+												"const": {
+													"val": "5"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14185
+							}
+						},
+						"condition": {
+							"not": {
+								"val": {
+									"spellIsReady": {
+										"spellId": {
+											"spellId": 1857
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"raidBuffs": {
+		"giftOfTheWild": true,
+		"prayerOfFortitude": true,
+		"strengthOfEarthTotem": true,
+		"graceOfAirTotem": true,
+		"windfuryTotem": true,
+		"battleShout": 1,
+		"leaderOfThePack": true,
+		"moonkinAura": true
+	},
+	"partyBuffs": {},
+	"debuffs": {
+		"curseOfElements": true,
+		"curseOfRecklessness": true,
+		"faerieFire": true,
+		"sunderArmor": true,
+		"giftOfArthas": true
+	},
+	"encounter": {
+		"duration": 120,
+		"durationVariation": 15,
+		"executeProportion20": 0.2,
+		"executeProportion35": 0.35,
+		"targets": [
+			{
+				"id": 213336,
+				"name": "Level 60",
+				"level": 63,
+				"stats": [
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					3731,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0
+				],
+				"minBaseDamage": 3000,
+				"damageSpread": 0.3333,
+				"swingSpeed": 2,
+				"parryHaste": true
+			}
+		]
+	}
+}

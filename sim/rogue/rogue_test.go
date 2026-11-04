@@ -28,11 +28,11 @@ func TestRogue(t *testing.T) {
 			OtherTalentSets: []core.TalentsCombo{
 				{
 					Label:   "Subtlety BS",
-					Talents: "0053031-3203-4320203300013211051",
+					Talents: "005303202014--025203031321021051",
 				},
 				{
 					Label:   "Asn Muti",
-					Talents: "00532310151501031-302303202014",
+					Talents: "00530321241051031-30230302020113",
 				},
 			},
 			Consumables: DefaultConsumables,
@@ -66,7 +66,7 @@ var DefaultOptions = &proto.Player_Rogue{
 	},
 }
 
-var DefaultTalents = "005323101012-32030320201515231"
+var DefaultTalents = "005303202013-3203030202012321521"
 
 var DefaultConsumables = &proto.ConsumesSpec{
 	FlaskId:         274274, // Flask of Natural Aggression

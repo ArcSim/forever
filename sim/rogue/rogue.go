@@ -21,7 +21,7 @@ const (
 	DDBC_Total
 )
 
-var TalentTreeSizes = [3]int{17, 17, 19}
+var TalentTreeSizes = [3]int{17, 19, 18}
 
 const RogueBleedTag = "RogueBleed"
 
@@ -56,26 +56,31 @@ type Rogue struct {
 	Vanish         *core.Spell
 	AdrenalineRush *core.Spell
 	InstantPoison  *core.Spell
+	Shank          *core.Spell
 
+	DeathMark    *core.Spell
 	Eviscerate   *core.Spell
 	ExposeArmor  *core.Spell
 	Rupture      *core.Spell
 	SliceAndDice *core.Spell
 
-	AdrenalineRushAura   *core.Aura
-	BladeFlurryAura      *core.Aura
-	ExposeArmorAuras     core.AuraArray
-	SliceAndDiceAura     *core.Aura
-	MasterOfSubtletyAura *core.Aura
-	ShadowstepAura       *core.Aura
-	StealthAura          *core.Aura
-	CutthroatAura        *core.Aura
+	AdrenalineRushAura    *core.Aura
+	BladeFlurryAura       *core.Aura
+	ExposeArmorAuras      core.AuraArray
+	SliceAndDiceAura      *core.Aura
+	MasterOfSubtletyAura  *core.Aura
+	ShadowstepAura        *core.Aura
+	StealthAura           *core.Aura
+	OpenerUnstealthedAura *core.Aura
+	VenomAura             *core.Aura
 
 	WoundPoisonDebuffAuras core.AuraArray
 
 	ruthlessnessMetrics               *core.ResourceMetrics
 	ruthlessnessChance                float64
 	relentlessStrikesMetrics          *core.ResourceMetrics
+	relentlessStrikesChancePerPoint   float64
+	relentlessStrikesEnergy           float64
 	puncturingWoundsComboPointMetrics *core.ResourceMetrics
 
 	HasPvpEnergy              bool
@@ -107,8 +112,8 @@ func (rogue *Rogue) ApplyFinisher(sim *core.Simulation, spell *core.Spell) {
 	rogue.SpendComboPoints(sim, spell.ComboPointMetrics())
 
 	// Relentless Strikes
-	if rogue.Talents.RelentlessStrikes && sim.Proc(0.2*float64(numPoints), "Relentless Strikes") {
-		rogue.AddEnergy(sim, 25, rogue.relentlessStrikesMetrics)
+	if rogue.Talents.RelentlessStrikes > 0 && sim.Proc(rogue.relentlessStrikesChancePerPoint*float64(numPoints), "Relentless Strikes") {
+		rogue.AddEnergy(sim, rogue.relentlessStrikesEnergy, rogue.relentlessStrikesMetrics)
 	}
 
 	// Ruthlessness
@@ -134,6 +139,8 @@ func (rogue *Rogue) Initialize() {
 	rogue.registerStealthAura()
 	rogue.registerKickSpell()
 	rogue.registerFeintSpell()
+	rogue.registerShankSpell()
+	rogue.registerPoised()
 
 	ruthRank := spellData.Ruthlessness.Rank(rogue.Talents.Ruthlessness)
 	if ruthRank != nil {
@@ -143,6 +150,8 @@ func (rogue *Rogue) Initialize() {
 	// real per-rank chance on the effect, so ProcChanceAt would read 100% at every rank.
 	rogue.ruthlessnessChance = spellData.Ruthlessness.FractionAt(rogue.Talents.Ruthlessness)
 	rogue.relentlessStrikesMetrics = rogue.NewEnergyMetrics(core.ActionID{SpellID: 14179})
+	rogue.relentlessStrikesChancePerPoint = spellData.RelentlessStrikes.FractionAt(rogue.Talents.RelentlessStrikes)
+	rogue.relentlessStrikesEnergy = spellData.RelentlessStrikesTriggered.Highest().EffectN(1).BaseValue()
 }
 
 func (rogue *Rogue) ApplyAdditiveEnergyRegenBonus(sim *core.Simulation, increment float64) {
@@ -283,6 +292,8 @@ const (
 	RogueSpellInstantPoison
 	RogueSpellWoundPoison
 	RogueSpellDeadlyPoison
+	RogueSpellShank
+	RogueSpellDeathMark
 
 	RogueSpellLast
 	RogueSpellsAll    = RogueSpellLast<<1 - 1
@@ -292,5 +303,4 @@ const (
 	RogueSpellLethality      = RogueSpellSinisterStrike | RogueSpellGouge | RogueSpellBackstab | RogueSpellGhostlyStrike | RogueSpellMutilateHit | RogueSpellHemorrhage
 	RogueSpellDirectFinisher = RogueSpellEviscerate
 	RogueSpellFinisher       = RogueSpellDirectFinisher | RogueSpellSliceAndDice | RogueSpellRupture | RogueSpellExposeArmor
-	RogueSpellQuietus        = RogueSpellSinisterStrike | RogueSpellHemorrhage | RogueSpellGhostlyStrike
 )

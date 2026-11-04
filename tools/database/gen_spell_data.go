@@ -336,7 +336,11 @@ func discoverLadders(db *sql.DB, class dbc.DbcClass, treeID int, runeOnly map[in
 		}
 		_, talentSkipped := traitSkipped[name]
 		if trainedUnranked[name] || talentSkipped {
-			byName[name] = map[int32][]rankCandidate{1: cands}
+			byRank, err := supersedeRanks(db, cands)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+			byName[name] = byRank
 		}
 	}
 
@@ -934,6 +938,81 @@ func claimedByClass(byRank map[int32][]rankCandidate, mask int, exclusive map[in
 // 20154 and 21084, same name, rank, effect shape and 20 mana. The sim has always used 21084.
 var ladderPins = map[string]map[int32]int32{
 	"Seal of Righteousness": {1: 21084},
+}
+
+// A family whose spells all lack a rank subtext is one rank, unless its trainer rows chain them: Shank
+// 1329549 supersedes 1329283, and the hotfix that adds both names neither "Rank 1" nor "Rank 2". The
+// chain's order is then the ranks'. Anything short of one chain through every spell stays rank 1, where
+// the ambiguity is reported as before.
+func supersedeRanks(db *sql.DB, cands []rankCandidate) (map[int32][]rankCandidate, error) {
+	var ids []int32
+	seen := map[int32]bool{}
+	for _, c := range cands {
+		if !seen[c.SpellID] {
+			seen[c.SpellID] = true
+			ids = append(ids, c.SpellID)
+		}
+	}
+	if len(ids) < 2 {
+		return map[int32][]rankCandidate{1: cands}, nil
+	}
+	supersedes := map[int32]int32{}
+	for _, id := range ids {
+		var prev int32
+		err := db.QueryRow(`SELECT COALESCE(MAX(SupercedesSpell), 0) FROM SkillLineAbility WHERE Spell = ?`, id).Scan(&prev)
+		if err != nil {
+			return nil, err
+		}
+		supersedes[id] = prev
+	}
+	order := supersedeOrder(ids, supersedes)
+	if order == nil {
+		return map[int32][]rankCandidate{1: cands}, nil
+	}
+	rankOf := map[int32]int32{}
+	for i, id := range order {
+		rankOf[id] = int32(i + 1)
+	}
+	byRank := map[int32][]rankCandidate{}
+	for _, c := range cands {
+		c.Rank = rankOf[c.SpellID]
+		byRank[c.Rank] = append(byRank[c.Rank], c)
+	}
+	return byRank, nil
+}
+
+// The spells in rank order when exactly one of them supersedes none of the others and each other one
+// supersedes the one before it; nil otherwise.
+func supersedeOrder(ids []int32, supersedes map[int32]int32) []int32 {
+	in := map[int32]bool{}
+	for _, id := range ids {
+		in[id] = true
+	}
+	next := map[int32]int32{}
+	var first []int32
+	for _, id := range ids {
+		prev := supersedes[id]
+		if !in[prev] {
+			first = append(first, id)
+			continue
+		}
+		if _, taken := next[prev]; taken {
+			return nil
+		}
+		next[prev] = id
+	}
+	if len(first) != 1 {
+		return nil
+	}
+	order := []int32{first[0]}
+	for len(order) < len(ids) {
+		id, ok := next[order[len(order)-1]]
+		if !ok {
+			return nil
+		}
+		order = append(order, id)
+	}
+	return order
 }
 
 // Forever re-issues a classic ability as a second spell in the 4xxxxx range, same name, same rank

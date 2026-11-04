@@ -34,11 +34,10 @@ func (rogue *Rogue) registerSubtletyTalents() {
 	rogue.registerHemorrhage()
 
 	// Tier 6
-	rogue.registerQuietus()
-	rogue.registerCutthroat()
+	// Boot Knife modeled in Shank
 
 	// Tier 7
-	rogue.registerThousandCuts()
+	rogue.registerDeathMark()
 }
 
 func (rogue *Rogue) registerOpportunity() {
@@ -83,14 +82,17 @@ func (rogue *Rogue) registerGhostlyStrike() {
 
 	// Dodge aura not implemented; maybe if rogue tanking comes back
 
+	rogue.registerOpenerUnstealthed()
+
 	config.ApplyEffects = func(sim *core.Simulation, target *core.Unit, spell *core.Spell) {
 		rogue.BreakStealth(sim)
-		baseDamage := spell.Unit.MHWeaponDamage(sim, spell.MeleeAttackPower(target)) // Data suggests un-normalized
+		baseDamage := mhStrikeDamage(ghostlyStrikeRank, spell.Unit, sim, spell.MeleeAttackPower(target))
 
 		result := spell.CalcAndDealDamage(sim, target, baseDamage, spell.OutcomeMeleeWeaponSpecialHitAndCrit)
 
 		if result.Landed() {
 			rogue.AddComboPoints(sim, int32(ghostlyStrikeRank.ProcEnergizeEffect().Roll(sim)), spell.ComboPointMetrics())
+			rogue.OpenerUnstealthedAura.Activate(sim)
 		} else {
 			spell.IssueRefund(sim)
 		}
@@ -236,103 +238,30 @@ func (rogue *Rogue) registerPremeditation() {
 	})
 }
 
-func (rogue *Rogue) registerQuietus() {
-	if rogue.Talents.Quietus == 0 {
-		return
+// Ghostly Strike's buff: the next Ambush or Garrote within its duration needs no Stealth, and the
+// cast that uses it spends it.
+func (rogue *Rogue) registerOpenerUnstealthed() {
+	allowOpeners := func(allowed bool) {
+		rogue.Ambush.CastRequirement.CasterForm = allowed
+		rogue.Garrote.CastRequirement.CasterForm = allowed
 	}
-
-	// The talent's effects are dummy auras: effect 1 is the damage bonus, effect 2 the health threshold.
-	rank := spellData.Quietus.Rank(rogue.Talents.Quietus)
-	threshold := int32(spellData.Quietus.EffectAt(2).ValueAt(rogue.Talents.Quietus))
-
-	executeBonus := rogue.RegisterAura(core.Aura{
-		Label:    "Quietus Damage Bonus",
-		ActionID: core.ActionID{SpellID: rank.ID},
-		Duration: core.NeverExpires,
-	}).AttachSpellMod(core.SpellModConfig{
-		Kind:       core.SpellMod_DamageDone_Flat,
-		ClassMask:  RogueSpellQuietus,
-		FloatValue: spellData.Quietus.EffectAt(1).FractionAt(rogue.Talents.Quietus),
-	})
-
-	rogue.RegisterResetEffect(func(sim *core.Simulation) {
-		executeBonus.Deactivate(sim)
-		sim.RegisterExecutePhaseCallback(func(sim *core.Simulation, isExecute int32) {
-			if isExecute <= threshold && !executeBonus.IsActive() {
-				executeBonus.Activate(sim)
-			}
-		})
-	})
-}
-
-func (rogue *Rogue) registerCutthroat() {
-	if rogue.Talents.Cutthroat == 0 {
-		return
-	}
-
-	cutthroatTrigger := spellData.CutthroatTriggered.Highest()
-	rogue.CutthroatAura = rogue.RegisterAura(spelldata.AuraConfig(cutthroatTrigger)).
+	rogue.OpenerUnstealthedAura = rogue.RegisterAura(spelldata.AuraConfig(spellData.GhostlyStrikeTriggered.Highest())).
 		ApplyOnGain(func(_ *core.Aura, _ *core.Simulation) {
-			rogue.Ambush.CastRequirement.CasterForm = true
+			allowOpeners(true)
 		}).
 		ApplyOnExpire(func(_ *core.Aura, _ *core.Simulation) {
-			rogue.Ambush.CastRequirement.CasterForm = false
+			allowOpeners(false)
 		})
 
-	cutthroatRank := spellData.Cutthroat.Rank(rogue.Talents.Cutthroat)
-	trigger := spelldata.ProcTrigger(&rogue.Character, cutthroatRank, func(sim *core.Simulation, spell *core.Spell, result *core.SpellResult) {
-		rogue.CutthroatAura.Activate(sim)
-	})
-	trigger.Name = "Cutthroat Trigger"
-	trigger.TriggerImmediately = true
-	// trigger.RequireDamageDealt = true - Unknown
-	trigger.ClassSpellMask = RogueSpellBackstab
-	rogue.MakeProcTriggerAura(trigger)
-
 	rogue.MakeProcTriggerAura(core.ProcTrigger{
-		Name:               "Cutthroat - Cast Watcher",
-		ActionID:           core.ActionID{SpellID: cutthroatRank.ID},
+		Name:               "Ghostly Strike - Opener Watcher",
+		ActionID:           core.ActionID{SpellID: spellData.GhostlyStrikeTriggered.Highest().ID},
 		Callback:           core.CallbackOnCastComplete,
-		ClassSpellMask:     RogueSpellAmbush,
+		ClassSpellMask:     RogueSpellAmbush | RogueSpellGarrote,
 		TriggerImmediately: true,
 		ProcChance:         1,
 		Handler: func(sim *core.Simulation, _ *core.Spell, _ *core.SpellResult) {
-			rogue.CutthroatAura.Deactivate(sim)
-		},
-	})
-}
-
-var thousandCutsRank = spellData.ThousandCuts.Highest()
-var thousandCutsTriggered = spellData.ThousandCutsTriggered.Highest()
-
-func (rogue *Rogue) registerThousandCuts() {
-	if !rogue.Talents.ThousandCuts {
-		return
-	}
-
-	aura := rogue.RegisterAura(spelldata.AuraConfig(thousandCutsTriggered))
-	spelldata.ParseEffects(&rogue.Character, aura, thousandCutsTriggered)
-
-	trigger := spelldata.ProcTrigger(&rogue.Character, thousandCutsRank,
-		func(sim *core.Simulation, _ *core.Spell, _ *core.SpellResult) {
-			aura.Activate(sim)
-			aura.AddStack(sim)
-		})
-	trigger.Name = "Thousand Cuts - Trigger"
-	trigger.ProcMask = core.ProcMaskUnknown
-	trigger.ClassSpellMask = RogueSpellRupture
-	trigger.TriggerImmediately = true
-	rogue.MakeProcTriggerAura(trigger)
-
-	rogue.MakeProcTriggerAura(core.ProcTrigger{
-		Name:               "Thousand Cuts - Cast Watcher",
-		ActionID:           core.ActionID{SpellID: thousandCutsRank.ID},
-		Callback:           core.CallbackOnCastComplete,
-		ClassSpellMask:     RogueSpellHemorrhage | RogueSpellBackstab,
-		TriggerImmediately: true,
-		ProcChance:         1,
-		Handler: func(sim *core.Simulation, _ *core.Spell, _ *core.SpellResult) {
-			aura.Deactivate(sim)
+			rogue.OpenerUnstealthedAura.Deactivate(sim)
 		},
 	})
 }

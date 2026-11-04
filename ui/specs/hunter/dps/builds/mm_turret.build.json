@@ -1,0 +1,537 @@
+{
+	"player": {
+		"name": "Player",
+		"race": "RaceNightElf",
+		"class": "ClassHunter",
+		"equipment": {
+			"items": [
+				{
+					"id": 252605,
+					"enchant": 1508
+				},
+				{
+					"id": 15411,
+					"enchant": 904
+				},
+				{
+					"id": 13116
+				},
+				{
+					"id": 13340,
+					"enchant": 7667
+				},
+				{
+					"id": 252483,
+					"enchant": 1891
+				},
+				{
+					"id": 13211,
+					"enchant": 7656
+				},
+				{
+					"id": 15063,
+					"enchant": 8206
+				},
+				{
+					"id": 272397
+				},
+				{
+					"id": 15062,
+					"enchant": 1508
+				},
+				{
+					"id": 13967,
+					"enchant": 1887
+				},
+				{
+					"id": 18500
+				},
+				{
+					"id": 13098
+				},
+				{
+					"id": 13965
+				},
+				{
+					"id": 272437
+				},
+				{
+					"id": 250619,
+					"enchant": 2646
+				},
+				{},
+				{
+					"id": 12651,
+					"enchant": 664
+				}
+			]
+		},
+		"consumables": {
+			"foodId": 250069,
+			"conjuredId": 12662,
+			"explosiveId": 11566,
+			"mhImbueId": 12404,
+			"extraIds": [
+				12217,
+				5342,
+				5206,
+				21151,
+				10646
+			],
+			"elixirIds": [
+				250328,
+				250337,
+				12451,
+				12460,
+				13454,
+				8412,
+				3825
+			],
+			"resourcePotId": 13444,
+			"offensivePotId": 250943
+		},
+		"buffs": {
+			"greaterBlessingOfKings": true,
+			"greaterBlessingOfMight": true,
+			"greaterBlessingOfWisdom": true
+		},
+		"talentsString": "502-0053352501513051-5",
+		"profession1": "Blacksmithing",
+		"profession2": "Engineering",
+		"reactionTimeMs": 200,
+		"distanceFromTarget": 3,
+		"hunter": {
+			"options": {
+				"classOptions": {
+					"quiverBonus": "HarpyHideQuiver",
+					"ammo": "SwiftfeatherArrow",
+					"petType": "Cat",
+					"petUptime": 1,
+					"petAttackSpeed": "FasterAttackVII",
+					"moveDelayMs": 100,
+					"meleeResetsAutoShot": true,
+					"laceratingMode": "LaceratingRefresh"
+				}
+			}
+		},
+		"rotation": {
+			"type": "TypeAPL",
+			"prepullActions": [
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 20906
+							}
+						}
+					},
+					"doAtValue": {
+						"const": {
+							"val": "-13s"
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14322
+							}
+						}
+					},
+					"doAtValue": {
+						"const": {
+							"val": "-10s"
+						}
+					}
+				},
+				{
+					"action": {
+						"move": {
+							"rangeFromTarget": {
+								"const": {
+									"val": "11"
+								}
+							}
+						}
+					},
+					"doAtValue": {
+						"const": {
+							"val": "-5s"
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14325
+							}
+						}
+					},
+					"doAtValue": {
+						"const": {
+							"val": "-4s"
+						}
+					}
+				}
+			],
+			"priorityList": [
+				{
+					"action": {
+						"condition": {
+							"cmp": {
+								"op": "OpGt",
+								"lhs": {
+									"math": {
+										"op": "OpSub",
+										"lhs": {
+											"maxMana": {}
+										},
+										"rhs": {
+											"currentMana": {}
+										}
+									}
+								},
+								"rhs": {
+									"const": {
+										"val": "1300"
+									}
+								}
+							}
+						},
+						"castSpell": {
+							"spellId": {
+								"itemId": 12662
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"itemId": 13965
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"condition": {
+							"cmp": {
+								"op": "OpGt",
+								"lhs": {
+									"math": {
+										"op": "OpSub",
+										"lhs": {
+											"maxMana": {}
+										},
+										"rhs": {
+											"currentMana": {}
+										}
+									}
+								},
+								"rhs": {
+									"const": {
+										"val": "1750"
+									}
+								}
+							}
+						},
+						"castSpell": {
+							"spellId": {
+								"itemId": 13444
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 3045
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"autocastOtherCooldowns": {}
+					}
+				},
+				{
+					"action": {
+						"condition": {
+							"and": {}
+						},
+						"castSpell": {
+							"spellId": {
+								"spellId": 20572
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 20554
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1259799
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"condition": {
+							"and": {}
+						},
+						"castSpell": {
+							"spellId": {
+								"itemId": 250943
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"condition": {
+							"not": {
+								"val": {
+									"auraIsActive": {
+										"sourceUnit": {
+											"type": "CurrentTarget"
+										},
+										"auraId": {
+											"spellId": 14325
+										}
+									}
+								}
+							}
+						},
+						"castSpell": {
+							"spellId": {
+								"spellId": 14325
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 20904
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"condition": {
+							"cmp": {
+								"op": "OpLe",
+								"lhs": {
+									"dotRemainingTime": {
+										"spellId": {
+											"spellId": 13555
+										}
+									}
+								},
+								"rhs": {
+									"const": {
+										"val": "0.5"
+									}
+								}
+							}
+						},
+						"castSpell": {
+							"spellId": {
+								"spellId": 13555
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 14287
+							}
+						}
+					}
+				},
+				{
+					"action": {
+						"castSpell": {
+							"spellId": {
+								"spellId": 1310786
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"raidBuffs": {
+		"arcaneBrilliance": true,
+		"prayerOfSpirit": true,
+		"giftOfTheWild": true,
+		"fireResistanceAura": true,
+		"fireResistanceTotem": true,
+		"strengthOfEarthTotem": true,
+		"graceOfAirTotem": true,
+		"windfuryTotem": true,
+		"battleShout": 1,
+		"trueshotAura": true,
+		"leaderOfThePack": true
+	},
+	"partyBuffs": {
+		"manaSpringTotem": "TristateEffectImproved"
+	},
+	"debuffs": {
+		"judgementOfWisdom": true,
+		"curseOfElements": true,
+		"curseOfRecklessness": true,
+		"faerieFire": true,
+		"exposeArmor": true,
+		"sunderArmor": true,
+		"giftOfArthas": true
+	},
+	"encounter": {
+		"duration": 120,
+		"durationVariation": 15,
+		"executeProportion20": 0.2,
+		"executeProportion35": 0.35,
+		"targets": [
+			{
+				"id": 213336,
+				"name": "Level 60",
+				"level": 63,
+				"stats": [
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					3731,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0
+				],
+				"minBaseDamage": 3000,
+				"damageSpread": 0.3333,
+				"swingSpeed": 2,
+				"parryHaste": true
+			}
+		]
+	},
+	"epWeightsStats": {
+		"stats": [
+			0,
+			1,
+			0,
+			0.77,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0.33,
+			0,
+			0.02,
+			0.98,
+			0.57,
+			0.12,
+			0.21,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0.61,
+			0,
+			0,
+			0,
+			0,
+			0,
+			1.01
+		],
+		"pseudoStats": [
+			0,
+			0,
+			3.22,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			12.63
+		]
+	}
+}

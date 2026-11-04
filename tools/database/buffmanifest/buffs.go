@@ -669,4 +669,15 @@ var Debuffs = []BuffSpec{
 			proto.Stat_StatDefenseRating,
 		},
 	},
+	// Last, so its proto field follows the others. A tank's Rivenspike keeps all three stacks up; a player's own Rivenspike
+	// lands the same debuff, so its copy bids in the same category and adds nothing over the tank's.
+	{
+		Field:    "puncture_armor",
+		SpellID:  17315,
+		Category: "PunctureArmor",
+		Driver:   true,
+		Stats: []proto.Stat{
+			proto.Stat_StatAttackPower,
+		},
+	},
 }

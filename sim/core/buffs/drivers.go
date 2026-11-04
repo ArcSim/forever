@@ -490,6 +490,11 @@ func driveArmorShatter(target *core.Unit, _ *proto.Debuffs, _ *proto.Raid) {
 	holdMaxStacks(core.MakePermanent(NewSpellDataArmorShatterAura(target, false, 0)))
 }
 
+// A tank's Rivenspike procs often enough to keep all three stacks on the target.
+func drivePunctureArmor(target *core.Unit, _ *proto.Debuffs, _ *proto.Raid) {
+	holdMaxStacks(core.MakePermanent(NewSpellDataPunctureArmorAura(target, false, 0)))
+}
+
 // The game files state one stack, so the raid's copy takes it as soon as it lands.
 func driveDustCloud(target *core.Unit, _ *proto.Debuffs, _ *proto.Raid) {
 	holdMaxStacks(core.MakePermanent(NewSpellDataDustCloudAura(target, false, 0)))
